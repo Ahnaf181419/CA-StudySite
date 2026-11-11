@@ -1,0 +1,58 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { MODULES } from '../data/syllabus.js'
+import { PAPERS, TOPICS } from '../data/papers/index.js'
+import { DIAGRAM_IDS } from '../components/diagrams/registry.js'
+
+// every diagram referenced in lecture or solution content must exist
+const BLOCK_DIAGRAM = (b) => b && b.type === 'diagram' && b.id
+
+test('all referenced diagrams exist', () => {
+  const missing = []
+  const check = (blocks, where) => {
+    for (const b of blocks || []) {
+      if (BLOCK_DIAGRAM(b) && !DIAGRAM_IDS.includes(b.id)) missing.push(`${where}: ${b.id}`)
+      if (b?.type === 'example') check(b.blocks, where)
+    }
+  }
+  for (const m of MODULES) {
+    for (const s of m.sections) check(s.blocks, m.id)
+  }
+  for (const p of PAPERS) for (const q of p.questions) check(q.solution, `${p.id} ${q.id}`)
+  assert.deepEqual(missing, [])
+})
+
+test('every paper question has a topic, marks and a non-empty solution', () => {
+  for (const p of PAPERS) {
+    assert.ok(p.questions.length > 0, `${p.id} has no questions`)
+    for (const q of p.questions) {
+      assert.ok(q.topic, `${p.id} ${q.id} missing topic`)
+      assert.ok(TOPICS[q.topic], `${p.id} ${q.id} unknown topic ${q.topic}`)
+      assert.ok(q.marks, `${p.id} ${q.id} missing marks`)
+      assert.ok(q.q, `${p.id} ${q.id} missing question text`)
+      assert.ok(Array.isArray(q.solution) && q.solution.length > 0, `${p.id} ${q.id} missing solution`)
+    }
+  }
+})
+
+test('every lecture topic tag maps to a real topic or module', () => {
+  for (const m of MODULES) {
+    assert.ok(m.id && m.title && m.sections.length > 0, `module ${m.id} malformed`)
+    const heads = m.sections.map((s) => s.heading)
+    assert.equal(new Set(heads).size, heads.length, `duplicate section headings in ${m.id}`)
+  }
+})
+
+test('every topic in TOPICS points to a real module', () => {
+  const ids = new Set(MODULES.map((m) => m.id))
+  for (const [tid, t] of Object.entries(TOPICS)) {
+    assert.ok(ids.has(t.module), `topic ${tid} points to missing module ${t.module}`)
+  }
+})
+
+test('each paper exposes counts computed from its questions', () => {
+  for (const p of PAPERS) {
+    const total = Object.values(p.counts).reduce((a, b) => a + b, 0)
+    assert.equal(total, p.questions.length, `${p.id} counts mismatch`)
+  }
+})
