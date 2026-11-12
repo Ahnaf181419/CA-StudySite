@@ -1,4 +1,4 @@
-import { Svg, Box, T, W, Bus } from './base.jsx'
+import { Svg, Box, T, W } from './base.jsx'
 
 // Slide 3 — processor/memory interface via MAR and MDR.
 export function MemInterface() {
@@ -8,13 +8,15 @@ export function MemInterface() {
       <T x={60} y={64} fs={12} bold>Processor</T>
       <Box x={70} y={80} w={120} h={36} label="MAR" sub="k bits" fs={11.5} />
       <Box x={70} y={150} w={120} h={36} label="MDR" sub="n bits" fs={11.5} />
-      <Box x={500} y={90} w={160} h={100} label="Memory" sub="2^k locations × n bits" fs={11.5} />
+      <Box x={500} y={90} w={160} h={115} label="Memory" sub="2^k locations × n bits" fs={11.5} />
       <W d="M190,98 H500" />
       <T x={300} y={90} fs={11}>k-bit address bus</T>
-      <W d="M500,140 H400" arrow={false} /><W d="M400,140 H190" open />
-      <T x={300} y={132} fs={11}>n-bit data bus</T>
-      <W d="M500,168 H400" arrow={false} /><W d="M400,168 H230" open />
-      <T x={290} y={190} fs={11}>Control lines (R/W̄, MFC)</T>
+      <W d="M190,158 H500" both />
+      <T x={300} y={149} fs={11}>n-bit data bus</T>
+      <W d="M220,180 H500" />
+      <T x={288} y={174} fs={11}>Read / write (R/W̄)</T>
+      <W d="M500,190 H220" />
+      <T x={288} y={208} fs={11}>Memory function completed (MFC)</T>
       <T x={40} y={245} fs={11}>k address bits → 2^k addressable locations. Word length n = bits moved in one memory operation.</T>
     </Svg>
   )
@@ -22,53 +24,47 @@ export function MemInterface() {
 
 // Slide 6 — internal organization of a 16-word × 8-bit RAM chip.
 export function RamChip() {
+  const wordLines = [['W0', 80], ['W1', 125], ['W15', 205]]
   return (
-    <Svg vb="0 0 780 400">
-      <T x={40} y={40} fs={11}>A0</T><W d="M62,44 H120" />
-      <T x={40} y={66} fs={11}>A1</T><W d="M62,70 H120" />
-      <T x={40} y={92} fs={11}>A2</T><W d="M62,96 H120" />
-      <T x={40} y={118} fs={11}>A3</T><W d="M62,122 H120" />
-      <Box x={120} y={30} w={120} h={100} label="Address" sub="decoder (4 → 16)" fs={11.5} />
-      <T x={40} y={150} fs={11}>4-bit address</T>
-
-      {/* 16 word lines */}
-      {Array.from({ length: 8 }, (_, i) => (
-        <g key={i}>
-          <W d={`M240,${48 + i * 24} H330`} arrow={false} />
-          <T x={248} y={44 + i * 24} fs={9}>W{i}</T>
+    <Svg vb="0 0 780 388">
+      <Box x={90} y={60} w={132} h={167} label="Address" sub="decoder (4 → 16)" fs={12} />
+      {[0, 1, 2, 3].map((bit) => (
+        <g key={bit}>
+          <T x={32} y={89 + bit * 31} fs={11}>A{bit}</T>
+          <W d={`M54,${85 + bit * 31} H90`} />
         </g>
       ))}
-      <T x={238} y={258} fs={10}>⋮  (16 word lines, W0…W15)</T>
-
-      {/* cell array */}
-      <Box x={330} y={30} w={240} h={240} fill="var(--dg-panel)" />
-      {Array.from({ length: 8 }, (_, i) => (
-        <g key={i}>
-          <line x1={330} y1={48 + i * 24} x2={570} y2={48 + i * 24} style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1" />
-          {Array.from({ length: 8 }, (_, j) => (
-            <rect key={j} x={344 + j * 27} y={36 + i * 24} width={20} height={14} fill="none" style={{ stroke: 'var(--dg-line)' }} strokeWidth="1" />
-          ))}
+      <T x={294} y={26} fs={12}>Cell array · 16 words × 8 bits</T>
+      {wordLines.map(([word, y]) => (
+        <g key={word}>
+          <W d={`M222,${y} H678`} arrow={false} />
+          <T x={235} y={y - 8} fs={11}>{word}</T>
         </g>
       ))}
-      <T x={450} y={288} fs={11} anchor="middle">Memory cells — 16 words × 8 bits = 128 bits</T>
-      <T x={578} y={56} fs={10}>1 row = 1 word</T>
-      <T x={578} y={70} fs={10}>(8 cells share a word line)</T>
-
-      {/* sense/write circuits */}
-      {Array.from({ length: 4 }, (_, i) => (
-        <g key={i}>
-          <W d={`M570,${52 + i * 40} H620`} arrow={false} /><W d={`M570,${52 + i * 40} H616`} open />
-        </g>
-      ))}
-      <Box x={620} y={30} w={120} h={170} label="Sense / Write" sub="circuits ×8" fs={11.5} />
-      <T x={752} y={115} fs={11} anchor="end">b7 … b0</T>
-      <W d="M740,60 H760" arrow={false} /><W d="M740,100 H760" arrow={false} />
-      <W d="M740,130 H760" arrow={false} /><W d="M740,170 H760" arrow={false} />
-      <T x={600} y={225} fs={11}>Data input/output lines</T>
-      <T x={620} y={250} fs={11}>R/W̄</T><T x={620} y={270} fs={11}>CS</T>
-
-      <T x={40} y={340} fs={11}>One row = one 8-bit word, selected by driving its word line. Every column is one bit position, read/written</T>
-      <T x={40} y={358} fs={11}>through its sense/write circuit. Chip select (CS) enables the chip; R/W̄ chooses read (1) or write (0).</T>
+      <T x={245} y={169} fs={14}>⋮</T>
+      <Box x={280} y={246} w={398} h={63} fill="none" dashed />
+      {Array.from({ length: 8 }, (_, i) => {
+        const x = 305 + i * 49
+        return (
+          <g key={i}>
+            <T x={x} y={49} fs={10} anchor="middle">bit {7 - i}</T>
+            <W d={`M${x},55 V264`} arrow={false} />
+            {wordLines.map(([word, y]) => (
+              <Box key={word} x={x - 12} y={y - 11} w={24} h={22} label="cell" fs={8} />
+            ))}
+            <T x={x + 14} y={169} fs={12}>⋮</T>
+            <Box x={x - 18} y={264} w={36} h={33} label="S/W" fs={10} />
+            <W d={`M${x},297 V326`} both />
+            <T x={x} y={343} fs={11} anchor="middle">b{7 - i}</T>
+          </g>
+        )
+      })}
+      <W d="M742,264 H678" />
+      <T x={692} y={257} fs={11}>R/W̄</T>
+      <W d="M742,293 H678" />
+      <T x={692} y={286} fs={11}>CS</T>
+      <T x={32} y={364} fs={11}>Horizontal: word lines select one row. Vertical: bit lines connect each column to its sense/write circuit.</T>
+      <T x={32} y={380} fs={11}>Rows W2–W14 are omitted. Each vertical line represents one bit-line connection (often a pair in SRAM).</T>
     </Svg>
   )
 }
@@ -80,7 +76,7 @@ export function MemoryHierarchy() {
     ['Primary (L1) cache', 260],
     ['Secondary (L2) cache', 310],
     ['Main memory', 360],
-    ['Magnetic disk (secondary storage)', 460],
+    ['Disk / SSD (secondary storage)', 388],
   ]
   return (
     <Svg vb="0 0 780 380">
@@ -89,11 +85,11 @@ export function MemoryHierarchy() {
           <Box x={390 - w / 2} y={30 + i * 62} w={w} h={46} label={label} fs={11.5} />
         </g>
       ))}
-      <T x={140} y={50} fs={11}>Increasing speed, increasing cost per bit</T>
-      <W d="M130,320 V60" open />
-      <T x={612} y={330} fs={11}>Increasing size</T>
-      <W d="M600,64 V320" open />
-      <T x={612} y={50} fs={11}>Faster access</T>
+      <W d="M45,322 V34" />
+      <T x={58} y={52} fs={11}>Faster access</T>
+      <T x={58} y={69} fs={11}>Higher cost per bit</T>
+      <W d="M633,34 V322" />
+      <T x={646} y={310} fs={11}>Larger capacity</T>
       <T x={40} y={365} fs={11}>Fastest access is to processor registers; each level down is larger, slower and cheaper per bit.</T>
     </Svg>
   )
@@ -108,8 +104,8 @@ export function CacheBlock() {
       <Box x={540} y={70} w={150} h={80} label="Main memory" sub="(DRAM)" fs={12} />
       <W d="M200,95 H290" /><W d="M290,120 H200" open />
       <W d="M450,95 H540" /><W d="M540,120 H450" open />
-      <T x={40} y={186} fs={11}>On a read, a block of words moves memory → cache one word at a time;</T>
-      <T x={40} y={200} fs={11}>later references to that block hit in the cache.</T>
+      <T x={40} y={186} fs={11}>On a read miss, the lower level supplies the block that contains the requested word;</T>
+      <T x={40} y={200} fs={11}>later references hit while the block remains valid in the cache.</T>
     </Svg>
   )
 }
@@ -132,7 +128,7 @@ function AddrSplit({ parts, y = 30 }) {
         x += w
         return el
       })}
-      <T x={80} y={y - 12} fs={11}>16-bit memory address:</T>
+      <T x={80} y={y - 12} fs={11}>{total}-bit word address:</T>
     </g>
   )
 }
@@ -140,30 +136,20 @@ function AddrSplit({ parts, y = 30 }) {
 // Slide 28 — direct-mapped cache.
 export function DirectMap() {
   return (
-    <Svg vb="0 0 780 470">
-      <AddrSplit parts={[['Tag', 5], ['Cache block', 7], ['Word', 4]]} />
-      <T x={80} y={130} fs={11}>cache block address = memory block address mod 128</T>
-
-      <T x={90} y={190} fs={12} bold>Main memory (4096 blocks)</T>
-      {['Block 0', 'Block 1', '⋮', 'Block 127', 'Block 128', 'Block 129', '⋮', 'Block 255', 'Block 256', '⋮', 'Block 4095'].map((b, i) => (
-        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
+    <Svg vb="0 0 780 364">
+      <AddrSplit parts={[['Tag', 5], ['Cache line', 7], ['Word', 4]]} />
+      <T x={80} y={132} fs={11}>Cache line = memory block number mod 128</T>
+      <T x={80} y={172} fs={12} bold>Main memory (4096 blocks)</T>
+      <T x={504} y={172} fs={12} bold>Cache (128 lines)</T>
+      {[['0, 128, 256, …', 'line 0'], ['1, 129, 257, …', 'line 1'], ['127, 255, …, 4095', 'line 127']].map(([blocks, line], i) => (
+        <g key={line}>
+          <Box x={80} y={188 + i * 47} w={202} h={34} label={blocks} fs={12} />
+          <W d={`M282,${205 + i * 47} H504`} />
+          <Box x={504} y={188 + i * 47} w={186} h={34} label={`tag | ${line}`} fs={12} />
+        </g>
       ))}
-      <T x={480} y={190} fs={12} bold>Cache (128 blocks)</T>
-      {['tag | block 0', 'tag | block 1', '⋮', 'tag | block 127'].map((b, i) => (
-        <Box key={i} x={470} y={205 + i * 23} w={170} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
-      ))}
-      <W d="M220,215 H470" />
-      <W d="M220,274 H470" dash />
-      <W d="M220,317 H470" />
-      <W d="M220,435 H470" dash />
-      <T x={300} y={268} fs={10.5}>blocks 0, 128, 256 …</T>
-      <T x={300} y={284} fs={10.5}>→ block 0</T>
-      <T x={660} y={215} fs={10.5}>5 tag bits</T>
-      <T x={660} y={230} fs={10.5}>identify which</T>
-      <T x={660} y={245} fs={10.5}>of the 32 blocks</T>
-      <T x={660} y={260} fs={10.5}>mapped here is</T>
-      <T x={660} y={275} fs={10.5}>resident now</T>
-      <T x={80} y={455} fs={10.5}>Position is fixed: block 0, 128, 256, … all compete for cache block 0. Replacement is trivial.</T>
+      <T x={80} y={335} fs={11}>Each group competes for one fixed line. For line 0, block 0 stores tag 0 and block 128 stores tag 1.</T>
+      <T x={80} y={353} fs={11}>Select the line with the index; hit only if its valid bit is set and its stored tag matches.</T>
     </Svg>
   )
 }
@@ -171,26 +157,21 @@ export function DirectMap() {
 // Slide 29 — associative-mapped cache.
 export function AssociativeMap() {
   return (
-    <Svg vb="0 0 780 470">
+    <Svg vb="0 0 780 374">
       <AddrSplit parts={[['Tag', 12], ['Word', 4]]} />
-      <T x={80} y={130} fs={11}>any memory block may be placed in any cache position</T>
-      <T x={90} y={190} fs={12} bold>Main memory (4096 blocks)</T>
-      {['Block 0', 'Block 1', '⋮', 'Block 127', 'Block 128', '⋮', 'Block 255', '⋮', 'Block 4095'].map((b, i) => (
-        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
+      <T x={80} y={132} fs={11}>Any memory block may occupy any of the 128 cache lines.</T>
+      <T x={80} y={172} fs={12} bold>Main memory (4096 blocks)</T>
+      <T x={510} y={172} fs={12} bold>Cache (128 lines)</T>
+      <Box x={80} y={220} w={202} h={48} label="Example: block 128" fs={12} />
+      <W d="M282,244 H396 V205 H510" />
+      <W d="M396,244 H510" />
+      <W d="M396,244 V310 H510" />
+      {[['line 0', 189], ['line 1', 228], ['line 127', 294]].map(([line, y]) => (
+        <Box key={line} x={510} y={y} w={182} h={32} label={`tag | ${line}`} fs={12} />
       ))}
-      <T x={480} y={190} fs={12} bold>Cache (128 blocks)</T>
-      {['tag | block 0', 'tag | block 1', '⋮', 'tag | block 127'].map((b, i) => (
-        <Box key={i} x={470} y={205 + i * 23} w={170} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
-      ))}
-      <W d="M220,215 H470" />
-      <W d="M220,251 H470" dash />
-      <W d="M220,297 H470" dash />
-      <W d="M220,390 H470" dash />
-      <T x={660} y={215} fs={10.5}>all 128 tags</T>
-      <T x={660} y={230} fs={10.5}>compared in</T>
-      <T x={660} y={245} fs={10.5}>parallel to</T>
-      <T x={660} y={260} fs={10.5}>decide hit/miss</T>
-      <T x={80} y={455} fs={10.5}>Flexible and uses cache space efficiently, but needs 128 comparators — costlier than direct mapping.</T>
+      <T x={600} y={281} fs={12} anchor="middle">⋮</T>
+      <T x={80} y={349} fs={11}>These arrows are alternative locations for one copy. The tag is the entire memory block number.</T>
+      <T x={80} y={367} fs={11}>A parallel lookup checks every valid tag; the matching line supplies the requested word.</T>
     </Svg>
   )
 }
@@ -198,26 +179,26 @@ export function AssociativeMap() {
 // Slide 30 — set-associative mapped cache (2-way here).
 export function SetAssocMap() {
   return (
-    <Svg vb="0 0 780 470">
+    <Svg vb="0 0 780 412">
       <AddrSplit parts={[['Tag', 6], ['Set', 6], ['Word', 4]]} />
-      <T x={80} y={130} fs={11}>128 cache blocks ÷ 2 per set = 64 sets · tag = 4096 / 64 = 64 = 2^6</T>
-      <T x={90} y={190} fs={12} bold>Main memory (4096 blocks)</T>
-      {['Block 0', 'Block 1', '⋮', 'Block 63', 'Block 64', 'Block 65', '⋮', 'Block 127', 'Block 128', '⋮', 'Block 4095'].map((b, i) => (
-        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
-      ))}
-      <T x={480} y={190} fs={12} bold>Cache (64 sets × 2 blocks)</T>
-      {['tag | block 0', 'tag | block 1', '⋮', 'tag | block 126', 'tag | block 127'].map((b, i) => (
-        <Box key={i} x={470} y={205 + i * 23} w={180} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
-      ))}
-      <T x={460} y={272} fs={10.5} anchor="end">Set 0</T>
-      <T x={460} y={432} fs={10.5} anchor="end">Set 63</T>
-      <W d="M220,215 H470" />
-      <W d="M220,320 H470" dash />
-      <W d="M220,435 H470" dash />
-      <T x={295} y={300} fs={10.5}>blocks 0, 64, 128 …</T>
-      <T x={295} y={316} fs={10.5}>→ set 0, either</T>
-      <T x={295} y={332} fs={10.5}>of its 2 slots</T>
-      <T x={80} y={455} fs={10.5}>One extreme: all blocks in one set = fully associative. Other extreme: one block per set = direct-mapped.</T>
+      <T x={80} y={132} fs={11}>128 cache lines ÷ 2 ways per set = 64 sets · set number = memory block number mod 64</T>
+      <T x={80} y={172} fs={12} bold>Main memory (4096 blocks)</T>
+      <T x={452} y={172} fs={12} bold>Cache (64 sets × 2 ways)</T>
+      {[['0, 64, 128, …', 'Set 0'], ['1, 65, 129, …', 'Set 1'], ['63, 127, …, 4095', 'Set 63']].map(([blocks, set], i) => {
+        const y = 185 + i * 60
+        return (
+          <g key={set}>
+            <Box x={80} y={y + 8} w={202} h={34} label={blocks} fs={12} />
+            <W d={`M282,${y + 25} H452`} />
+            <Box x={452} y={y} w={256} h={50} fill="none" />
+            <T x={464} y={y + 29} fs={11}>{set}</T>
+            <Box x={526} y={y + 8} w={80} h={34} label="Way 0" sub="tag | data" fs={11} />
+            <Box x={614} y={y + 8} w={80} h={34} label="Way 1" sub="tag | data" fs={11} />
+          </g>
+        )
+      })}
+      <T x={80} y={372} fs={11}>Each block may occupy either way of its indexed set. Compare both valid tags in that set.</T>
+      <T x={80} y={391} fs={11}>One way per set = direct mapping. One set containing every line = fully associative mapping.</T>
     </Svg>
   )
 }
@@ -225,20 +206,31 @@ export function SetAssocMap() {
 // Virtual memory — MMU translation (Fig 5.26 idea).
 export function VirtualMemory() {
   return (
-    <Svg vb="0 0 780 350">
-      <Box x={40} y={100} w={140} h={70} label="Processor" />
-      <W d="M180,125 H300" />
-      <T x={192} y={118} fs={11}>virtual address</T>
-      <Box x={300} y={100} w={140} h={70} label="MMU" fs={12} bold />
-      <W d="M440,125 H560" />
-      <T x={455} y={118} fs={11}>physical address</T>
-      <Box x={560} y={100} w={150} h={70} label="Main memory" />
-      <Box x={300} y={240} w={150} h={60} label="Disk" sub="(secondary)" fs={11.5} />
-      <W d="M635,170 V270 H450" dash />
-      <T x={470} y={295} fs={11}>valid page absent → OS handles page fault</T>
-      <W d="M370,240 V170" dash />
-      <T x={40} y={315} fs={11}>The MMU translates resident pages to physical frames.</T>
-      <T x={40} y={333} fs={11}>On a page fault, the OS loads or initializes a valid missing page and retries.</T>
+    <Svg vb="0 0 780 424">
+      <Box x={52} y={29} w={270} h={48} label="Processor" />
+      <Box x={425} y={112} w={172} h={45} label="MMU" sub="translate and check access" fs={12} />
+      <Box x={52} y={181} w={270} h={48} label="Cache" />
+      <Box x={52} y={273} w={270} h={48} label="Main memory (RAM)" />
+      <Box x={52} y={365} w={270} h={48} label="Disk / SSD backing storage" />
+      <W d="M112,77 V181" both />
+      <T x={62} y={131} fs={11}>Data</T>
+      <W d="M322,53 H511 V112" />
+      <T x={349} y={43} fs={11}>Virtual address</T>
+      <W d="M425,145 H258 V181" />
+      <T x={265} y={136} fs={11}>Physical address</T>
+      <W d="M112,229 V273" both />
+      <T x={62} y={253} fs={11}>Data</T>
+      <W d="M258,229 V273" />
+      <T x={269} y={253} fs={11}>Physical address</T>
+      <W d="M112,321 V365" both />
+      <T x={128} y={347} fs={11}>Page transfer (e.g. DMA)</T>
+      <W d="M511,157 V181" dash />
+      <Box x={419} y={181} w={184} h={48} label="OS fault handler" fs={12} />
+      <T x={525} y={173} fs={11}>Page fault</T>
+      <T x={419} y={257} fs={11}>Valid page absent? The OS supplies</T>
+      <T x={419} y={276} fs={11}>a RAM frame, updates the mapping,</T>
+      <T x={419} y={295} fs={11}>and retries the instruction.</T>
+      <T x={419} y={329} fs={11}>Invalid or forbidden access may fail.</T>
     </Svg>
   )
 }

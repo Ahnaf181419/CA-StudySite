@@ -3,6 +3,21 @@
 // material earlier in the deck is not in the exam syllabus, so it is not
 // taught here; the three worked three-bus control sequences come from the
 // class notes.
+export const branchLessThanTrace = {
+  type: 'table',
+  head: ['µAddress', 'Microinstruction', 'Effect'],
+  rows: [
+    ['0', '`PCout, MARin, Read, Select4, Add, Zin`', 'Start instruction fetch and compute PC + 4 into Z.'],
+    ['1', '`Zout, PCin, Yin, WMFC`', 'Save PC + 4 in PC and Y, and wait for the instruction word.'],
+    ['2', '`MDRout, IRin`', 'Load the instruction into IR.'],
+    ['3', 'Dispatch using the opcode in IR', 'For Branch < 0, load µPC with 25.'],
+    ['25', 'If N = 0, set µPC to 0', 'If the tested value is nonnegative, fetch the next instruction. If N = 1, continue to µ26.'],
+    ['26', '`Offset-field-of-IRout, SelectY, Add, Zin`', 'Compute the machine-instruction target as Y + branch displacement.'],
+    ['27', '`Zout, PCin, End`', 'Load the target into the machine PC, then start the next fetch at µ0.'],
+  ],
+  caption: 'Chapter 7, Figure 7.17 (slide 52). The µaddresses select control words. The displacement in IR contributes to the machine PC target.',
+}
+
 export default {
   id: 'ch7',
   chapter: 'Chapter 7 · Slides 5',
@@ -132,7 +147,7 @@ export default {
         { type: 'think', text: [
           'To build any one signal, list the (step, instruction) pairs where it must be 1 — that table *is* the Boolean function. Buffer the pairs that apply to all instructions, AND-gate the pairs that need a specific instruction, OR everything together.',
         ] },
-        { type: 'exam', text: ['**Fall 2024 Q1(d)**: this block diagram with a 16-instruction processor, 4th instruction, 8 steps. **Spring 2024 Q2(b)** (second half): sketch the gates for `PCin, R1in, MARin, MDRinE`. **Fall 2023 Q1(a)**: both control-unit types with figures.'] },
+        { type: 'exam', text: ['**Fall 2024 Q1(d)**: this block diagram with a 16-instruction processor, 4th instruction, 8 steps. **Spring 2024 Q2(b)** (second half): sketch the gates for `PCin, R=B, MARin, MDRinE`. **Fall 2023 Q1(a)**: both control-unit types with figures.'] },
         { type: 'practice', prompt: 'A 16-opcode CPU has up to eight control steps. A signal X is required in T2 for every instruction, T4 for ADD, and T6 for STORE only when MFC is true. Give the two decoder widths and draw or write X.', blocks: [
           { type: 'answer', text: 'A 4-to-16 opcode decoder and a 3-to-8 step decoder (assuming eight encoded counter states). X = T2 OR (T4 AND ADD) OR (T6 AND STORE AND MFC).' },
         ] },
@@ -148,18 +163,25 @@ export default {
           'Microroutines for all instructions are stored in a special memory, the **control store**.',
           'The control unit generates the signals by **sequentially reading the CWs** of the corresponding microroutine from the control store.',
         ] },
+        { type: 'p', text: 'To encode a control step, fix a column order, place a 1 for every asserted signal and a 0 for every other signal. The example shows six columns from the single-bus instruction fetch in slides 46–47.' },
+        { type: 'table', head: ['Step', 'PCin', 'PCout', 'MARin', 'Read', 'WMFC', 'IRin', 'Six-bit slice'], rows: [
+          ['1', '0', '1', '1', '1', '0', '0', '011100'],
+          ['2', '1', '0', '0', '0', '1', '0', '100010'],
+          ['3', '0', '0', '0', '0', '0', '1', '000001'],
+        ], caption: 'The full control word also includes the signals omitted from these six columns.' },
         { type: 'diagram', id: 'microCU', caption: 'Figure 7.16 — basic organization: IR → starting-address generator → µPC; the clocked µPC steps through the control store, whose CW output drives the datapath.' },
         { type: 'list', items: [
           'The **microprogram counter (µPC)** reads CWs from the control store sequentially.',
           'When a new instruction is loaded into IR, the **starting-address generator** produces the microroutine’s first address and loads it into µPC.',
         ] },
         { type: 'diagram', id: 'microCUCond', caption: 'Figure 7.18 — adding conditional branching: a starting-and-branch address generator fed by the condition codes and external inputs can load a new address into µPC.' },
-        { type: 'p', text: 'The basic organization cannot do **conditional branching** or operations based on external inputs such as WMFC — the extended version adds the starting-and-branch address generator. If the CW is a conditional branch, the generator checks the condition codes and, if necessary, branches by loading a new address into µPC using the offset-address field.' },
+        { type: 'p', text: 'The extended sequencer chooses the next control-store address from the current microinstruction, condition codes and external inputs such as MFC. In the single-bus Branch < 0 example below, the N test selects either the common fetch microaddress or the next step that computes the machine-instruction target.' },
+        branchLessThanTrace,
         { type: 'think', text: [
           'Map the vocabulary one-to-one: instruction ↔ microroutine, program ↔ microprogram (contents of the control store), instruction step ↔ microinstruction (= control word), opcode lookup ↔ starting-address generator, PC ↔ µPC. Once you see “the control unit is a CPU inside the CPU”, every figure reads itself.',
           'Why is it slower? Every control-signal step costs a **control-store read** before the datapath can act, while hardwired logic is just gate delay.',
         ] },
-        { type: 'exam', text: ['**Spring 2024 Q1(d)**: Figure 7.18 plus the Branch<0 walkthrough — N = 1 means negative; the generator checks N, and if N = 0 execution continues at microinstruction 0 instead of jumping to L1.'] },
+        { type: 'exam', text: ['**Spring 2024 Q1(d)** asks for Figure 7.18 and this trace. Label both decisions: N controls µPC at µ25, and the datapath updates PC at µ27 on the taken path.'] },
         { type: 'practice', prompt: 'A control word at µPC = 11 tests N. Its next-address field selects µaddress 40 if N=1; otherwise the sequencer increments. Give the next µPC for each N and explain what happens to the instruction PC.', blocks: [
           { type: 'answer', text: 'N=1 gives 40; N=0 gives 12. The sequencer changes the microinstruction address. The instruction PC changes only if a control word explicitly causes a datapath transfer into it.' },
         ] },

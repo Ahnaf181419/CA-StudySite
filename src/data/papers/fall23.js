@@ -10,7 +10,7 @@ export default {
   format: 'Three sections of short questions. The choices are generous — the repeated core (control sequences, hazards, cache performance, mapping, VM) is enough to answer the required number twice over.',
   questions: [
     {
-      id: 'Q1a', topic: 'hardwired-cu', marks: '[6]', inNotes: true, repeats: 2,
+      id: 'Q1a', topic: 'hardwired-cu', marks: '[6]', inNotes: true,
       q: 'What are the different types of control units? Write down short notes on each and draw the figures of their basic organization.',
       think: [
         'Two types: hardwired and microprogrammed. For each: what generates the signals, one organization figure, and the speed/flexibility trade-off sentence — that is the whole marking scheme.',
@@ -34,7 +34,7 @@ export default {
       ],
     },
     {
-      id: 'Q1b', topic: 'multdiv', marks: '[6]', inNotes: true, repeats: 3,
+      id: 'Q1b', topic: 'multdiv', marks: '[6]', inNotes: true,
       q: 'Multiply (60)₁₀ by (15)₁₀ using the Sequential Multiplication Algorithm, with 6-bit numbers.',
       pattern: 'The arithmetic hardware staple — also Spring 2023 Q1(b) (31 × 13, 5-bit) and the class-notes 4 × 3 worked table.',
       think: [
@@ -54,27 +54,24 @@ export default {
       ],
     },
     {
-      id: 'Q1c', topic: 'scsi', marks: '[6]', repeats: 2,
+      id: 'Q1c', topic: 'scsi', marks: '[6]',
       q: 'Explain how a processor can read a block of data from a disk drive where data are stored in non-contiguous disk sectors, using SCSI controllers.',
       pattern: 'Asked again in Spring 2024 Q3(a) with arbitration added.',
-      think: [
-        'Key sentences: the processor addresses data by **logical block**, the SCSI **target** translates logical → physical (cylinder, surface, sector) and reads each sector independently — so non-contiguity costs extra seeks, not extra commands.',
-      ],
+
+      think: 'Separate logical block addresses in the command from the physical positions on disk. Trace who sends the command, who positions the head, and who puts the data into RAM.',
       solution: [
-        { type: 'diagram', id: 'scsiRead', caption: 'Processor (initiator) — SCSI bus — target controller — disk with two non-contiguous sectors.' },
+        { type: 'diagram', id: 'scsiRead', caption: 'The CPU programs the host adapter, which communicates with the disk controller on the SCSI bus.' },
         { type: 'steps', items: [
-          'The processor, acting as **initiator**, sends a command over the SCSI bus to the disk’s controller (the **target**), identifying the required data by logical block numbers.',
-          'The target translates each logical block number into physical disk coordinates — (cylinder, surface, sector) — so two non-contiguous sectors become two separate physical addresses.',
-          'The controller seeks to the first sector’s coordinates and reads it.',
-          'The sector’s data is transferred over the SCSI bus to the initiator and stored in main memory (the controller has DMA capability, so the processor need not move each word).',
-          'The controller then re-positions the head for the **second sector** (its own seek + rotational delay) and repeats read + transfer.',
-          'When all requested blocks are delivered, the target sends a **status** completion message to the processor.',
+          'The host adapter wins the SCSI bus, selects the target and sends a READ with a start LBA and block count.',
+          'The target maps the requested logical blocks to the disk media and reads the two physical sectors. One READ can cover adjacent logical blocks even if they are physically scattered. For disjoint LBAs, issue separate READs for the required ranges.',
+          'If the target disconnects while positioning the disk, it arbitrates for the SCSI bus and reselects the initiator when ready.',
+          'Data and completion status return to the host adapter. The adapter can DMA the data into RAM and signal completion to the CPU.',
         ] },
-        { type: 'answer', text: ['Logical-block addressing + per-sector physical translation is exactly what makes non-contiguous sectors transparent: one command, several independent physical reads by the target.'] },
+        { type: 'answer', text: 'Draw CPU → host adapter → SCSI target → disk, then show data returning via the adapter to RAM. Command count depends on whether the requested LBAs are contiguous.' },
       ],
     },
     {
-      id: 'Q1d', topic: 'addressing', marks: '[6]', repeats: 2,
+      id: 'Q1d', topic: 'addressing', marks: '[6]',
       q: 'Determine the addressing modes of each operand of the following instructions:\ni) MOV Z, R2  ii) SUB (R1)−, R2  iii) ADD #120, R1  iv) CLEAR Y  v) ADD R2, 50(R3, R4)  vi) MUL R3, R4',
       pattern: 'The same drill in Spring 2023 Q2(b) — mode names are the marks; one line of justification each.',
       think: [
@@ -82,10 +79,10 @@ export default {
       ],
       solution: [
         { type: 'table', head: ['Instruction', 'Operand', 'Mode', 'Effective address / value'], rows: [
-          ['i) MOV Z, R2', 'Z (destination)', 'direct (absolute)', 'operand is at memory location Z itself'],
-          ['', 'R2 (source)', 'register', 'value already in R2'],
-          ['ii) SUB (R1)−, R2', '(R1)− (destination)', 'auto-decrement register-indirect', 'R1 is decremented first, then the new [R1] is the address of the destination'],
-          ['', 'R2 (source)', 'register', ''],
+          ['i) MOV Z, R2', 'Z (source)', 'direct (absolute)', 'operand is at memory location Z itself'],
+          ['', 'R2 (destination)', 'register', 'receives the value from Z'],
+          ['ii) SUB (R1)−, R2', '(R1)− (source)', 'auto-decrement register-indirect', 'The minus marks auto-decrement. For pre-decrement, written −(R1) in the usual course notation, subtract the operand size before using R1. In a post-decrement notation, use the old R1 first.'],
+          ['', 'R2 (destination)', 'register', 'subtract the memory operand from R2 and store the result in R2'],
           ['iii) ADD #120, R1', '#120 (source)', 'immediate', 'the constant 120 is the operand, in the instruction'],
           ['', 'R1 (destination)', 'register', ''],
           ['iv) CLEAR Y', 'Y', 'direct (single-operand)', 'the content of memory location Y is cleared'],
@@ -98,7 +95,7 @@ export default {
       ],
     },
     {
-      id: 'Q1e', topic: 'hazards', marks: '[6]', repeats: 4,
+      id: 'Q1e', topic: 'hazards', marks: '[6]',
       q: 'Demonstrate how data dependency can be handled in hardware vs. in software with relevant examples.',
       pattern: 'The most repeated short question in the bank — Spring 2023 Q1(a), Spring 2024 Q1(b), Fall 2024 Q3(b) all rotate on this.',
       think: 'Definition + example pair (`Mul R2,R3,R4` → `Add R5,R4,R6`), then hardware = forwarding (figure + 2-step walkthrough), software = NOPs/reordering (code block). End with one contrast line.',
@@ -114,7 +111,7 @@ export default {
       ],
     },
     {
-      id: 'Q1f', topic: 'cache', marks: '[6]', repeats: 1,
+      id: 'Q1f', topic: 'cache', marks: '[6]',
       q: 'Explain the concept of Locality of Reference and its classifications using relevant examples.',
       think: 'Definition, then the two classes each with a code-shaped example (loop = temporal; array walk / sequential addresses = spatial), then the one-line consequence: put the active parts in a fast cache and fetch whole blocks.',
       solution: [
@@ -131,7 +128,7 @@ export default {
       ],
     },
     {
-      id: 'Q2a', topic: 'asm', marks: '[8]', flagged: true, repeats: 3,
+      id: 'Q2a', topic: 'asm', marks: '[8]', flagged: true,
       q: 'Write an assembly language program to show how indirect addressing can be used to compute the average of the elements of an array.',
       pattern: 'Chapter-2 material kept in every paper’s Q2 — the average/product/dot-product trio rotates (Spring 2023 Q2(a)/(c), Fall 2023 Q2(b)).',
       think: [
@@ -148,7 +145,7 @@ export default {
       ],
     },
     {
-      id: 'Q2b', topic: 'asm', marks: '[8]', flagged: true, repeats: 3,
+      id: 'Q2b', topic: 'asm', marks: '[8]', flagged: true,
       q: 'Write an assembly language program to show how indirect addressing can be used to compute the dot product of two vectors.',
       think: 'Same skeleton, two pointers and a Multiply in the loop: sum ← sum + A[i]·B[i]. Two pointer registers advance together.',
       solution: [
@@ -161,7 +158,7 @@ export default {
       ],
     },
     {
-      id: 'Q2c', topic: 'stack', marks: '[8]', flagged: true, repeats: 2,
+      id: 'Q2c', topic: 'stack', marks: '[8]', flagged: true,
       q: 'Evaluate the given expression in one-address and two-address instruction notations. Make sure to write statements in assembly language notations. Compare how the number of steps varies depending on the instruction set architecture.\nA = M + (B×C×D) + (N+P+(Q−R))',
       think: [
         'One-address machine = single accumulator (LOAD/STORE/OP with one operand name); two-address machine = `OP src, dst` with general registers. Evaluate the three terms (M, B×C×D, N+P+Q−R) into registers/accumulators, then sum. Count instructions at the end — that comparison is the last mark.',
@@ -204,7 +201,7 @@ export default {
       ],
     },
     {
-      id: 'Q3a', topic: 'vmem', marks: '[6]', repeats: 2,
+      id: 'Q3a', topic: 'vmem', marks: '[6]',
       q: 'Suppose you are constructing a computer. You have a 64-bit processor and a 2 GB main memory. Now consider that you have to run a game of size 5 GB on this computer. Will your processor face any issues while running the game? What technique would you use to solve this potential issue? Show what the memory organization might look like in such a scenario.',
       pattern: 'Same question as Spring 2023 Q3(a) with different sizes — a free 6 marks once.',
       think: [
@@ -223,7 +220,7 @@ export default {
       ],
     },
     {
-      id: 'Q3b', topic: 'single-bus', marks: '[6]', inNotes: true, repeats: 3,
+      id: 'Q3b', topic: 'single-bus', marks: '[6]', inNotes: true,
       q: 'Consider the CPU Architecture given in Fig 3(b)-1 (single-bus CPU organization). Generate the control sequence required for the execution of the following complete instruction in the context of this architecture: SUB (R1), (R2)',
       pattern: 'The flagship repeated question: Fall 2023 SUB, Spring 2023 MUL, Spring 2024 MUL R1,4(R2) — one table format, different opcodes.',
       think: [
@@ -252,7 +249,7 @@ export default {
       ],
     },
     {
-      id: 'Q3c', topic: 'hazards', marks: '[6]', repeats: 4,
+      id: 'Q3c', topic: 'hazards', marks: '[6]',
       q: 'Consider the instructions being executed in a pipeline in the given Fig 3(c)-1 (instructions I4–I7 in clock cycles 4–10). Suppose an instruction hazard occurs due to a cache miss while fetching I5, and it takes 3 clock cycles to fetch I5 from memory. Subsequently, a data hazard occurs for I6 as it depends on data from both I4 and I5 — I6 can only continue once both finish storing their results. Compare how the execution is affected due to the hazards vs. the ideal hazard-free scenario shown in the figure. Show which stages occur during each clock cycle in the two scenarios.',
       pattern: 'The combined-hazard chart; Spring 2023 Q3(c) asks the instruction-hazard half alone.',
       think: [
@@ -277,7 +274,7 @@ export default {
       ],
     },
     {
-      id: 'Q3d', topic: 'perf', marks: '[6]', repeats: 3,
+      id: 'Q3d', topic: 'perf', marks: '[6]',
       q: 'Suppose you have a processor that uses a secondary cache memory. The cache miss penalty for the primary and secondary cache are 12 and 16 clock cycles respectively. The miss ratios for instructions, data, and the secondary cache are 15%, 20% and 25%. Suppose that 32% of instructions access memory. Compare the performance of this processor with the performance of a processor consisting of the same configuration but without a secondary cache, and mention which performs better based on throughput.',
       pattern: 'The two-level-cache formula question — Spring 2023 Q3(d) is its sibling. Same formula, different numbers.',
       think: [
@@ -294,7 +291,7 @@ export default {
       ],
     },
     {
-      id: 'Q3e', topic: 'perf', marks: '[6]', repeats: 2,
+      id: 'Q3e', topic: 'perf', marks: '[6]',
       q: 'Suppose you have a computer with a primary cache that takes 11 clock cycles per memory access and a cache access time of 2 clock cycles; the hit rates for instructions and data are 90% and 85%. You have a second computer with 2 cache memories with access times of 1 and 5 clock cycles and a memory access time of 16 clock cycles. The miss rates in the 1st cache for instructions and data are 5% and 9%; the hit rates in the 2nd cache are 65% and 78%. Assume 25% of the instructions require memory access. Compare the performances of the 2 computers based on time and state which one performs better.',
       pattern: 'The tave comparison — Spring 2023 Q3(e) is the same question with a cache-less first computer; this is the Chapter 5 “measuring cache performance” example in disguise.',
       think: [
@@ -311,14 +308,14 @@ export default {
       ],
     },
     {
-      id: 'Q3f', topic: 'cache', marks: '[6]', repeats: 5,
+      id: 'Q3f', topic: 'cache', marks: '[6]',
       q: 'Demonstrate, with relevant figures and explanation, the Set-Associative Mapping function for placing memory blocks in the cache, considering that the memory address length is 32 bits, each block consists of 32 memory locations and each set consists of 64 blocks.',
       pattern: 'The mapping family again — this variant asks for the drawing and the address division rather than a numeric placement.',
       think: [
         'Word field = log2(32) = 5 bits — fixed by the block size. The number of sets is not given, so carry it as S: set field = log2 S, tag = 32 − 5 − log2 S, and cache size = 64 × S blocks. Draw the slide’s set-associative figure and state one concrete instance (e.g. S = 64) so the numbers are visible.',
       ],
       solution: [
-        { type: 'diagram', id: 'setAssocMap', caption: 'Set-associative mapping: cache blocks grouped into sets; a memory block may live in any block of one set; the set field of the address selects the set and the tag is compared against every block in it.' },
+        { type: 'diagram', id: 'setAssocMap', caption: 'Chapter 5 template: the figure shows a 16-bit address and two ways per set. For this paper, redraw each set with 64 ways and label the 32-bit address Tag (27−log₂ S) | Set (log₂ S) | Word (5).' },
         { type: 'p', text: 'Set-associative mapping is the **combination** of direct and associative mapping: blocks of the cache are grouped into sets, and the mapping allows a memory block to reside in **any block of a specific set** — here each set has **64 block positions**, so each memory block has 64 candidate homes.' },
         { type: 'h', text: 'Address division (32-bit address)' },
         { type: 'list', items: [

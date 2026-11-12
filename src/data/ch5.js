@@ -15,16 +15,16 @@ export default {
       heading: 'Basic concepts: address space, word length, access and cycle time',
       blocks: [
         { type: 'list', items: [
-          'Maximum memory size depends on the **addressing scheme**: a 16-bit computer generates 16-bit addresses → up to 2^16 = 65536 locations. The number of locations is the **address space**.',
+          'The address width determines the **address space**. A 16-bit address identifies up to 2^16 = 65,536 locations. In a byte-addressed machine these locations are bytes; in a word-addressed machine they are words.',
           'Most modern computers are **byte-addressable**, but memory is designed to store and retrieve data in **word-length** quantities — the word length is the number of bits stored/retrieved in one memory operation.',
-          'Data transfers between processor and memory always involve **MAR and MDR**; if the address bus is k bits, MAR is k bits; if the word length is n bits, MDR is n bits.',
-          'Control lines include **R/W̄** (1 = read, 0 = write) and **MFC**.',
+          'In this simplified datapath the **memory address register (MAR)** holds the k-bit address, and the **memory data register (MDR)** holds the n-bit value read or written.',
+          'The processor drives **R/W̄** (1 = read, 0 = write). Memory can signal completion with **MFC**.',
         ] },
         { type: 'diagram', id: 'memInterface', caption: 'Processor–memory interface: k-bit address bus (one-way out), n-bit data bus (both ways), control lines.' },
         { type: 'h', text: 'Two different speed measures — do not swap them' },
         { type: 'list', items: [
           '**Memory access time**: elapsed time between initiation and completion of one operation (e.g. Read to MFC).',
-          '**Memory cycle time**: minimum time between the initiation of two successive operations. Cycle time is slightly **longer** than access time (the memory needs recovery).',
+          '**Memory cycle time**: minimum time between the initiation of two successive operations. In the simple non-pipelined memory model, cycle time can be **longer** than access time because the memory needs recovery before the next operation.',
         ] },
         { type: 'p', text: 'The faster a memory system, the **costlier** and the **smaller** it is. The design problem: give the system as large and fast a memory as possible within a cost target. Two techniques: **cache memory** (raises effective speed) and **virtual memory** (raises effective size).' },
       ],
@@ -33,7 +33,7 @@ export default {
       heading: 'Semiconductor RAM: cells, chips, SRAM vs DRAM',
       blocks: [
         { type: 'list', items: [
-          'RAM = any location addressed in a **fixed time independent of its address** (contrast with disks).',
+          'RAM allows direct selection of an arbitrary address without scanning or moving a disk head. The course model treats access as uniform, though actual DRAM timing can vary, for example with an already-open row.',
           'Each memory cell holds **one bit**; in the simple word-organized diagram, **one row is one word**. DRAM chips can organize many words in a row and use a separate column selection.',
           'All cells of a row connect to a common **word line**, driven by the **address decoder**; **sense/write circuits** connect to the data input/output lines.',
         ] },
@@ -43,10 +43,10 @@ export default {
           'Fall 2024 Q1(b) asks exactly this for a 1 KB chip with 16-bit words — solved in the question bank.',
         ] },
         { type: 'table', head: ['', 'SRAM', 'DRAM'], rows: [
-          ['Cell', 'retains state as long as power is applied (6 transistors)', 'does not retain state indefinitely — must be periodically refreshed (1 transistor)'],
+          ['Cell', 'retains state as long as power is applied (typically 6 transistors)', 'stores charge in a capacitor accessed by one transistor in a typical cell; the charge must be refreshed'],
           ['Volatility', 'volatile (contents lost without power)', 'volatile, and leaks even with power on'],
           ['Speed / size / cost', 'access time a few nanoseconds; low capacity; high cost', 'longer access time; higher capacity; lower cost'],
-          ['Refresh', 'not needed', 'needed; can be done while reading'],
+          ['Refresh', 'not needed', 'needed; sensing a row restores its charge, and the controller schedules refresh for all rows'],
           ['Used for', 'cache memories (speed is primary)', 'main memories (large and affordable)'],
         ] },
         { type: 'h', text: 'Latency and bandwidth' },
@@ -88,7 +88,7 @@ export default {
           '**DRAM**: simpler cell, cheaper, slower → large affordable = **main memory**.',
           '**Magnetic disks**: huge cheap storage, much slower than DRAM → secondary storage.',
         ] },
-        { type: 'diagram', id: 'memoryHierarchy', caption: 'Fastest access is to processor registers (top). L1 cache is on the processor chip; L2 sits between L1 and main memory; then the magnetic disk. Going down: increasing size, decreasing speed, decreasing cost per bit.' },
+        { type: 'diagram', id: 'memoryHierarchy', caption: 'Fastest access is to processor registers (top). L1 and L2 sit between the processor and main memory. Disk or SSD provides secondary storage. Going down: increasing size, decreasing speed, decreasing cost per bit.' },
         { type: 'think', text: [
           'The hierarchy works only because of locality (next section): if accesses were random, the hit rate at the small fast levels would collapse and the hierarchy would just add delays. Whenever asked “why does this work?”, the answer starts with locality of reference.',
         ] },
@@ -115,17 +115,17 @@ export default {
           ['02:05:00', 'Instruction A', '1008'],
           ['02:05:01', 'Instruction B', '1012'],
           ['02:05:02', 'Instruction C', '1016'],
-        ], caption: 'The slides’ illustration: re-running a loop re-uses X, Y, Z (temporal — they are still in cache); the second loop walks 1008, 1012, 1016 (spatial — neighbours come along in the same block).' },
+        ], caption: 'The slides’ illustration: re-running a loop re-uses X, Y, Z (temporal — they are still in cache); the second loop walks 1008, 1012, 1016. With 16-byte aligned blocks, those three byte addresses share the block starting at 1008 (spatial locality).' },
         { type: 'diagram', id: 'cacheBlock', caption: 'Processor ↔ cache (SRAM) ↔ main memory (DRAM). The processor issues ordinary Read/Write requests; the cache is transparent to it.' },
         { type: 'h', text: 'Hit/miss vocabulary (any two adjacent levels)' },
         { type: 'table', head: ['Term', 'Meaning'], rows: [
-          ['block', 'minimum unit of data moved between levels (usually 1 word in the slides’ examples)'],
+          ['block', 'unit of data moved between levels; its size is specified by the cache (16 words in the mapping examples below)'],
           ['hit / miss', 'requested data is / is not in the upper (closer) level'],
           ['hit rate, miss rate', 'fraction of accesses that hit; miss rate = 1 − hit rate'],
           ['hit time', 'time to confirm the hit + deliver the data from the upper level'],
-          ['miss penalty', 'time to detect the miss + replace the upper-level block from the lower level + deliver it'],
+          ['miss penalty', 'extra time after the upper-level lookup to fetch and deliver the data; include write-back time if the model requires it'],
         ] },
-        { type: 'p', text: 'On a processor Read, a **block of words** is transferred from memory into the cache one word at a time; later references to that block hit. At any time only some memory blocks are held in the cache — **which** ones is decided by the *mapping function*; when the cache is full, **which block to evict** is decided by the *replacement algorithm*.' },
+        { type: 'p', text: 'On a read miss, the cache fetches the **block of words** that contains the requested word. Later reads of the block hit while it stays valid in the cache. The *mapping function* determines where the block may go. If every candidate slot is occupied, the *replacement policy* chooses which block to evict.' },
       ],
     },
     {
@@ -133,17 +133,17 @@ export default {
       blocks: [
         { type: 'table', head: ['Event', 'What happens'], rows: [
           ['Read hit', 'data obtained from the cache'],
-          ['Write hit', '**write-through**: update cache and main memory simultaneously · **write-back (copy-back)**: update the cache only and set the **dirty/modified bit**; main memory is updated when this block is replaced'],
+          ['Write hit', '**write-through**: update the cache and forward the write to the next level (often through a write buffer) · **write-back (copy-back)**: update the cache only and set the **dirty/modified bit**; the next level is updated when the dirty block is written back, commonly on eviction'],
           ['Read miss', 'transfer the block containing the word from memory, then forward the word — possibly immediately (**load-through / early-restart**) without waiting for the whole block'],
           ['Write miss', '**Write-allocate**: fetch the block into cache, then apply the write policy. **No-write-allocate**: send the store to the next level and leave the line absent. Write-back commonly uses allocation; write-through commonly bypasses on a miss.'],
         ] },
         { type: 'list', items: [
           'A **valid bit** per block: 1 if the block holds valid data. All valid bits are 0 at power-on; set to 1 when a block is first loaded.',
           'A DMA transfer may bypass the CPU cache. With non-coherent DMA, software must arrange for stale CPU copies to be invalidated and dirty data written back when needed; coherent systems handle the relevant snoops in hardware.',
-          '**Cache coherence problem**: with write-back, the cached copy and the memory copy differ (memory does not reflect cache changes). If a disk transfer reads that block from memory, it gets stale data. One option: **force a write-back before the disk is updated**.',
+          '**Cache coherence problem**: with write-back, the cached copy and the memory copy differ (memory does not reflect cache changes). If a disk transfer reads that block from memory, it gets stale data. One option: **write back the dirty data before a non-coherent device reads the RAM buffer**.',
         ] },
         { type: 'think', text: [
-          'Write-through trades bandwidth for consistency (every write costs a memory access, but memory is always current). Write-back trades consistency bookkeeping for speed (memory updated only on eviction, using the dirty bit to skip untouched blocks). Pick the one a question emphasizes: “memory always up to date” → through; “fewer memory writes” → back.',
+          'Write-through sends each write to the next level, increasing traffic. Write-back can combine repeated stores to one block. The dirty bit tells the cache whether it needs to write that block back. For a single-level exam model, the next level is main memory.',
         ] },
         { type: 'exam', text: ['In Fall 2024 Q3(c), describe all four read/write and hit/miss cases. Explain the two write policies and the allocation decision separately.'] },
         { type: 'practice', prompt: 'A write misses in a write-back, write-allocate cache. Every way in the set is valid and the chosen victim is dirty. Give the order of operations and the final dirty bit.', blocks: [
@@ -174,7 +174,7 @@ export default {
         { type: 'list', items: [
           'A **combination** of direct and associative: cache blocks are grouped into **sets**; a memory block may reside in **any block of one specific set**.',
           'Divide the 128-block cache into **64 sets of 2 blocks**: memory blocks 0, 64, 128, … map to set 0 and may occupy **either** position.',
-          '16-bit address: low 4 bits = word; middle **6 bits = set number**; high **6 bits = tag**, compared against the tags of the two blocks in the set. Tag size = memory blocks ÷ sets = 4096/64 = 64 = 2^6.',
+          '16-bit address: low 4 bits = word; middle **6 bits = set number**; high **6 bits = tag**, compared against the tags of the two blocks in the set. There are 4096/64 = 64 possible tag values per set, so the tag width is log₂(64) = 6 bits.',
           'Blocks per set is a **design parameter**: all blocks in one set = fully associative; one block per set = direct mapped.',
         ] },
         { type: 'think', text: [
@@ -195,7 +195,7 @@ export default {
           'When the target set is full and a new block must come in, some resident block in that set must be replaced — decided by the **replacement algorithm**.',
           'Direct-mapped: position is fixed → replacement is trivial.',
           'Associative / set-associative: flexibility → a real choice. Locality suggests replacing the block that has gone **longest without being referenced** — the **Least Recently Used (LRU)** block. LRU is used extensively but performs poorly in some cases; adding a little randomness can improve it.',
-          'Other algorithms remove the “oldest” block (FIFO-style) — they disregard locality and do not perform as well.',
+          'FIFO evicts the block loaded earliest. A hit changes LRU order but leaves FIFO order unchanged. Which policy gets more hits depends on the access sequence.',
         ] },
         { type: 'note', title: 'From the class notes', text: [
           'The notes compare **LRU, MRU** and a **fetch-time-based** rule on a concrete access sequence (blocks 100, 400, 200, 300, 400 with their fetch times). Conclusion written in the notes: LRU usually gives better efficiency, **but not always** — “it depends on the requirements”. MRU evicts the most recently used block. It can help on repeated scans where older entries will be needed before the newest one. Use the reference trace to compare policies.',
@@ -214,20 +214,19 @@ export default {
         { type: 'p', text: 'Ideally the whole hierarchy would look like one memory with **the access time of an on-chip cache and the size of a disk**. How close you get depends on the hit rates — high hit rates (well over 0.9) are essential. The extra time to bring desired information in is the **miss penalty**; it becomes processor stall time.' },
         { type: 'p', text: 'Start by asking what the question’s miss time includes. With hit rate h, cache hit time C and extra miss penalty P, the cache lookup is paid on every access, so a miss costs C+P. If the question gives the total miss-path time M instead, average the two complete paths.' },
         { type: 'pre', text: 'Extra penalty: tave = C + (1−h)·P\nTotal miss path: tave = h·C + (1−h)·M, where M = C + P' },
-        { type: 'h', text: 'The slides’ worked estimate — cache vs no cache' },
+        { type: 'h', text: 'Worked comparison: cache vs no cache' },
         { type: 'list', items: [
-          'No cache: each memory read takes **10 clock cycles**; loading a block into the cache takes **17 cycles**.',
-          '30% of instructions perform a read or write → **130 memory accesses per 100 instructions** (100 instruction fetches + 30 data).',
-          'Hit rates: **0.95 for instructions, 0.9 for data**; miss penalty assumed equal for reads and writes.',
-          'Instruction access: 0.95×1 + 0.05×(1+17) = **1.9 cycles**; data access: 0.9×1 + 0.1×18 = **2.8 cycles**.',
-          'Per 100 instructions: 100×1.9 + 30×2.8 = 190 + 84 = **274 cycles**. Without the cache: 130×10 = **1300 cycles** → the memory-access component is **4.74× faster** under this model. Total CPU speedup also depends on non-memory work and overlap.',
-          'Against an ideal (100%-hit) cache — all references in 1 cycle → 130 cycles: 274/130 ≈ 2.1, i.e. the DRAM main memory *appears* only about **two times slower** than the cache circuits.',
+          'No cache: a reference takes **10 cycles**. With a cache: a hit takes **1 cycle**. The slides use **17 cycles** as the complete miss-path time in the worked calculation.',
+          '30% of instructions perform one data access → **130 references per 100 instructions** (100 instruction fetches + 30 data). The hit rates are 0.95 for instructions and 0.90 for data.',
+          'Under the slide convention, average instruction access = 0.95×1 + 0.05×17 = **1.8 cycles**. Average data access = 0.90×1 + 0.10×17 = **2.6 cycles**. Total = 100×1.8 + 30×2.6 = **258 cycles**, versus 130×10 = **1300 cycles** without cache. Memory-reference time improves by 1300/258 ≈ **5.04×**.',
+          'If 17 cycles are **additional** after the 1-cycle lookup, the full miss path is 18 cycles. Then the two averages are 1.85 and 2.7 cycles, for 100×1.85 + 30×2.7 = **266 cycles** and a speedup of about **4.89×**.',
+          'These compare memory-reference time under a serial-access model. Total CPU speedup also depends on other work and overlap.',
         ] },
         { type: 'h', text: 'Two levels of cache' },
         { type: 'list', items: [
           'From the speed viewpoint the optimal cache location is **on the processor chip**, but chip space is limited → small L1.',
           'Separate **instruction and data caches** (68040, Pentium III/4) allow both to be accessed at once → parallelism, but more complex circuitry; a **combined cache** (ARM710T) has a somewhat better hit rate from flexible mapping.',
-          'High-performance processors use **two levels**: L1 on-chip (must be very fast — it constrains the clock rate), L2 much larger (SRAM, off-chip), only affecting L1’s miss penalty.',
+          'The slides model two levels: a small, fast on-chip L1 and a larger L2 consulted on an L1 miss. The historical example places L2 off chip. A design may place L2 on chip or add an L3.',
           'Access to a big cache is slower than to a register file — a practical speedup is accessing **several words at once** and letting the processor consume them one by one.',
           'Typical workstation: L1 of tens of KB, L2 of several MB; L2 further reduces the impact of memory speed.',
         ] },
@@ -247,16 +246,16 @@ export default {
         { type: 'list', items: [
           'In most modern systems, physical main memory is **smaller than the address space** the processor can issue (32-bit byte addresses span at most 4 GiB; installed RAM is a separate quantity).',
           'With demand paging, the virtual address space is divided into fixed-size **pages** and RAM into equal-size **frames**. Code and data need physical frames when accessed. A valid page may be backed by an executable file, swap or zero-filled memory before first use.',
-          'The OS moves programs and data **automatically** between memory and disk, so the application programmer never manages these limits — these are **virtual-memory techniques**.',
-          'Virtual memory **increases the apparent size of physical memory**: data is addressed in a **virtual address space** as large as the processor’s addressing capability, but only the active portion is mapped onto physical memory; the rest is mapped onto bulk storage (disk).',
-          'The binary addresses the processor issues are **virtual (logical) addresses**, translated into **physical addresses** by a combination of hardware and software. If the referenced item is in memory it is accessed immediately; otherwise it is brought into a suitable location before use.',
+          'The OS manages mappings and can move eligible pages between RAM and backing storage as needed. A file-backed page can be reloaded from its file, and some newly allocated pages start filled with zeros.',
+          'A **virtual address space** can exceed installed RAM. Only resident virtual pages map to RAM frames. Parts of the address space can be unmapped or protected.',
+          'The binary addresses the processor issues are **virtual (logical) addresses**, translated into **physical addresses** by a combination of hardware and software. With a valid resident mapping, the physical address goes to the cache or memory system. A valid nonresident reference can trigger a page fault so the OS can supply the page and retry.',
         ] },
         { type: 'diagram', id: 'virtualMemory', caption: 'The MMU translates virtual to physical addresses. When a valid page is not resident, a page fault lets the OS bring it in before retrying the instruction.' },
         { type: 'note', title: 'From the class notes', text: [
           'Worked frame: a 20-bit address → 2^20 = 1 MB address space, but only 512 KB of real memory (plus the hard disk). The address space can name 1 MiB, while 512 KiB of RAM holds the currently resident pages. Unmapped and protected pages still cause faults. The exam version of this (Fall/Spring 2023 Q3a): “64-bit processor, 2 GB memory, 5 GB game — any issue? which technique? draw the organization.”',
         ] },
         { type: 'think', text: [
-          'Answer shape for the “big game, small memory” question: (1) program or install size alone does not determine whether it will run; a process may use more virtual memory than installed RAM if the OS can back its pages; (2) the technique is virtual memory with paging/segmentation managed by the OS; (3) the drawing is processor → virtual address → MMU → physical memory (2 GB) ↔ disk holding the rest; (4) one line on why it works — only referenced pages need to be resident. A working set that persistently exceeds RAM may cause frequent faults and thrashing.',
+          'Answer shape for the “big game, small memory” question: (1) program or install size alone does not determine whether it will run; a process may use more virtual memory than installed RAM if the OS can back its pages; (2) the technique is virtual memory with paging/segmentation managed by the OS; (3) the drawing is processor → virtual address → MMU → cache → physical memory (2 GB) ↔ backing storage; (4) one line on why it works — only referenced pages need to be resident. A working set that persistently exceeds RAM may cause frequent faults and thrashing.',
         ] },
         { type: 'steps', items: ['Split a virtual address into page number and page offset. For 4 KiB pages, the offset is 12 bits.', 'The MMU checks a cached translation (TLB). On a TLB miss, consult the page table; a resident mapping can still exist.', 'For a valid resident page, substitute its physical frame number and preserve the offset. For a legal but absent page, the OS handles the page fault, allocates a frame or evicts a victim, installs the mapping, and retries. A protection or invalid-address fault may instead terminate the access.'] },
         { type: 'note', text: 'A physically tagged cache compares physical identities even if its set index is taken from unchanged page-offset bits. Page translation, cache lookup and fetching a nonresident page solve different problems.' },

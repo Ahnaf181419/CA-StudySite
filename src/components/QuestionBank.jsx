@@ -2,14 +2,8 @@ import Blocks from './Blocks.jsx'
 import { PAPERS, TOPICS } from '../data/papers/index.js'
 import { md } from '../lib/md.jsx'
 
-function Badge({ kind }) {
-  const map = {
-    must: ['Repeated 3+', 'bg-ink text-paper'],
-    high: ['Repeated 2×', 'border-2 border-ink'],
-    notes: ['In class notes', 'border border-line2 bg-panel'],
-  }
-  const [label, cls] = map[kind]
-  return <span className={`text-[10.5px] font-semibold uppercase tracking-[0.08em] px-1.5 py-0.5 whitespace-nowrap ${cls}`}>{label}</span>
+function Badge({ label }) {
+  return <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] px-1.5 py-0.5 whitespace-nowrap border border-line2 bg-panel">{label}</span>
 }
 
 function Question({ q }) {
@@ -20,8 +14,8 @@ function Question({ q }) {
         <div className="text-[14.5px] leading-[1.7] whitespace-pre-line">{md(q.q)}</div>
         <div className="flex flex-wrap items-center gap-2 mt-2.5">
           <span className="text-[11.5px] border border-line bg-panel px-2 py-0.5 text-ash">{TOPICS[q.topic].name}</span>
-          {q.repeats >= 3 ? <Badge kind="must" /> : q.repeats === 2 ? <Badge kind="high" /> : null}
-          {q.inNotes ? <Badge kind="notes" /> : null}
+          {q.repeats > 1 ? <Badge label={`Topic in ${q.repeats} papers`} /> : null}
+          {q.inNotes ? <Badge label="In class notes" /> : null}
           {q.flagged ? <span className="text-[10.5px] uppercase tracking-[0.08em] text-ash">Supplemental question</span> : null}
         </div>
         {q.pattern ? <p className="text-[12.5px] text-ash mt-2 italic">{md(q.pattern)}</p> : null}

@@ -34,6 +34,7 @@ const MAP = {
   daisyChain: C4.DaisyChain,
   prioritizedDaisyChain: C4.PrioritizedDaisyChain,
   dmaSystem: C4.DmaSystem,
+  dmaRegisters: C4.DmaRegisters,
   dmaModes: C4.DmaModes,
   busArbCentralized: C4.BusArbCentralized,
   distributedArb: C4.DistributedArb,
@@ -45,6 +46,7 @@ const MAP = {
   seqMultiplier: AR.SeqMultiplier,
   divHardware: AR.DivHardware,
   fpAdder: AR.FpAdder,
+  fpAddFlow: AR.FpAddFlow,
 }
 
 // every registered id must have a component, and vice versa (guards registry drift)

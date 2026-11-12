@@ -25,7 +25,7 @@ src/data/
                        → one file per module
   topics.js            → TOPICS: topic registry (id → name, module link, class-notes signal)
   papers/
-    index.js           → PAPERS: assembles papers, computes per-topic counts + repeat badges
+    index.js           → PAPERS: assembles papers, computes per-topic counts + topic frequency
     fall22.js … fall24.js → one file per past paper
 ```
 
@@ -71,12 +71,11 @@ Inline text is formatted by `src/lib/md.jsx`: `**bold**`, `*em*`, `` `code` ``, 
   q: '…', pattern: '…',              // question text; how it repeats across papers
   think: […],                        // how to approach it — rendered before the solution
   solution: [blocks],                // full exam-format answer (tested non-empty)
-  repeats: 3,                        // distinct papers asking this topic (computed if omitted)
 }
 ```
 
 `papers/index.js` computes `counts` (per-paper topic histogram, shown on the paper list, tested
-to match) and fills `repeats` from cross-paper presence when a question doesn't pin it.
+to match) and computes topic frequency from distinct papers containing the topic.
 
 ### Patterns view
 
@@ -127,7 +126,7 @@ and an inline SVG favicon in `index.html`.
 
 ## Build, test, deploy
 
-- `npm test` — 8 content-integrity checks, including question deep-link IDs, worked checkpoints and timing chart widths
+- `npm test` — 9 content-integrity checks, including question deep-link IDs, worked checkpoints and timing chart widths
 - `npm run build` — single-chunk bundle (~580 kB / ~185 kB gzip); the size warning is expected
   and accepted
 - `.github/workflows/deploy.yml` — on push to `main`: test → build → GitHub Pages.

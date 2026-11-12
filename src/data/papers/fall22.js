@@ -12,7 +12,7 @@ export default {
   format: 'Seven questions of 14 marks; Q1 compulsory, then two from each half. Sub-questions are long and multi-part (design + numeric).',
   questions: [
     {
-      id: 'Q1a', topic: 'mips', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q1a', topic: 'mips', marks: '[4]', flagged: true,
       q: 'Consider a branch-if-equal instruction that is 32 bits long: [Opcode | RS | RT | Offset]. The offset is 16 bits (not in 2’s complement form, a constant). The instruction syntax is BEQ $t3, $t2, X, where X is the offset. If $t3 == $t2, the PC is set to PC + X instead of PC + 4. Answer whether the following code snippet will function properly or not, and explain your reasoning.\nAddress [Instruction]\n5000 [ … ]\n5004 BEQ $t3, $t2, Label\n5008 ADD $t4, $t3, $t2\n80000 Label: SUB $t5, $t4, $t2',
 
       think: [
@@ -25,45 +25,45 @@ export default {
       ],
     },
     {
-      id: 'Q1b', topic: 'mips', marks: '[6]', flagged: true, repeats: 1,
+      id: 'Q1b', topic: 'mips', marks: '[6]', flagged: true,
       q: 'Write the machine code for the following MIPS assembler code assembled at the starting address 0x00800024 (decimal or binary encodings).\n0x00800024 main: lw $s1, 32($t0)\n0x00800028 addi $t1, $s1, −2\n0x0080002C slt $t2, $t1, $a1\n0x00800030 beq $t2, $zero, exit\n0x00800034 j main\n0x00800038 sll $0, $0, 0\n0x0080003C exit: …',
       think: [
         'Three encodings to remember: I-type = opcode(6) rs(5) rt(5) immediate(16); R-type = opcode(6) rs(5) rt(5) rd(5) shamt(5) funct(6); J-type = opcode(6) target(26). Register numbers: $s0–$s7 = 16–23, $t0–$t7 = 8–15, $a0–$a3 = 4–7, $zero = 0. Key detail: the BEQ offset counts **words** from PC+4, and the J target is the address ÷ 4.',
       ],
       solution: [
-        { type: 'table', head: ['Instruction', 'Fields', 'Machine code'], rows: [
-          ['`lw $s1, 32($t0)`', 'op 35 · rs $t0=8 · rt $s1=17 · imm 32', '`0x8D110020`'],
-          ['`addi $t1, $s1, −2`', 'op 8 · rs 17 · rt 9 · imm −2 = 0xFFFE', '`0x2229FFFE`'],
-          ['`slt $t2, $t1, $a1`', 'op 0 · rs 9 · rt 5 · rd 10 · shamt 0 · funct 42 (0x2A)', '`0x0125502A`'],
-          ['`beq $t2, $zero, exit`', 'op 4 · rs 10 · rt 0 · offset: (0x3C − 0x34)/4 = 2', '`0x11400002`'],
-          ['`j main`', 'op 2 · target = 0x00800024 ÷ 4 = 0x00200009', '`0x08000009`'],
-          ['`sll $0, $0, 0`', 'op 0 · rs 0 · rt 0 · rd 0 · shamt 0 · funct 0 — the canonical NOP', '`0x00000000`'],
+        { type: 'table', head: ['Instruction', 'Fields', '32-bit binary'], rows: [
+          ['`lw $s1, 32($t0)`', 'op 35 · rs $t0=8 · rt $s1=17 · imm 32', '`1000 1101 0001 0001 0000 0000 0010 0000`'],
+          ['`addi $t1, $s1, −2`', 'op 8 · rs 17 · rt 9 · imm −2 = 0xFFFE', '`0010 0010 0010 1001 1111 1111 1111 1110`'],
+          ['`slt $t2, $t1, $a1`', 'op 0 · rs 9 · rt 5 · rd 10 · shamt 0 · funct 42 (0x2A)', '`0000 0001 0010 0101 0101 0000 0010 1010`'],
+          ['`beq $t2, $zero, exit`', 'op 4 · rs 10 · rt 0 · offset: (0x3C − 0x34)/4 = 2', '`0001 0001 0100 0000 0000 0000 0000 0010`'],
+          ['`j main`', 'op 2 · target index = 0x00800024 ÷ 4 = 0x00200009', '`0000 1000 0010 0000 0000 0000 0000 1001`'],
+          ['`sll $0, $0, 0`', 'op 0 · rs 0 · rt 0 · rd 0 · shamt 0 · funct 0 — the canonical NOP', '`0000 0000 0000 0000 0000 0000 0000 0000`'],
         ] },
         { type: 'list', items: [
           'lw opcode 35 (100011₂), addi 8, beq 4, j 2; R-type op 0 with funct 42 for slt, 0 for sll.',
           'BEQ: base = branch address + 4 = 0x34; target 0x3C → offset = (0x3C − 0x34)/4 = 2 words.',
-          'J: the 26-bit field holds the word address (PC÷4); the top 4 bits come from PC+4.',
+          'J: the 26-bit field holds target bits 27 through 2. The processor supplies the top four bits from PC+4 and appends two zero bits.',
           '(-2 in 16 bits: invert 0000 0000 0000 0010 → 1111 1111 1111 1101, +1 → 1111 1111 1111 1110 = FFFE.)',
         ] },
-        { type: 'answer', text: ['0x8D110020 · 0x2229FFFE · 0x0125502A · 0x11400002 · 0x08000009 · 0x00000000'] },
+        { type: 'answer', text: 'Write the binary encodings above. Their hex equivalents, in order, are 0x8D110020, 0x2229FFFE, 0x0125502A, 0x11400002, 0x08200009, and 0x00000000.' },
       ],
     },
     {
-      id: 'Q1c', topic: 'mips', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q1c', topic: 'mips', marks: '[4]', flagged: true,
       q: 'Given the C code: while (A[i] == k) { i = i + 1; } — translate to MIPS code. Assume i is in $s3, k in $s5, and the base address of the integer array A is in $s6.',
       think: 'Loop: compute &A[i] = $s6 + 4i (shift + add), load, compare with $s5, exit when different, else increment i and jump back.',
       solution: [
-        { type: 'pre', text: 'Loop:  sll  $t1, $s3, 2      # $t1 = 4 × i   (word offset)\n      add  $t1, $t1, $s6   # $t1 = address of A[i]\n      lw   $t0, 0($t1)     # $t0 = A[i]\n      bne  $t0, $s5, Exit  # while (A[i] == k): leave when different\n      addi $s3, $s3, 1     # i = i + 1\n      j    Loop\nExit: …' },
+        { type: 'pre', text: 'Loop: sll  $t1, $s3, 2      # byte offset: 4 × i\n      addu $t1, $t1, $s6   # address of A[i]\n      lw   $t0, 0($t1)     # load A[i]\n      bne  $t0, $s5, Exit  # exit if A[i] differs from k\n      nop                  # branch delay slot\n      addi $s3, $s3, 1     # increment on the fall-through path\n      j    Loop\n      nop                  # jump delay slot\nExit: …' },
         { type: 'list', items: [
           'Integers are 4 bytes, so the index scales by 4 with `sll … 2`.',
           'The C `while` is tested **before** the body: branch out on the failure condition (`bne`), fall through into the body.',
-          'Only $s3 (i) changes; $s5 (k) and $s6 (base) stay untouched — the question’s register convention.',
+          'Of the input registers, only $s3 (i) changes. On a classic MIPS implementation, the branch delay slot executes on either path, so the increment must follow the NOP. If the course simulator disables delay slots, omit both NOPs.',
         ] },
-        { type: 'answer', text: ['Six-instruction loop: compute &A[i], load, bne $t0,$s5,Exit, addi $s3,$s3,1, j Loop — as listed.'] },
+        { type: 'answer', text: 'Compute &A[i], load A[i], and branch out on inequality. Increment i only on equality, then jump back. Include the two NOPs when delay slots are enabled.' },
       ],
     },
     {
-      id: 'Q2a', topic: 'perf', marks: '[4]', repeats: 2,
+      id: 'Q2a', topic: 'perf', marks: '[4]',
       q: 'The pipelined datapath has generally been broken down into five stages. Assume that each stage takes the time specified in Table 1 (Fetch 8 ns, Decode 6 ns, Execute 9 ns, Memory 12 ns, Write-back 6 ns). Assuming that N instructions are executed and all N instructions are load (lw) instructions, evaluate the speedup of a pipeline implementation (assuming no hazards/stalls) when compared to a single-cycle implementation.',
       pattern: 'The speedup derivation that Spring 2022 Q5(a) asks with equal stage times — the formula family every performance question leans on.',
       think: [
@@ -77,7 +77,7 @@ export default {
       ],
     },
     {
-      id: 'Q2b', topic: 'misc', marks: '[6]', flagged: true, repeats: 1,
+      id: 'Q2b', topic: 'misc', marks: '[6]', flagged: true,
       q: 'A computer consists of three basic types of components or modules (CPU, I/O, and memory) and they use different paths and signals to communicate. Investigate the modules (in light of their structural and functional aspect, interconnection structure, and incorporating strategies) to formulate a computer system.',
       think: 'Essay question — structure it: (1) each module’s function + structure; (2) the interconnection structure = the bus (address/data/control); (3) incorporating strategies (single bus, multiple/hierarchical buses, caches close to CPU). Draw the classic modules-over-a-bus figure.',
       solution: [
@@ -102,7 +102,7 @@ export default {
       ],
     },
     {
-      id: 'Q2c', topic: 'hazards', marks: '[4]', repeats: 4,
+      id: 'Q2c', topic: 'hazards', marks: '[4]',
       q: 'Describe why the load-use data hazards in the pipeline cannot be resolved by the forwarding unit alone. In order to resolve the dependency, the pipeline must stall for one clock cycle after the load (lw) instruction in addition to the forwarding unit. Examine the hazard detection unit and describe the steps to create a pipeline stall of one clock cycle to solve the load-use data hazards.',
       think: [
         'The one-sentence core: forwarding feeds the **ALU output** forward, but a Load’s value only appears after the **memory** stage — one cycle later than an ALU result, so one bubble is unavoidable. Then the mechanics of stalling: freeze PC + IF/ID, inject NOP into ID/EX.',
@@ -122,7 +122,7 @@ export default {
       ],
     },
     {
-      id: 'Q3a', topic: 'perf', marks: '[4]', repeats: 1,
+      id: 'Q3a', topic: 'perf', marks: '[4]',
       q: 'Examine the following MIPS instructions for a 5-stage pipelined processor with fixed 2 ns cycle time. Calculate the total clock cycles and the overall CPI. Consider forwarding and hazard detection methods to reduce the stalls and beq has TRUE condition.\nlw $t0, 0($s5)\naddi $s5, $s5, 4\nadd $t0, $s3, $t0\nsw $t0, 0($s5)\nxor $t3, $t2, $s5\nbeq $t3, $t4, Label\nadd $t2, $t3, $t2\nLabel: add $t5, $t6, $t7',
       think: [
         'Schedule instruction by instruction and count only real stalls. Key observations: the addi **between** lw and add absorbs the load-use hazard (no stall); every ALU dependency is forwarded; assume branch resolution at the end of EX with sequential fetch and forwarding to EX. Two younger fetch slots are discarded; the target may have been fetched speculatively and is fetched again after redirect.',
@@ -144,7 +144,7 @@ export default {
       ],
     },
     {
-      id: 'Q3b', topic: 'cache', marks: '[6]', repeats: 5,
+      id: 'Q3b', topic: 'cache', marks: '[6]',
       q: 'Consider a 1 MByte main memory, block size of 16 bytes and cache size 64 KByte. For the main memory addresses F0010₁₆ and 01234₁₆ determine the tag, index and byte offset bits for direct-mapped and four-way set-associative cache topologies.',
       pattern: 'The mapping staple with hex addresses — same field arithmetic as every other year.',
       think: [
@@ -169,36 +169,36 @@ export default {
       ],
     },
     {
-      id: 'Q3c', topic: 'branch', marks: '[4]', repeats: 3,
+      id: 'Q3c', topic: 'branch', marks: '[4]',
       q: 'Branch decision is confirmed in the MEM stage of branch instructions. Thus, to make the decision for the next instruction that should be inserted in the pipeline following the branch instruction, the pipeline needs to stall for three (3) clock cycles. This is a very inefficient procedure and significantly slows the pipeline execution. Investigate the hardware-based units in Fig. 2 (the 5-stage datapath with the hazard detection unit) and determine the appropriate solution to reduce the branch delay. Be precise in your answer.',
       pattern: 'The MIPS-side twin of the Hamacher branch-penalty reduction question (Fall 2024 Q2(a), Spring 2023 Q1(e)) — same idea: resolve the branch earlier in the pipeline.',
       think: [
         'Penalty 3 means three wrong-path instructions are in flight when the branch decides in MEM. The fix the figure’s hardware suggests: **decide the branch in the Decode stage** — a dedicated comparator and branch-target adder in ID, plus the hazard unit’s IF.Flush to kill the single wrong instruction. Penalty drops to 1.',
       ],
       solution: [
-        { type: 'timing', columns: 8, rows: [
-          { label: 'beq (decision in MEM)', cells: ['F', 'D', 'E', 'M', 'W', '', '', ''] },
-          { label: 'wrong path 1', cells: ['', 'F', 'D', 'E', { t: 'flush', dim: true }, '', '', ''] },
-          { label: 'wrong path 2', cells: ['', '', 'F', 'D', { t: 'flush', dim: true }, '', '', ''] },
-          { label: 'wrong path 3', cells: ['', '', '', 'F', { t: 'flush', dim: true }, '', '', ''] },
-          { label: 'target', cells: ['', '', '', '', '', 'F', 'D', 'E'] },
-        ], caption: 'Branch resolving in MEM: three instructions fetched on the wrong path must be flushed → penalty 3 cycles.' },
+        { type: 'timing', columns: 9, rows: [
+          { label: 'beq (decision in MEM)', cells: ['F', 'D', 'E', 'M', 'W', '', '', '', ''] },
+          { label: 'wrong path 1', cells: ['', { t: 'F', dim: true }, { t: 'D', dim: true }, { t: 'E', dim: true }, '', '', '', '', ''] },
+          { label: 'wrong path 2', cells: ['', '', { t: 'F', dim: true }, { t: 'D', dim: true }, '', '', '', '', ''] },
+          { label: 'wrong path 3', cells: ['', '', '', { t: 'F', dim: true }, '', '', '', '', ''] },
+          { label: 'target', cells: ['', '', '', '', 'F', 'D', 'E', 'M', 'W'] },
+        ], caption: 'A taken branch resolves at the end of MEM in cycle 4. Fetches in cycles 2–4 are discarded. Target fetch starts in cycle 5, three cycles later than the ideal cycle 2.' },
         { type: 'p', text: '**Solution — move the branch decision into the Decode (ID) stage**, with dedicated hardware that does not touch the main pipeline path:' },
         { type: 'steps', items: [
           'Add a **comparator in ID** that tests register equality directly on the register-file read outputs (for beq) — no ALU pass needed.',
           'Add a **dedicated branch-target adder in ID** computing PC + 4 + (offset ≪ 2) in parallel with the comparison.',
           'If the branch is taken, the **hazard detection unit asserts IF.Flush** (the signal shown in Fig. 2), turning the one wrongly fetched instruction into a bubble and redirecting the PC to the target.',
         ] },
-        { type: 'timing', columns: 6, rows: [
-          { label: 'beq (decision in ID)', cells: ['F', 'D', 'E', 'M', 'W', ''] },
-          { label: 'wrong path 1', cells: ['', { t: 'flush', dim: true }, '', '', '', ''] },
-          { label: 'target', cells: ['', '', 'F', 'D', 'E', 'M'] },
+        { type: 'timing', columns: 7, rows: [
+          { label: 'beq (decision in ID)', cells: ['F', 'D', 'E', 'M', 'W', '', ''] },
+          { label: 'wrong path 1', cells: ['', { t: 'F', dim: true }, '', '', '', '', ''] },
+          { label: 'target', cells: ['', '', 'F', 'D', 'E', 'M', 'W'] },
         ], caption: 'With the decision in ID, only one wrong instruction is in flight → branch penalty 1 cycle.' },
-        { type: 'answer', text: ['Add an ID-stage equality comparator + branch-target adder and flush one instruction via IF.Flush: the penalty falls from 3 clock cycles to 1 (and to 0 with correct branch prediction).'] },
+        { type: 'answer', text: ['Add an ID-stage equality comparator + branch-target adder and flush one instruction via IF.Flush: the penalty falls from 3 clock cycles to 1 assuming the branch operands are ready in ID. With early prediction and an available correct target, fetch need not wait for the decision.'] },
       ],
     },
     {
-      id: 'Q4a', topic: 'dma', marks: '[4]', repeats: 3,
+      id: 'Q4a', topic: 'dma', marks: '[4]',
       q: 'As a CPU designer designing a high-performance CPU, you must choose the technique applied at the interface between the CPU and I/O devices. Three approaches are conceivable: Direct Memory Access (DMA), Interrupt Driven I/O, and Programmed I/O. Make your decision after considering the advantages and disadvantages of each strategy.',
       think: 'Ladder of processor involvement: programmed (poll everything) → interrupt (device announces) → DMA (controller moves blocks). For a **high-performance** CPU the answer is DMA for block devices, interrupts for slow ones — justify by counting processor cycles per byte.',
       solution: [
@@ -212,7 +212,7 @@ export default {
       ],
     },
     {
-      id: 'Q4b', topic: 'mips', marks: '[6]', flagged: true, repeats: 1,
+      id: 'Q4b', topic: 'mips', marks: '[6]', flagged: true,
       q: 'You are asked to design a new instruction in MIPS that performs arithmetic and logic operations between the content of a register and a memory location, and then stores the result back to the same register. For example, ORm $t0, 1000($s2) would fetch the content of memory location 1000+($s2) and logical OR it to the content of $t0. Each such instruction can potentially eliminate the need for one load instruction. Examine Fig. 3 (single-cycle datapath) and identify the required changes.',
       think: [
         'Trace the datapath stages a load already uses (register read → ALU address → memory read → writeback) and see what’s missing: the **second operand** ($t0) and the **operation** on the memory data. That means: read two registers, add a second ALU after memory (or reuse the main ALU in a second pass), and widen the writeback MUX.',
@@ -232,7 +232,7 @@ export default {
       ],
     },
     {
-      id: 'Q4c', topic: 'hamming', marks: '[4]', flagged: true, repeats: 2,
+      id: 'Q4c', topic: 'hamming', marks: '[4]', flagged: true,
       q: 'A 00110011-bit stream is encoded and transmitted over a noisy channel. During Viterbi decoding at the receiver, the bitstream found is 00100011 with a single bit error. Apply the Hamming code algorithm to identify and correct the single-bit error. In addition, explain the procedure to detect double-bit errors in the bit message.',
       think: [
         'The two displayed words also form a valid SECDED(8,4) example if treated as already encoded. Under that convention, positions 1, 2 and 4 are Hamming checks and position 8 is overall parity. Recompute each check over its positions; the syndrome (s4s2s1) **is** the position of the error; the overall parity bit separates single from double errors.',
@@ -256,7 +256,7 @@ export default {
       ],
     },
     {
-      id: 'Q5a', topic: 'prog-io', marks: '[4]', repeats: 1,
+      id: 'Q5a', topic: 'prog-io', marks: '[4]',
       q: 'Contrast a memory map system with an isolated I/O system.',
       solution: [
         { type: 'table', head: ['', 'Memory-mapped I/O', 'Isolated (I/O-mapped) I/O'], rows: [
@@ -270,7 +270,7 @@ export default {
       ],
     },
     {
-      id: 'Q5b', topic: 'fp', marks: '[6]', flagged: true, repeats: 3,
+      id: 'Q5b', topic: 'fp', marks: '[6]', flagged: true,
       q: 'b) Answer the following:\ni) Given the 32-bit pattern 1100 1101 0010 1000 0000 0000 0011 1001, write the corresponding single precision floating-point number and the corresponding two’s complement integer.\nii) Explain the use of guard, round and sticky bits during floating point arithmetic.',
       think: [
         '(i) is two decodes of the same word — split S/E/F on the 1-8-23 boundary for IEEE, then invert+1 for the two’s complement magnitude. (ii) is the precision story: bits kept during alignment so rounding is correct.',
@@ -295,7 +295,7 @@ export default {
       ],
     },
     {
-      id: 'Q5c', topic: 'misc', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q5c', topic: 'misc', marks: '[4]', flagged: true,
       q: 'Explain the necessity of differential signaling in the Quick Path Interconnection (QPI) bus system.',
       solution: [
         { type: 'list', items: [
@@ -308,7 +308,7 @@ export default {
       ],
     },
     {
-      id: 'Q6a', topic: 'fp', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q6a', topic: 'fp', marks: '[4]', flagged: true,
       q: 'Explain how a denormalized number is represented. Provide the highest positive, lowest positive, highest negative, and lowest negative single precision denormalized numbers.',
       solution: [
         { type: 'p', text: 'When the exponent field is all zeros and the fraction is non-zero, the IEEE single-precision number is **denormalized**: there is **no hidden 1**, and the exponent is fixed at the minimum, −126:' },
@@ -324,7 +324,7 @@ export default {
       ],
     },
     {
-      id: 'Q6b', topic: 'perf', marks: '[6]', flagged: true, repeats: 1,
+      id: 'Q6b', topic: 'perf', marks: '[6]', flagged: true,
       q: 'You are the lead designer of a new processor. The design and compiler are complete, and now you must decide whether to produce the current design as it stands (μP clock rate 500 MHz) or spend additional time improving it (μP clock rate 600 MHz). Table II gives the instruction classes with their CPI values and frequencies. Choose your option and justify it according to the performance ratio of the options.\nTable II — Current: A CPI 2 (40%), B CPI 3 (25%), C CPI 3 (25%), D CPI 5 (10%). After improvement: A CPI 2 (40%), B CPI 2 (25%), C CPI 3 (25%), D CPI 4 (10%).',
       think: [
         'Compute the class-weighted CPI of each option (S = Σ CPIᵢ·fᵢ), then compare T = N·S/R. The 600 MHz design wins only if its S stays below 1.2× the old S — check: S₁ = 2.80, S₂ = 2.45 and 2.45/2.80 = 0.875 < 1.2, so it wins on both terms.',
@@ -341,7 +341,7 @@ export default {
       ],
     },
     {
-      id: 'Q6c', topic: 'bus-arb', marks: '[4]', repeats: 3,
+      id: 'Q6c', topic: 'bus-arb', marks: '[4]',
       q: 'Explain the necessity of bus arbitration in computer organization. Distinguish between centralized and distributed arbitration processes with proper examples.',
       solution: [
         { type: 'p', text: '**Necessity:** more than one unit can initiate bus transfers — the processor and every DMA controller — but the bus (address/data/control lines) can serve only **one master at a time**; two drivers would corrupt every transfer. Arbitration selects the next master and hands over mastership.' },
@@ -357,7 +357,7 @@ export default {
       ],
     },
     {
-      id: 'Q7a', topic: 'misc', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q7a', topic: 'misc', marks: '[4]', flagged: true,
       q: 'The most recent advancements in the ROM and RAM families are Flash memory and Resistive Random-Access Memory (RRAM). Assume you need to update the BIOS memory on your machine. Compare the efficiency of both memories as BIOS memory.',
       solution: [
         { type: 'table', head: ['', 'Flash (NOR flash typically)', 'RRAM (ReRAM)'], rows: [
@@ -372,7 +372,7 @@ export default {
       ],
     },
     {
-      id: 'Q7b', topic: 'ram-chip', marks: '[6]', repeats: 2,
+      id: 'Q7b', topic: 'ram-chip', marks: '[6]',
       q: 'Draw the block diagram of a SRAM chip of size 64×8 bits using D-flip-flops, address decoder and tri-state buffers.',
       think: '64 words → 6 address lines → 6-to-64 decoder → 64 word lines; 8 columns of D-FFs (one per bit); tri-state output buffers per bit line to the 8 data pins; R/W̄ + CS control.',
       solution: [
@@ -388,7 +388,7 @@ export default {
       ],
     },
     {
-      id: 'Q7c', topic: 'misc', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q7c', topic: 'misc', marks: '[4]', flagged: true,
       q: 'Building a new computer architecture requires focusing on its Microarchitecture and Instruction Set Architecture (ISA). Explain their interrelationships and how they influence computer architecture design.',
       solution: [
         { type: 'list', items: [

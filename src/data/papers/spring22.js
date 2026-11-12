@@ -11,7 +11,7 @@ export default {
   format: 'Seven 14-mark questions with long multi-part sub-questions; the cache and pipeline parts overlap heavily with the later Hamacher-track papers.',
   questions: [
     {
-      id: 'Q2b', topic: 'mips', marks: '[~4]', flagged: true, repeats: 1,
+      id: 'Q2b', topic: 'mips', marks: '[~4]', flagged: true,
       q: 'Explain the ALU logic(s) to take the decision for the following set-on-less-than instruction: slt $t0, $t3, $t4',
       think: 'slt computes rd = (rs < rt) — here $t0 = ($t3 < $t4) ? 1 : 0. The ALU performs a subtraction and decides from the **sign** of the result — with an overflow correction, because subtracting numbers with opposite signs can overflow and flip the sign.',
       solution: [
@@ -25,7 +25,7 @@ export default {
       ],
     },
     {
-      id: 'Q3a', topic: 'hamming', marks: '[4]', flagged: true, repeats: 2,
+      id: 'Q3a', topic: 'hamming', marks: '[4]', flagged: true,
       q: 'A 10100110-bit message is encoded and transmitted over a noisy channel. During Viterbi decoding at the receiver, the bit message found is 10110110. Apply the SEC code to detect and correct a single error in the bit message. In addition, explain the procedure to detect double bits error.',
 
       think: [
@@ -39,7 +39,7 @@ export default {
       ],
     },
     {
-      id: 'Q3b', topic: 'cache', marks: '[6]', repeats: 5,
+      id: 'Q3b', topic: 'cache', marks: '[6]',
       q: 'Cache size 1 KB, block size 8 B, direct-mapped scheme. Determine the tag, index and byte offset bits from a 16-bit memory address. For the main memory address 1100 0011 0011 0100, give the corresponding cache line number.',
       think: '16-bit address, byte addressing: offset = log2(8) = 3; lines = 1 KB/8 B = 128 → index = 7; tag = 16 − 10 = 6. Cut the address, cross-check with block mod 128.',
       solution: [
@@ -49,7 +49,7 @@ export default {
       ],
     },
     {
-      id: 'Q3c', topic: 'vmem', marks: '[4]', flagged: true, repeats: 2,
+      id: 'Q3c', topic: 'vmem', marks: '[4]', flagged: true,
       q: 'Logical and physical memory addresses are used in the virtual memory scheme. Choose which one (logical/physical) is mapped as the cache address by direct-mapped or fully associative data caches. Express the reasons for your choice.',
       think: 'The eternal trade: virtual addressing = no translation before cache access (fast hit path) but suffers the **synonym/alias** problem (two virtual addresses → one physical location) and needs flushing on context switch. Physical = one canonical address, no aliases, no flush — at the cost of translating first.',
       solution: [
@@ -64,7 +64,7 @@ export default {
       ],
     },
     {
-      id: 'Q4a', topic: 'hazards', marks: '[4]', repeats: 4,
+      id: 'Q4a', topic: 'hazards', marks: '[4]',
       q: 'Examine the following MIPS instructions for a 5-stage pipelined processor with fixed 3 ns cycle time:\nand $t3, $t2, $t1\nand $t5, $t3, $t4\nlw $t3, 8($t5)\nor $t6, $t6, $t3\n(i) Detect the location of data hazards. (ii) Remove the hazards using NOP operations and count the number of NOPs. (iii) Calculate the total execution time using full forwarding (without NOP operations).',
       think: [
         'Underline destinations and sources pair by pair: I2 reads $t3 (written I1), I3 reads $t5 (written I2), I4 reads $t3 (written I3 — a **load**). For NOPs on a 5-stage pipeline: 2 NOPs per ALU dependency, and the load-use pair also needs the values in time (2 NOPs here as well, since the decode then coincides with the load’s writeback cycle). For forwarding: ALU deps forward for free; only the load-use costs 1 stall.',
@@ -90,7 +90,7 @@ export default {
       ],
     },
     {
-      id: 'Q4b', topic: 'cache', marks: '[6]', repeats: 5,
+      id: 'Q4b', topic: 'cache', marks: '[6]',
       q: 'A fully associative cache has 64 B size, block size 4 B and RAM size 16 KB. It has comparators, an encoder and a multiplexer to choose the specific block data for the CPU. (i) Estimate the number of required comparators. (ii) Estimate the number of input and output channels of the encoder. (iii) Estimate the number of required selector bits for the multiplexer. (iv) Illustrate them in a diagram.',
       think: [
         'Blocks = 64/4 = 16 — that one number drives everything: 16 comparators (one per block, full tag compare in parallel), encoder 16-in → 4-out (winning block number), MUX 16-to-1 → 4 selector bits, plus 2 offset bits select the byte within the 4-byte block.',
@@ -102,27 +102,27 @@ export default {
           '**Encoder:** the comparator outputs (one-hot, at most one hit) encode into the block number → **16 inputs, log2 16 = 4 outputs**.',
           '**Multiplexer:** selects the 32-bit data of the winning block from the 16 blocks → **4 selector bits** (from the encoder); the **2 offset bits** then select the byte within the 4-byte block on the data path (6 select bits in total if you count the byte MUX).',
         ] },
-        { type: 'diagram', id: 'associativeMap', caption: 'Illustration basis: fully associative cache — 16 tagged blocks, all tags compared in parallel, encoder picks the hit, MUX steers its data out.' },
-        { type: 'answer', text: ['16 comparators (12-bit), encoder 16-in/4-out, MUX 4 block-selector bits + 2 offset bits (6 total); diagram = 16 tag|block rows feeding parallel comparators → encoder → 16-to-1 MUX → CPU.'] },
+        { type: 'pre', text: 'Address tag[11:0] ─→ 16 parallel tag comparators\nStored tags[11:0] ─→ (one comparator per line)\n                          │ match AND valid, per line\n                          ▼\n                     16 match bits ─────────→ OR ─→ hit\n                          │\n                          ▼\n                      16:4 encoder\n                          │ 4-bit line select\n                          ▼\n16 stored 32-bit blocks → 16:1 block MUX\n                          │ selected 32-bit block\n                          ▼\nOffset[1:0] ────────────→ 4:1 byte MUX ─→ CPU (on hit)', caption: 'The encoder selects a line only when hit is asserted. The address has no cache index field.' },
+        { type: 'answer', text: ['16 comparators (12-bit), a 16-input/4-output encoder, and 4 select bits for the 16-to-1 block MUX. Two separate offset bits select a byte within the winning block.'] },
       ],
     },
     {
-      id: 'Q4c', topic: 'misc', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q4c', topic: 'misc', marks: '[4]', flagged: true,
       q: 'Compare the performance of write operations achieved by a RAID level 5 organization with that achieved by a RAID level 1 organization.',
       solution: [
         { type: 'table', head: ['', 'RAID 1 (mirroring)', 'RAID 5 (distributed parity)'], rows: [
           ['Layout', 'every disk has a full mirror copy', 'parity blocks striped across all disks'],
-          ['Small write', '**2 disks** written (data + mirror), can be done in parallel', '**2 data disks + parity**: either read-modify-write (2 reads + 3 writes) or reconstruct-write (read all other data disks, write 2) — parity calculation dominates'],
-          ['Large/sequential write', 'writes the mirror too (2× traffic)', 'one parity per stripe group: overhead ≈ 1/N of data — much better than 2×'],
+          ['Single-block overwrite', '2 writes: new data and its mirror, possibly in parallel', 'Read-modify-write: read old data and old parity, then write new data and new parity (2 reads + 2 writes). Reconstruct-write can read the other data blocks in the stripe and then write the updated data and parity.'],
+          ['Full-stripe write', '2 physical writes per logical block', 'With N drives, write N−1 new data blocks and one new parity block. No old data or parity needs to be read.'],
           ['Read performance', 'excellent (either copy)', 'excellent (N-disk striping)'],
           ['Capacity / fault tolerance', '50% capacity cost; 1 disk per mirror may fail', '~(N−1)/N usable; 1 disk may fail'],
         ] },
-        { type: 'p', text: '**Write-performance verdict:** RAID 1 wins on small random writes (two independent writes, no parity computation); RAID 5 wins on large sequential writes (parity overhead amortizes to 1/N instead of 100%) and on capacity efficiency.' },
-        { type: 'answer', text: ['RAID 1: small writes cheaper (mirror copy only). RAID 5: large writes cheaper (distributed parity ≈ 1/N overhead) but small writes pay a read-modify-write penalty.'] },
+        { type: 'p', text: '**Write-performance comparison:** RAID 1 usually has lower overhead for small random overwrites. For full-stripe writes, RAID 5 adds 1/(N−1) parity blocks per logical data block on average, compared with one extra mirror block per logical block in RAID 1. Measured speed also depends on stripe coverage, drives and controller.' },
+        { type: 'answer', text: ['RAID 1 writes two copies. RAID 5 pays extra reads on small read-modify-writes, but a full-stripe write computes parity from the new data and writes only one extra block per stripe.'] },
       ],
     },
     {
-      id: 'Q5a', topic: 'perf', marks: '[4]', repeats: 2,
+      id: 'Q5a', topic: 'perf', marks: '[4]',
       q: 'Assuming that N instructions are executed, and all N instructions are load (lw) instructions, each stage has fixed clock length (3 ns), evaluate the speedup of a pipelined implementation without any hazard when compared to a single-cycle implementation.',
       solution: [
         { type: 'pre', text: 'single-cycle:  T_single = N × 5 × 3 ns = 15N ns\npipelined:     T_pipe  = 5 × 3 + (N − 1) × 3 = (3N + 12) ns\n\nspeedup = 15N / (3N + 12) = 5N / (N + 2)·2 → simplify: = 5N/(N+4)' },
@@ -131,7 +131,7 @@ export default {
       ],
     },
     {
-      id: 'Q5b', topic: 'mips', marks: '[6]', flagged: true, repeats: 1,
+      id: 'Q5b', topic: 'mips', marks: '[6]', flagged: true,
       q: 'You are asked to design a new instruction in MIPS that performs arithmetic addition between the contents of three registers and stores the result back to the destination register. For example, add3 $t0, $t1, $t2, $t3 fetches $t1, $t2, $t3, adds them and writes the result to $t0. Each such instruction can potentially eliminate the need for two add instructions. Examine Figure 1 (single-cycle datapath with control signals) and identify the required changes, especially in the register file and the ALU.',
       solution: [
         { type: 'steps', items: [
@@ -146,7 +146,7 @@ export default {
       ],
     },
     {
-      id: 'Q5c', topic: 'mips', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q5c', topic: 'mips', marks: '[4]', flagged: true,
       q: 'Examine the datapath and control signals in Figure 1, where the Main Control Unit creates a 2-bit ALUOp signal sent to the ALU Control Unit, which generates 3-bit ALU control signals. You are asked to build a new datapath that does not include the ALU Control Unit — the 3-bit ALU signals will be generated directly by the Main Control Unit. Write the contents of your analysis report evaluating the advantages and disadvantages of both models.',
       solution: [
         { type: 'table', head: ['', 'Two-level (current: Main CU → ALUOp → ALU CU)', 'Single-level (Main CU drives ALU control directly)'], rows: [
@@ -161,7 +161,7 @@ export default {
       ],
     },
     {
-      id: 'Q6a', topic: 'dma', marks: '[4]', repeats: 3,
+      id: 'Q6a', topic: 'dma', marks: '[4]',
       q: 'The processor initiates the communication with the DMA. Explain what necessary information is required from the processor to start transferring data from memory to an I/O device.',
       solution: [
         { type: 'steps', items: [
@@ -174,7 +174,7 @@ export default {
       ],
     },
     {
-      id: 'Q6b', topic: 'fp', marks: '[6]', flagged: true, repeats: 3,
+      id: 'Q6b', topic: 'fp', marks: '[6]', flagged: true,
       q: 'Given the bit pattern 10101101 11110010 00000000 00000000, determine their representation assuming it is (a) a two’s complement integer, (b) an unsigned integer, (c) a single precision floating-point number.',
       solution: [
         { type: 'steps', items: [
@@ -186,7 +186,7 @@ export default {
       ],
     },
     {
-      id: 'Q6c', topic: 'ram-chip', marks: '[4]', repeats: 2,
+      id: 'Q6c', topic: 'ram-chip', marks: '[4]',
       q: 'The size of a DRAM memory is 64K×1. Identify the total number of bits for the row number, the total number of bits for the column numbers, and the highest address that the refresh counter generates.',
       solution: [
         { type: 'steps', items: [
@@ -198,7 +198,7 @@ export default {
       ],
     },
     {
-      id: 'Q6d', topic: 'ram-chip', marks: '[4]', repeats: 2,
+      id: 'Q6d', topic: 'ram-chip', marks: '[4]',
       q: 'Identify the reasons why DRAM is an analog device and SRAM is a digital device.',
       solution: [
         { type: 'list', items: [
@@ -210,7 +210,7 @@ export default {
       ],
     },
     {
-      id: 'Q6e', topic: 'perf', marks: '[6]', flagged: true, repeats: 1,
+      id: 'Q6e', topic: 'perf', marks: '[6]', flagged: true,
       q: 'Consider an atomic motion modeling application that runs on machine M1. The application has three instruction classes — floating-point (F), integer arithmetic (I) and all others (N) — with the CPI values and frequencies of Table II. M1’s clock rate is 800 MHz. Calculate the execution time for the application on M1.\nTable II — Integer arithmetic (I): CPI 5.2, frequency 30%. Floating-point (F): CPI 2.0, 30%. All others (N): CPI 2.4, 40%.',
       think: [
         'Weight each class CPI by its frequency to get the average S, then T = N·S/R. The instruction count N is not given — carry it symbolically and also give the per-instruction figure so the answer is complete either way.',
@@ -226,7 +226,7 @@ export default {
       ],
     },
     {
-      id: 'Q6f', topic: 'misc', marks: '[4]', flagged: true, repeats: 1,
+      id: 'Q6f', topic: 'misc', marks: '[4]', flagged: true,
       q: 'The rate of improvement in processor speed (55% per year) is much higher than the improvement in memory speed (7% per year). Express your opinion in the context of reducing the improvement gap between processor and memory speed.',
       solution: [
         { type: 'steps', items: [

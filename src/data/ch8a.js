@@ -129,12 +129,12 @@ export default {
         ], boldFirst: true },
         { type: 'timing', columns: 9, rows: [
           { label: 'I1  Mul R2,R3,R4', cells: ['F1', 'D1', 'E1', 'W1', '', '', '', '', ''] },
-          { label: 'I2  Add R5,R4,R6', cells: ['', 'F2', 'D2', { t: 'D2A', box: true }, 'E2', 'W2', '', '', ''] },
+          { label: 'I2  Add R5,R4,R6', cells: ['', 'F2', 'D2', { t: 'hold', box: true }, { t: 'D2A', box: true }, 'E2', 'W2', '', ''] },
           { label: 'I3', cells: ['', '', 'F3', '', '', 'D3', 'E3', 'W3', ''] },
           { label: 'I4', cells: ['', '', '', '', '', 'F4', 'D4', 'E4', 'W4'] },
-        ], caption: 'Assume W writes early enough for D to read the same cycle. Mul writes R4 in cycle 4, so Add retries Decode in cycle 4 and enters Execute in cycle 5. If Decode cannot see a same-cycle write, delay it one more cycle. The dependency arises because the destination of one instruction is the source of the next.' },
+        ], caption: 'Chapter 8 slide “Data hazards (contd.)”, printed page 25. Mul writes R4 at the end of cycle 4. Add detects the dependency in D2, retries the operand read in cycle 5 (D2A), and executes in cycle 6. A register file with write-first, read-later timing can retry in cycle 4 instead, shifting the remaining work one cycle earlier.' },
         { type: 'list', items: [
-          'In cycle 5 the Write stage is **idle** — it has nothing to work with.',
+          'The Write stage is idle in cycles 5 and 6. The Add writes back in cycle 7.',
           'A blocked Decode holds the waiting instruction. Fetch must also hold when its buffer is full. Older instructions downstream may still complete.',
           'Most arithmetic/logic operations take one E cycle; **division takes longer** — the same kind of stall, longer.',
         ] },
@@ -216,7 +216,7 @@ export default {
           'Software alternative: the **compiler detects the dependency** and inserts the right number of `NOP` instructions between the two instructions.',
         ] }
         ,
-        { type: 'pre', text: 'I1: Mul R2, R3, R4\n     NOP\n     NOP\nI2: Add R5, R4, R6', caption: 'A two-cycle delay = two NOPs. The NOPs do nothing, but they give W1 time to finish before D2 reads R4.' },
+        { type: 'pre', text: 'I1: Mul R2, R3, R4\n     NOP\n     NOP\nI2: Add R5, R4, R6', caption: 'With the course timing above, two NOPs move the Add’s Decode from cycle 3 to cycle 5. W1 has finished by then. With a register file that supports a same-cycle write and read, one NOP suffices.' },
         { type: 'p', text: 'Software can also simply **reorder** independent instructions into the gap — the same idea that delayed branch exploits later in Part 2.' },
         { type: 'think', text: [
           'Hardware (forwarding/stalling) costs circuits but works on any code; software (NOP/reorder) costs instruction slots but no circuits. Which one a question wants is usually stated — “in hardware” → forwarding figure, “in software” → NOP insertion.',

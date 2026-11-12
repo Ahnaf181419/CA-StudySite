@@ -25,7 +25,7 @@ export default {
           '**Left-shift the multiplicand** (it doubles, ready for the next bit).',
           '**Right-shift the multiplier** (bring the next bit to the LSB).',
         ] },
-        { type: 'p', text: 'Loop until the multiplier becomes 0 — the loop runs at most **n times for an n-bit multiplier** (that is how many bits must be tested).' },
+        { type: 'p', text: 'The slide algorithm runs **n rounds for an n-bit multiplier**: test one bit per round. If the hardware explicitly supports early termination, it may stop once the multiplier becomes 0, since all remaining rounds would skip the add. Use n rounds when tracing the slide flowchart.' },
         { type: 'p', text: 'Register widths for 32 × 32 → 64-bit product (from the notes): multiplier 32 bits; multiplicand zero-extended to 64 bits before shifts; product 64 bits, because (2^32 − 1)² < 2^64.' },
         { type: 'diagram', id: 'seqMultiplier', caption: 'Sequential multiplication hardware: multiplicand (shift left), ALU, product (accumulates without shifting), multiplier (shift right), control tests the multiplier LSB.' },
       ],
@@ -33,7 +33,7 @@ export default {
     {
       heading: 'Multiplication worked example: 4 × 3 in 4 bits (class notes)',
       blocks: [
-        { type: 'p', text: 'Multiplicand 0100 (4), multiplier 0011 (3), product starts 0000 0000. Two loops (after two right-shifts the multiplier is 0):' },
+        { type: 'p', text: 'Multiplicand 0100 (4), multiplier 0011 (3), product starts 0000 0000. This class-notes trace stops early after two right shifts make the multiplier 0.' },
         { type: 'table', head: ['Step', 'Multiplier', 'Multiplicand', 'Product'], rows: [
           ['initial', '0011', '0000 0100', '0000 0000'],
           ['L1: LSB = 1 → add', '0011', '0000 0100', '0000 0100'],
@@ -42,7 +42,7 @@ export default {
           ['L2: LSB = 1 → add', '0001', '0000 1000', '0000 1100'],
           ['L2: left-shift multiplicand', '0001', '0001 0000', '0000 1100'],
           ['L2: right-shift multiplier', '0000', '0001 0000', '0000 1100'],
-        ], caption: 'Multiplier is now 0000 → stop. Product = 0000 1100 = 12 = 4 × 3 ✓' },
+        ], caption: 'Product = 0000 1100 = 12. A fixed four-round trace also shows rounds 3 and 4, each skipping the add and shifting both operand registers.' },
         { type: 'think', text: [
           'Check yourself with columns, not prose: every row changes **at most one** register, and the add row is the only one that touches Product. In the exam, write exactly this table — the marker looks for the (add, shift-multiplicand, shift-multiplier) triple per loop. Scale the widths to whatever the paper gives (5-bit in Spring 2023: 31 × 13; 6-bit in Fall 2023: 60 × 15) — the table shape never changes.',
         ] },
@@ -128,22 +128,23 @@ export default {
       blocks: [
         { type: 'p', text: 'The slides ask for the **flowchart and block diagram** of floating-point addition. The flowchart in order:' },
         { type: 'steps', items: [
-          'Compare exponents; find the difference d = |Ea − Eb|.',
-          '**Align**: shift the mantissa of the smaller-exponent operand right by d (it becomes 0.F-form relative to the larger exponent).',
-          'Add (or subtract, per the signs) the two mantissas — the ALU step.',
-          'If the result mantissa is 0, finish with +0.',
-          '**Normalize**: shift left while the leading 1 is not in the hidden position (each left shift decrements the exponent), or shift right one if the addition carried out (exponent +1).',
+          'Unpack the operands. Compare their effective exponents and find the difference d = |eₐ − eᵦ|. A subnormal has effective exponent −126 and a leading 0.',
+          '**Align**: shift the significand of the smaller-exponent operand right by d and retain guard, round and sticky bits.',
+          'If the signs match, add the significands and keep that sign. If they differ, subtract the smaller aligned magnitude from the larger and take the larger magnitude’s sign.',
+          'Exact cancellation of nonzero operands gives +0 under round-to-nearest-even.',
+          '**Normalize**: shift left toward the hidden-bit position and decrement the exponent, stopping at −126. A result with a leading 0 at that limit is subnormal. If the addition carried out, shift right once and increment the exponent.',
           '**Round** to 23 fraction bits; re-normalize if rounding carried out again.',
           'Under round-to-nearest, overflow goes to signed infinity. A tiny result can become subnormal or round to zero. Handle NaN, infinity and signed zero separately; the steps here trace finite operands under round-to-nearest.',
         ] },
-        { type: 'p', text: 'The matching **block diagram** boxes: exponent comparator → aligner (right-shifter) → mantissa adder/subtractor → normalizer (left/right shifter) → rounding logic → exponent adjust, all wrapped around the same control loop as the flowchart.' },
+        { type: 'diagram', id: 'fpAddFlow', caption: 'Floating-point addition workflow for finite inputs under round-to-nearest-even. A rounding carry can require another exponent adjustment.' },
+        { type: 'p', text: 'In the hardware block diagram, the exponent comparator controls alignment. The normalizer adjusts the working exponent along with the significand, and the rounder can adjust it again before packing.' },
         { type: 'think', text: [
           'Why align before adding? Two numbers like 2^5 × 1.1 and 2^3 × 1.01 must have the same exponent before their fraction digits line up — exactly like aligning decimal points. The smaller exponent always shifts right, never the larger, so no precision is spent on the bigger number’s leading bits.',
         ] },
         { type: 'note', title: 'Guard, round, sticky (P&H §3.5 precision bits)', text: [
           'When the aligner shifts a mantissa right, bits would be lost. The hardware keeps **guard** (first extra bit), **round** (second extra bit) and **sticky** (OR of everything shifted out beyond that) so rounding is correct. With round-to-nearest, ties-to-even, increment the retained significand when G = 1 and at least one of R, S, or the least significant retained bit is 1. They are only extra precision during the operation — the stored result stays 23 bits. Fall 2022 Q5(b)(ii) asks for exactly this explanation.',
         ] },
-        { type: 'diagram', id: 'fpAdder', caption: 'Finite operands: compare exponents and align the smaller significand, then add or subtract, normalize, round, and pack. The selected exponent feeds normalization and packing.' },
+        { type: 'diagram', id: 'fpAdder', caption: 'Floating-point adder block diagram. The exponent path controls the alignment shifter and supplies the exponent for normalization and packing.' },
         { type: 'example', title: 'Worked addition: 1.5 + 0.75', blocks: [
           { type: 'steps', items: ['Write 1.5 as 1.1₂×2⁰ and 0.75 as 1.1₂×2⁻¹.', 'Align to exponent 0: 0.75 becomes 0.11₂×2⁰.', 'Add: 1.10₂ + 0.11₂ = 10.01₂. Shift right and increment exponent: 1.001₂×2¹.', 'All discarded bits are zero. Pack S=0, E=128 (10000000₂), F=001 followed by twenty zeroes.'] },
           { type: 'answer', text: '0x40100000 = 2.25.' },

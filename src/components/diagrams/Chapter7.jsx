@@ -1,374 +1,351 @@
 import { Svg, Box, T, W, Bus, ALUshape, Muxshape } from './base.jsx'
 
-// Hamacher Fig 7.1 — single-bus organization of the datapath inside a processor.
+// Figure 7.1, Chapter 7 slide 8.
 export function SingleBus() {
+  const registers = [
+    ['PC', 44, true],
+    ['MAR', 139, false],
+    ['MDR', 234, true],
+    ['IR', 329, false],
+    ['R0', 424, true],
+    ['R(n−1)', 519, true],
+    ['TEMP', 614, true],
+  ]
+
   return (
-    <Svg vb="0 0 780 560">
-      {/* internal processor bus */}
-      <Bus x1={60} y1={60} x2={730} y2={60} />
-      <T x={62} y={50} fs={11}>Internal processor bus</T>
+    <Svg vb="0 0 780 565">
+      <Bus x1={22} y1={70} x2={754} y2={70} />
+      <T x={25} y={52}>Internal processor bus</T>
 
-      {/* registers hanging from the bus */}
-      <W d="M140,60 V95" /><Box x={100} y={95} w={80} h={36} label="PC" />
-      <W d="M280,60 V95" /><Box x={240} y={95} w={80} h={36} label="MAR" />
-      <W d="M320,60 V175" /><Box x={240} y={175} w={80} h={36} label="MDR" sub="2-in, 2-out" fs={12} />
-      <W d="M665,60 V95" /><Box x={620} y={95} w={90} h={36} label="IR" />
-      <W d="M635,60 V175" /><Box x={620} y={175} w={90} h={36} label="R0" />
-      <W d="M635,215 V255" /><Box x={620} y={255} w={90} h={36} label="R(n-1)" fs={12} />
-      <W d="M635,295 V335" /><Box x={620} y={335} w={90} h={36} label="TEMP" />
+      {registers.map(([name, x, bidirectional]) => (
+        <g key={name}>
+          <W d={`M${x + 41},70 V125`} both={bidirectional} />
+          <Box x={x} y={125} w={82} h={36} label={name} />
+        </g>
+      ))}
 
-      {/* memory bus side */}
-      <W d="M240,113 H75" />
-      <T x={75} y={105} fs={11}>Address lines</T>
-      <W d="M240,193 H75" arrow={false} />
-      <W d="M75,193 H240" open />
-      <T x={75} y={186} fs={11}>Data lines</T>
-      <T x={30} y={300} fs={12}>M e m o r y</T>
-      <T x={30} y={318} fs={12}>b u s</T>
+      <W d="M180,161 V220" />
+      <T x={180} y={239} anchor="middle" fs={11}>Memory address</T>
+      <W d="M275,161 V220" both />
+      <T x={275} y={239} anchor="middle" fs={11}>Memory data</T>
 
-      {/* Y — loaded FROM the bus, output to MUX */}
-      <W d="M190,60 V240" />
-      <Box x={140} y={240} w={70} h={32} label="Y" />
-      <W d="M175,272 V290" />
+      <W d="M370,161 V200" />
+      <Box x={345} y={200} w={210} h={52} label="Instruction decoder" sub="and control logic" />
+      <W d="M450,252 V265 H567 V398 H515" dash />
+      <T x={575} y={394} fs={11}>ALU control</T>
 
-      {/* constant 4 + MUX feed ALU input A */}
-      <Box x={55} y={292} w={82} h={30} label="Constant 4" fs={11.5} />
-      <W d="M137,307 H185" />
-      <Muxshape x={185} y={268} w={46} h={40} />
-      <T x={150} y={262} fs={11}>Select</T>
-      <W d="M150,278 H185" />
-      <W d="M231,288 H315 V292" />
+      <W d="M22,70 V290 H102" />
+      <Box x={102} y={272} w={90} h={36} label="Y" />
+      <Box x={102} y={324} w={90} h={36} label="Constant 4" fs={11.5} />
+      <W d="M192,290 H236" />
+      <W d="M192,342 H236" />
+      <Muxshape x={236} y={271} w={68} h={91} />
+      <W d="M270,249 V275" dash />
+      <T x={275} y={258} fs={11}>Select</T>
+      <W d="M304,316 H387 V372" />
+      <W d="M730,70 V338 H485 V372" />
+      <T x={387} y={366} anchor="middle" fs={11}>A</T>
+      <T x={485} y={366} anchor="middle" fs={11}>B</T>
+      <ALUshape x={368} y={372} w={150} h={77} />
+      <W d="M445,449 V483" />
+      <Box x={410} y={483} w={70} h={36} label="Z" />
+      <W d="M480,501 H754 V70" />
+      <T x={627} y={493} fs={11}>Zout → bus</T>
 
-      {/* ALU: A from MUX, B from the bus (line dropped at x=400) */}
-      <ALUshape x={300} y={292} w={120} h={64} />
-      <T x={296} y={286} fs={11}>A</T><T x={345} y={286} fs={11}>B</T>
-      <W d="M400,60 V310 H345 V312" />
-      <T x={405} y={70} fs={11}>from bus</T>
-
-      {/* ALU control */}
-      <T x={212} y={366} fs={11}>ALU control (Add, Sub, XOR…)</T>
-      <W d="M212,360 H262" arrow={false} /><W d="M212,360 H258" open />
-
-      {/* Z: fed by ALU, output back up to the bus */}
-      <W d="M330,356 V430" />
-      <Box x={295} y={430} w={70} h={32} label="Z" />
-      <W d="M365,446 H430 V60" />
-      <T x={436} y={300} fs={11}>Z → bus</T>
-
-      {/* control unit */}
-      <Box x={55} y={470} w={330} h={50} label="Instruction decoder and control logic" mono={false} fs={12} />
-      <T x={55} y={548} fs={11}>Control signals go to every register (Riin/Riout), Select, the ALU, Read/Write and WMFC.</T>
-      <W d="M110,470 V360" dash />
-      <W d="M220,470 V465" dash arrow={false} />
-      <W d="M300,470 V468" dash arrow={false} />
-      <W d="M385,470 V468 H420 V466" dash arrow={false} />
-      <W d="M430,462 V340" dash />
+      <T x={25} y={550} fs={11}>Only one source drives the internal bus in a control step. Several registers may load it.</T>
     </Svg>
   )
 }
 
-// Hamacher Fig 7.2/7.3 — input/output gating of one register (and one bit).
+// Figure 7.2, Chapter 7 slide 14.
 export function RegisterGating() {
   return (
-    <Svg vb="0 0 780 380">
-      <Bus x1={80} y1={70} x2={700} y2={70} />
-      <T x={82} y={60} fs={11}>Internal processor bus</T>
+    <Svg vb="0 0 670 446">
+      <Bus x1={575} y1={55} x2={575} y2={400} />
+      <T x={575} y={36} anchor="middle">Internal processor bus</T>
 
-      {/* Ri with Riin / Riout switches */}
-      <W d="M230,70 V118" />
-      <Box x={190} y={120} w={80} h={40} label="Ri" />
-      <T x={285} y={98} fs={11}>Riout</T>
-      <path d="M281,74 L295,80 L281,86 Z" style={{ fill: 'var(--dg-ink)' }} />
-      <T x={252} y={112} fs={11}>Riin</T>
-      <path d="M256,118 L262,104 L268,118 Z" style={{ fill: 'var(--dg-ink)' }} />
+      <Box x={155} y={69} w={105} h={42} label="Ri" />
+      <Box x={380} y={76} w={74} h={28} label="Riin" fs={11.5} />
+      <W d="M575,90 H454" />
+      <W d="M380,90 H260" />
+      <Box x={380} y={121} w={74} h={28} label="Riout" fs={11.5} />
+      <W d="M207,111 V135 H380" />
+      <W d="M454,135 H575" />
 
-      {/* Y, MUX, ALU, Z below the bus */}
-      <W d="M420,70 V140" />
-      <Box x={385} y={142} w={70} h={34} label="Y" />
-      <T x={300} y={132} fs={11}>Yin</T>
-      <Box x={120} y={212} w={82} h={30} label="Constant 4" fs={11.5} />
-      <W d="M202,227 H252" />
-      <Muxshape x={252} y={188} w={46} h={40} />
-      <T x={218} y={182} fs={11}>Select</T>
-      <W d="M225,198 H252" />
-      <W d="M420,176 V220 H275 V188" />
-      <W d="M298,208 H345 V220" />
-      <ALUshape x={345} y={220} w={115} h={60} />
-      <T x={352} y={214} fs={11}>A</T><T x={398} y={214} fs={11}>B</T>
-      <W d="M400,70 V220" />
-      <T x={406} y={80} fs={11}>from bus</T>
-      <W d="M402,280 V330" />
-      <Box x={368} y={332} w={70} h={32} label="Z" />
-      <T x={452} y={310} fs={11}>Zin</T>
-      <W d="M438,348 H560 V70" />
-      <T x={566} y={300} fs={11}>Zout → bus</T>
+      <Box x={155} y={159} w={105} h={42} label="Y" />
+      <Box x={380} y={166} w={74} h={28} label="Yin" fs={11.5} />
+      <W d="M575,180 H454" />
+      <W d="M380,180 H260" />
 
-      <T x={80} y={375} fs={11}>Each register Ri has two control signals: Riin (load from bus on next clock) and Riout (drive the bus).</T>
+      <Box x={34} y={202} w={91} h={32} label="Constant 4" fs={11.5} />
+      <Muxshape x={151} y={218} w={66} h={54} />
+      <W d="M125,218 H128 M136,218 H139 V231 H151" />
+      <W d="M207,201 V208 H132 V258 H151" />
+      <T x={238} y={226} fs={11}>Select</T>
+      <W d="M246,233 H217" dash />
+      <W d="M217,250 H259 V282" />
+      <W d="M575,250 H346 V282" />
+      <T x={259} y={276} anchor="middle" fs={11}>A</T>
+      <T x={346} y={276} anchor="middle" fs={11}>B</T>
+      <ALUshape x={239} y={282} w={128} h={57} />
+
+      <Box x={267} y={351} w={72} h={26} label="Zin" fs={11.5} />
+      <W d="M303,339 V351" />
+      <W d="M303,377 V385" />
+      <Box x={267} y={385} w={72} h={30} label="Z" />
+      <Box x={380} y={386} w={74} h={28} label="Zout" fs={11.5} />
+      <W d="M339,400 H380" />
+      <W d="M454,400 H575" />
+      <T x={32} y={438} fs={11}>Riin loads Ri at the clock edge. Riout enables Ri to drive the bus.</T>
     </Svg>
   )
 }
 
-// One register BIT (Hamacher Fig 7.3) — D flip-flop with input MUX and output buffer.
+// Figure 7.3, Chapter 7 slide 15.
 export function RegisterBit() {
   return (
-    <Svg vb="0 0 640 358">
-      <Bus x1={60} y1={60} x2={580} y2={60} />
-      <T x={62} y={50} fs={11}>Bus (1 bit of it)</T>
+    <Svg vb="0 0 670 299">
+      <Bus x1={55} y1={45} x2={622} y2={45} />
+      <T x={55} y={28}>Internal bus (one bit)</T>
 
-      {/* tri-state output buffer: Q drives the bus only when Riout = 1 */}
-      <W d="M268,230 V144" arrow={false} />
-      <path d="M258,144 L278,144 L268,124 Z" style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
-      <W d="M268,124 V60" />
-      <T x={286} y={132} fs={11}>Riout (enable buffer)</T>
+      <Muxshape x={210} y={113} w={70} h={78} label="2-to-1" />
+      <T x={202} y={124} anchor="end" fs={11}>0</T>
+      <T x={202} y={171} anchor="end" fs={11}>1</T>
+      <W d="M130,45 V175 H210" />
+      <W d="M280,152 H350" />
+      <Box x={350} y={128} w={105} h={48} label="D flip-flop" />
+      <T x={354} y={143} fs={10}>D</T>
+      <T x={446} y={143} fs={10}>Q</T>
 
-      {/* 2:1 input MUX: 1 = load from bus, 0 = hold (Q feedback) */}
-      <W d="M150,60 V158 H277" />
-      <T x={106} y={150} fs={11}>1 → load</T>
-      <Muxshape x={277} y={150} w={46} h={44} label="2×1" />
-      <T x={228} y={146} fs={11}>Riin</T>
+      <W d="M455,152 H516" arrow={false} />
+      <W d="M481,152 V82 H179 V128 H210" />
+      <circle cx={481} cy={152} r={2.8} style={{ fill: 'var(--dg-ink)' }} />
+      <T x={263} y={73} fs={11}>Feedback (hold current bit)</T>
+      <path d="M516,136 L516,168 L560,152 Z" style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
+      <W d="M560,152 H622 V45" />
+      <T x={512} y={120} fs={11}>Tri-state buffer</T>
 
-      {/* MUX output into the flip-flop */}
-      <W d="M299,194 V230" />
-
-      {/* flip-flop */}
-      <Box x={258} y={230} w={84} h={56} label="D  Q" sub="flip-flop" fs={12} />
-
-      {/* Q feedback into the MUX's 0 input (hold) */}
-      <W d="M342,262 H370 V210 H255 V172 H277" />
-      <T x={440} y={224} fs={11}>feedback (hold)</T>
-
-      {/* clock */}
-      <W d="M258,272 H200" />
-      <T x={192} y={268} fs={11} anchor="end">Clock</T>
-
-      <T x={60} y={316} fs={11}>Riin = 0 → FF holds its bit (Q fed back).</T>
-      <T x={60} y={332} fs={11}>Riin = 1 → FF loads the bus bit on the next clock pulse.</T>
-      <T x={60} y={348} fs={11}>Riout = 1 → the bit drives the bus; only one register may assert Riout at a time.</T>
+      <W d="M245,225 V187" dash />
+      <T x={245} y={243} anchor="middle" fs={11}>Riin (MUX select)</T>
+      <W d="M403,225 V176" />
+      <T x={403} y={243} anchor="middle" fs={11}>Clock</T>
+      <W d="M540,225 V159" dash />
+      <T x={540} y={243} anchor="middle" fs={11}>Riout (enable)</T>
+      <T x={55} y={277} fs={11}>Riin=1 loads the bus bit at the next edge. Riout=0 leaves the bus undriven by Ri.</T>
     </Svg>
   )
 }
 
-// Hamacher Fig 7.8 — three-bus organization of the datapath.
+// Figure 7.8, Chapter 7 slide 34.
 export function ThreeBus() {
   return (
-    <Svg vb="0 0 780 540">
-      <Bus x1={110} y1={70} x2={110} y2={500} />
-      <Bus x1={210} y1={70} x2={210} y2={500} />
-      <Bus x1={520} y1={70} x2={520} y2={500} />
-      <T x={96} y={62} fs={12} bold>Bus A</T>
-      <T x={196} y={62} fs={12} bold>Bus B</T>
-      <T x={504} y={62} fs={12} bold>Bus C</T>
+    <Svg vb="0 0 780 560">
+      <Bus x1={110} y1={70} x2={110} y2={495} />
+      <Bus x1={210} y1={70} x2={210} y2={495} />
+      <Bus x1={520} y1={70} x2={520} y2={495} />
+      <T x={110} y={60} anchor="middle" bold>Bus A</T>
+      <T x={210} y={60} anchor="middle" bold>Bus B</T>
+      <T x={520} y={60} anchor="middle" bold>Bus C</T>
 
-      {/* incrementer + PC */}
       <Box x={330} y={16} w={120} h={32} label="Incrementer" fs={12} />
-      <Box x={330} y={70} w={120} h={36} label="PC" />
-      <W d="M370,70 V48" arrow={false} /><W d="M362,52 V70" />
-      <W d="M330,88 H210" />
-      <W d="M520,108 H450" />
+      <Box x={330} y={72} w={120} h={36} label="PC" />
+      <W d="M359,72 V48" />
+      <W d="M422,48 V72" />
+      <W d="M330,90 H210" />
+      <W d="M520,90 H450" />
 
-      {/* register file */}
-      <Box x={330} y={140} w={120} h={72} label="Register file" sub="R0 … R(n-1)" fs={12} />
-      <W d="M330,158 H110" />
+      <Box x={330} y={140} w={120} h={72} label="Register file" sub="R0 … R(n−1)" fs={12} />
+      <W d="M330,158 H217 M203,158 H110" />
       <W d="M330,186 H210" />
       <W d="M520,200 H450" />
 
-      {/* constant 4 → MUX → ALU input A ; bus B → input B ; R → bus C */}
-      <Box x={30} y={270} w={82} h={30} label="Constant 4" fs={11.5} />
-      <W d="M112,285 H150" />
-      <Muxshape x={150} y={262} w={46} h={44} />
-      <T x={118} y={256} fs={11}>Select</T>
-      <W d="M120,270 H150" />
-      <W d="M196,284 H300 V300" />
+      <Box x={12} y={245} w={84} h={28} label="Constant 4" fs={11.5} />
+      <W d="M96,259 H103 M117,259 H203 M217,259 H243" />
+      <W d="M110,292 H203 M217,292 H243" />
+      <Muxshape x={243} y={245} w={50} h={60} />
+      <T x={226} y={333} fs={11}>Select A / 4</T>
+      <W d="M270,317 V301" dash />
+      <W d="M293,275 H328 V300" />
       <ALUshape x={300} y={300} w={120} h={64} />
-      <T x={296} y={294} fs={11}>A</T><T x={352} y={294} fs={11}>B</T>
-      <W d="M210,345 H296" />
-      <T x={330} y={390} fs={11}>R = A / R = B (pass-through)</T>
+      <W d="M210,338 H312" />
+      <T x={323} y={320} fs={11}>A</T>
+      <T x={318} y={352} fs={11}>B</T>
       <W d="M420,332 H520" />
+      <T x={440} y={325} fs={11}>R</T>
+      <T x={310} y={388} fs={11}>R=A / R=B copies an input.</T>
 
-      {/* instruction decoder + IR */}
-      <Box x={600} y={160} w={160} h={46} label="Instruction" sub="decoder" fs={12} />
+      <Box x={600} y={160} w={160} h={46} label="Instruction decoder" fs={11.5} />
       <Box x={600} y={230} w={100} h={36} label="IR" />
       <W d="M650,230 V206" />
-      <W d="M600,248 H110" />
-      <W d="M520,262 H600" />
+      <W d="M600,243 H527 M513,243 H217 M203,243 H110" />
+      <W d="M520,259 H600" />
 
-      {/* MDR and MAR */}
-      <Box x={600} y={380} w={100} h={36} label="MDR" />
-      <W d="M600,392 H110" />
-      <W d="M600,406 H210" />
-      <W d="M520,388 H600" />
-      <W d="M650,416 V462" />
-      <T x={560} y={478} fs={11} anchor="middle">Memory bus data lines</T>
-      <Box x={330} y={440} w={100} h={36} label="MAR" />
-      <W d="M520,458 H430" />
-      <W d="M380,476 V505" />
-      <T x={374} y={522} fs={11} anchor="middle">Address lines</T>
+      <Box x={600} y={397} w={100} h={50} label="MDR" />
+      <W d="M600,407 H527 M513,407 H217 M203,407 H110" />
+      <W d="M600,421 H527 M513,421 H210" />
+      <W d="M520,436 H600" />
+      <W d="M650,447 V488" both />
+      <T x={650} y={506} fs={11} anchor="middle">Memory data lines</T>
 
-      <T x={30} y={522} fs={11}>GPR → buses A, B · GPR ← bus C · ALU ← (bus A or Constant 4) and bus B · ALU → bus C</T>
-      <T x={30} y={536} fs={11}>PC → bus B only · IR → bus A only · MDR → buses A, B · IR, PC, MDR, MAR ← bus C</T>
+      <Box x={330} y={443} w={100} h={36} label="MAR" />
+      <W d="M520,461 H430" />
+      <W d="M380,479 V514" />
+      <T x={380} y={532} fs={11} anchor="middle">Memory address lines</T>
     </Svg>
   )
 }
 
-// Hardwired control unit organization (slide 40).
+// Chapter 7 slide 40.
 export function HardwiredCU() {
   return (
-    <Svg vb="0 0 780 470">
-      <T x={30} y={28} fs={12} bold>Clock</T>
-      <W d="M80,34 H150" />
-      <Box x={150} y={16} w={170} h={40} label="Clock / control step" sub="counter" fs={11.5} />
-      <Box x={150} y={110} w={170} h={40} label="Step decoder" fs={12} />
-      <W d="M235,56 V110" />
+    <Svg vb="0 0 780 435">
+      <Box x={35} y={21} w={87} h={36} label="Clock" />
+      <W d="M122,39 H229" />
+      <Box x={229} y={15} w={195} h={53} label="Control step counter" />
+      <W d="M326,68 V113" />
+      <Box x={241} y={113} w={170} h={42} label="Step decoder" />
+      <W d="M326,155 V233" />
+      <T x={334} y={196} fs={11}>T1, T2, …, Tn</T>
 
-      <Box x={470} y={110} w={150} h={40} label="Instruction" sub="decoder" fs={11.5} />
-      <Box x={470} y={16} w={150} h={40} label="IR" />
-      <W d="M545,56 V110" />
+      <Box x={35} y={246} w={58} h={36} label="IR" />
+      <W d="M93,264 H115" />
+      <Box x={115} y={243} w={135} h={42} label="Instruction" sub="decoder" fs={11.5} />
+      <W d="M250,264 H294" />
+      <T x={112} y={306} fs={11}>INS1, INS2, …, INSm →</T>
 
-      {/* T lines and INS lines into the encoder */}
-      <T x={180} y={175} fs={11}>T1  T2  …  Tn</T>
-      <T x={470} y={175} fs={11}>INS1  INS2  …  INSm</T>
-      <W d="M190,160 V210" />
-      <W d="M240,160 V210" />
-      <W d="M300,160 V210" />
-      <W d="M500,160 V210" />
-      <W d="M555,160 V210" />
-      <W d="M610,160 V210" />
-      <Box x={180} y={210} w={430} h={70} label="Encoder" bold />
-      <W d="M340,280 V310" />
-      <Box x={140} y={310} w={510} h={44} label="Control signals  (PCout, MARin, Read, Add, Zin, WMFC, End, …)" fs={11.5} />
+      <Box x={294} y={233} w={210} h={88} label="Encoder" bold />
+      <Box x={567} y={234} w={159} h={33} label="External inputs" fs={11.5} />
+      <W d="M567,250 H504" />
+      <Box x={567} y={283} w={159} h={33} label="Condition codes" fs={11.5} />
+      <W d="M567,300 H504" />
 
-      {/* side inputs */}
-      <T x={622} y={248} fs={11}>External inputs</T>
-      <W d="M700,252 H612" />
-      <T x={622} y={190} fs={11}>Condition codes</T>
-      <W d="M700,194 H612" />
-
-      {/* run / end feedback */}
-      <W d="M660,332 H730 V80 H235 V60" dash />
-      <T x={640} y={72} fs={11}>End / Run</T>
+      <W d="M398,321 V372" />
+      <T x={398} y={396} anchor="middle">Control signals</T>
+      <W d="M341,321 V350 H12 V58 H229" dash />
+      <T x={65} y={342} fs={11}>Run → counter enable</T>
+      <W d="M463,321 V351 H752 V42 H424" dash />
+      <T x={581} y={343} fs={11}>End → counter reset</T>
     </Svg>
   )
 }
 
-// Hamacher Fig 7.16 — basic microprogrammed control unit.
+// Figure 7.16, Chapter 7 slide 50.
 export function MicroCU() {
   return (
     <Svg vb="0 0 640 360">
-      <Box x={60} y={20} w={110} h={40} label="IR" />
-      <W d="M170,40 H300" />
-      <Box x={300} y={20} w={200} h={40} label="Starting address generator" fs={11.5} />
-      <W d="M400,60 V120" />
-      <T x={30} y={110} fs={12} bold>Clock</T>
-      <W d="M80,116 H240" />
-      <Box x={240} y={120} w={160} h={44} label="µPC" bold />
-      <W d="M400,142 H460" />
-      <Box x={300} y={210} w={240} h={90} label="Control store" sub="microroutines" fs={12} />
-      <W d="M400,164 V210" />
-      <W d="M540,255 H610" />
-      <T x={545} y={244} fs={12} bold>CW</T>
-      <T x={60} y={330} fs={11}>µPC is clocked so successive microinstructions are read from the control store;</T>
-      <T x={60} y={348} fs={11}>a new instruction in IR loads its microroutine's starting address into µPC.</T>
+      <Box x={47} y={24} w={105} h={50} label="IR" />
+      <W d="M152,49 H217" />
+      <Box x={217} y={24} w={245} h={50} label="Starting address generator" fs={11.5} />
+      <W d="M340,74 V135" />
+      <Box x={47} y={141} w={105} h={36} label="Clock" />
+      <W d="M152,159 H261" />
+      <Box x={261} y={135} w={158} h={48} label="µPC" bold />
+      <W d="M340,183 V226" />
+      <Box x={217} y={226} w={245} h={71} label="Control store" sub="holds the microroutines" />
+      <W d="M462,261 H586" />
+      <T x={516} y={251} fs={11}>CW</T>
+      <T x={55} y={334} fs={11}>The µPC addresses the control store. Its output word drives the datapath.</T>
     </Svg>
   )
 }
 
-// Hamacher Fig 7.18 — microprogrammed control unit with conditional branching.
+// Figure 7.18, Chapter 7 slide 51.
 export function MicroCUCond() {
   return (
-    <Svg vb="0 0 640 400">
-      <Box x={60} y={20} w={110} h={40} label="IR" />
-      <W d="M170,40 H290" />
-      <Box x={290} y={20} w={230} h={46} label="Starting and branch" sub="address generator" fs={11.5} />
-      <W d="M405,66 V120" />
-      <T x={30} y={110} fs={12} bold>Clock</T>
-      <W d="M80,116 H240" />
-      <Box x={240} y={120} w={160} h={44} label="µPC" bold />
-      <W d="M405,142 H460" arrow={false} /><W d="M405,142 H456" />
-      <Box x={290} y={215} w={240} h={90} label="Control store" sub="microroutines" fs={12} />
-      <W d="M405,164 V215" />
-      <W d="M530,260 H610" />
-      <T x={535} y={249} fs={12} bold>CW</T>
-      <T x={530} y={60} fs={11}>Condition codes</T>
-      <W d="M610,66 H520" />
-      <T x={530} y={186} fs={11}>External inputs</T>
-      <W d="M610,190 H520" />
-      <T x={60} y={336} fs={11}>If the CW is a conditional branch, the generator checks the condition codes and,</T>
-      <T x={60} y={354} fs={11}>may load a new µPC address from the offset field.</T>
+    <Svg vb="0 0 720 388">
+      <Box x={35} y={67} w={100} h={42} label="IR" />
+      <W d="M135,88 H211" />
+      <Box x={211} y={40} w={247} h={118} label="Starting and branch" sub="address generator" />
+      <Box x={550} y={27} w={142} h={42} label="External inputs" fs={11.5} />
+      <W d="M550,48 H458" />
+      <Box x={550} y={78} w={142} h={42} label="Condition codes" fs={11.5} />
+      <W d="M550,99 H458" />
+
+      <W d="M335,158 V198" />
+      <Box x={35} y={200} w={100} h={42} label="Clock" />
+      <W d="M135,221 H254" />
+      <Box x={254} y={198} w={162} h={46} label="µPC" bold />
+      <W d="M335,244 V281" />
+      <Box x={211} y={281} w={247} h={54} label="Control store" />
+      <W d="M458,308 H661" />
+      <T x={624} y={297} fs={11}>CW</T>
+      <W d="M531,308 V140 H458" />
+      <circle cx={531} cy={308} r={2.8} style={{ fill: 'var(--dg-ink)' }} />
+      <T x={543} y={159} fs={11}>CW feedback</T>
+      <T x={38} y={369} fs={11}>The current CW and flags tell the sequencer whether to load a new microaddress.</T>
     </Svg>
   )
 }
 
-// Complete processor with internal + system bus (slide 43 / subsection 7.4.1).
+// Figure 7.14, Chapter 7 slide 43.
 export function CompleteProcessor() {
   return (
-    <Svg vb="0 0 780 484">
-      <Box x={90} y={30} w={600} h={300} fill="none" dashed />
-      <T x={110} y={55} fs={12} bold>CPU</T>
-      <Box x={130} y={80} w={170} h={54} label="Instruction" sub="cache" fs={12} />
-      <Box x={480} y={80} w={170} h={54} label="Data" sub="cache" fs={12} />
-      <Box x={130} y={200} w={180} h={70} label="Integer unit" sub="ALU + control" fs={12} />
-      <Box x={470} y={200} w={180} h={70} label="Floating-point unit" sub="ALU + control" fs={11.5} />
-      <Bus x1={200} y1={180} x2={560} y2={180} w={4} />
-      <T x={398} y={172} fs={11}>CPU internal bus</T>
-      <W d="M220,134 V200" /><W d="M210,200 V134" />
-      <W d="M565,134 V200" arrow={false} /><W d="M555,200 V134" />
-      <T x={398} y={178} fs={11}>CPU internal bus</T>
+    <Svg vb="0 0 780 485">
+      <Box x={39} y={26} w={702} h={332} fill="none" dashed />
+      <T x={55} y={46} bold>Processor</T>
 
-      {/* system bus */}
-      <Bus x1={60} y1={380} x2={720} y2={380} w={6} />
-      <T x={62} y={372} fs={11}>System bus (address, data, control)</T>
-      <W d="M160,380 V332" />
-      <W d="M215,330 V378" arrow={false} /><W d="M215,332 V378" />
-      <W d="M300,380 V250" /><W d="M290,250 V380" />
-      <T x={196} y={352} fs={10.5}>instr: in only</T>
-      <T x={306} y={340} fs={10.5}>data: both ways</T>
-      <Box x={560} y={400} w={150} h={44} label="Memory" />
-      <Box x={90} y={400} w={150} h={44} label="I/O" />
-      <W d="M165,400 V380" /><W d="M635,400 V380" />
-      <T x={90} y={454} fs={11}>Two separate ALUs (integer and floating-point), each with its own control unit.</T>
-      <T x={90} y={468} fs={11}>Separate instruction and data caches hide memory latency — note the arrow directions.</T>
+      <Box x={83} y={75} w={158} h={49} label="Instruction unit" fs={12} />
+      <Box x={312} y={75} w={155} h={49} label="Integer unit" sub="ALU + control" fs={12} />
+      <Box x={538} y={75} w={163} h={49} label="Floating-point unit" sub="ALU + control" fs={11.5} />
+      <W d="M162,75 V57 H619 V75" />
+      <W d="M389,57 V75" />
+      <circle cx={389} cy={57} r={2.8} style={{ fill: 'var(--dg-ink)' }} />
+
+      <Box x={83} y={205} w={158} h={51} label="Instruction cache" fs={12} />
+      <W d="M162,205 V124" />
+      <Box x={420} y={205} w={171} h={51} label="Data cache" />
+      <W d="M389,124 V160 H472 V205" both />
+      <W d="M619,124 V160 H537 V205" both />
+
+      <Box x={283} y={291} w={214} h={47} label="Bus interface" />
+      <W d="M333,291 V274 H162 V256" />
+      <W d="M449,291 V274 H505 V256" both />
+      <W d="M390,338 V391" both />
+
+      <Bus x1={39} y1={391} x2={741} y2={391} />
+      <T x={55} y={382} fs={11}>System bus</T>
+      <W d="M192,391 V426" both />
+      <W d="M588,391 V426" both />
+      <Box x={105} y={426} w={174} h={41} label="Main memory" />
+      <Box x={501} y={426} w={174} h={41} label="Input / output" />
     </Svg>
   )
 }
 
-// Gate network generating one control signal from step counter + instruction decoder (class notes).
+// The sum-of-products example shown on Chapter 7 slide 41.
 export function ControlSignalGates() {
-  const AndGate = ({ x, y }) => (
+  const andGate = (y) => (
     <g>
-      <path d={`M${x},${y} h18 a18,18 0 0 1 0,36 h-18 z`} style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
-      <T x={x + 14} y={y + 23} fs={10}>AND</T>
+      <path d={`M170,${y} h24 a24,24 0 0 1 0,48 h-24 z`} style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
+      <T x={191} y={y + 28} anchor="middle" fs={11}>AND</T>
     </g>
   )
+
   return (
-    <Svg vb="0 0 720 330">
-      <T x={40} y={30} fs={12}>Zin is asserted: T1 for every instruction, T6 for ADD, T4 for BRANCH →</T>
-      <T x={40} y={50} fs={12} bold>Zin = T1 + T6·ADD + T4·BRANCH + …</T>
+    <Svg vb="0 0 660 340">
+      <T x={40} y={38} bold>Zin = T1 OR (T6 AND ADD) OR (T4 AND BRANCH)</T>
 
-      {/* T1 term: always on → straight through a buffer into the OR gate */}
-      <T x={40} y={120} fs={12}>T1</T>
-      <W d="M70,116 H230" arrow={false} />
-      <path d="M160,110 L172,116 L160,122 Z" style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
+      <T x={41} y={94} fs={11}>T1</T>
+      <W d="M66,90 H302 V130 H389" arrow={false} />
+      <T x={41} y={154} fs={11}>T6</T>
+      <T x={41} y={178} fs={11}>ADD</T>
+      <W d="M75,150 H170" arrow={false} />
+      <W d="M75,174 H170" arrow={false} />
+      {andGate(138)}
+      <W d="M218,162 H397" arrow={false} />
 
-      {/* T6 · ADD */}
-      <T x={40} y={105} fs={12}>T6</T><W d="M85,109 H150" />
-      <AndGate x={150} y={100} />
-      <T x={40} y={135} fs={12}>ADD</T><W d="M100,131 H150" />
-      <W d="M186,118 H230" />
+      <T x={41} y={244} fs={11}>T4</T>
+      <T x={41} y={268} fs={11}>BRANCH</T>
+      <W d="M96,240 H170" arrow={false} />
+      <W d="M96,264 H170" arrow={false} />
+      {andGate(228)}
+      <W d="M218,252 H302 V194 H389" arrow={false} />
 
-      {/* T4 · BRANCH */}
-      <T x={40} y={215} fs={12}>T4</T><W d="M85,219 H150" />
-      <AndGate x={150} y={210} />
-      <T x={40} y={245} fs={12}>BRANCH</T><W d="M118,241 H150" />
-      <W d="M186,228 H230 V166" />
-
-      <g>
-        <path d="M230,118 h14 a24,24 0 0 1 0,48 h-14 z" style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
-        <T x={244} y={146} fs={10}>OR</T>
-      </g>
-      <W d="M268,142 H330" />
-      <Box x={330} y={124} w={110} h={36} label="Zin" bold />
-      <T x={40} y={302} fs={11}>" + " is an OR gate and " · " is an AND gate:</T>
-      <T x={40} y={316} fs={11}>each control signal is a sum-of-products of timing steps and instruction signals.</T>
+      <path d="M379,119 Q408,119 423,126 Q446,137 462,162 Q446,187 423,198 Q408,205 379,205 Q409,162 379,119 Z" style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
+      <T x={427} y={166} anchor="middle" fs={11}>OR</T>
+      <W d="M462,162 H534" />
+      <Box x={534} y={144} w={77} h={36} label="Zin" bold />
+      <T x={40} y={318} fs={11}>Each AND selects one instruction and step. The OR combines the three cases.</T>
     </Svg>
   )
 }

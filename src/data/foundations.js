@@ -41,8 +41,9 @@ export default {
       blocks: [
         { type: 'p', text: 'This material prepares you for questions that supply a single-bus figure. The main Chapter 7 module starts at the three-bus design. On one bus, only one output may drive the wires at a time. Multiple inputs can latch the same bus value. Y holds one ALU input while the other uses the bus, and Z latches the result so it can drive the bus in a later cycle.' },
         { type: 'diagram', id: 'singleBus', caption: 'Follow the data path from a source register to the bus, through the ALU to Z, then from Z back onto the bus.' },
-        { type: 'diagram', id: 'registerGating', caption: 'Each bit has its own storage and bus connection. The four bits share the same register input and output controls.' },
+        { type: 'diagram', id: 'registerGating', caption: 'Register-level gating. Riin controls loading from the bus and Riout controls driving it. Y and Z use their own enables.' },
         { type: 'p', text: 'Rin enables the register to latch the bus at the clock edge. Rout enables its tri-state output drivers. With Rout low the drivers are high-impedance, leaving the bus available to another register. During memory reads, MAR supplies the address, Read initiates the transfer and WMFC holds the control step until MDR receives the data. Use MDR on the internal bus in a later step.' },
+        { type: 'diagram', id: 'registerBit', caption: 'Expand a register into one slice per bit. Each slice has an input selector, a D flip-flop and an output buffer. Every slice shares Riin, Riout and Clock.' },
         { type: 'example', title: 'Trace SUB R1,R2 after instruction fetch', blocks: [
           { type: 'table', head: ['Step', 'Signals', 'Value at end of step'], rows: [
             ['1', 'R2out, Yin', 'Y ← R2'],

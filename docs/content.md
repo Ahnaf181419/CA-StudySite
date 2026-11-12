@@ -10,8 +10,9 @@ partial.
 - Fall 2024 Q2(a) can fill both delay slots by moving ADD and SHIFT LEFT together after the
   branch, preserving their order. The trace assumes the branch samples DEC's flags and the
   exit path does not need those flags preserved. The solution gives the one-slot case too.
-- Fall 2024 Q3(b) follows the Chapter 8 slides' destination-last syntax. Spring 2024 Q2(b)
-  specifies `R1in`, which identifies the destination for that question.
+- Fall 2024 Q3(b) follows the Chapter 8 slides' destination-last syntax. The Spring 2024 Q2(b)
+  scan asks for `R=B` among the four signals. The worked answer uses the course's
+  source-then-destination convention and writes the product to the indexed memory operand.
 - The cache lesson and 2023 solutions now state whether times represent complete paths or
   successive lookup costs. Both interpretations are calculated where the wording permits them.
 - The source scans and slides determine the course scope. The supplemental explanations use
@@ -20,6 +21,23 @@ partial.
   [OSTEP on paging](https://pages.cs.wisc.edu/~remzi/Classes/537/Fall2022/Book/vm-beyondphys-policy.pdf),
   [Oracle's IEEE-format guide](https://docs.oracle.com/cd/E60778_01/html/E60763/z4000ac019878.html),
   and the original [RAID paper](https://www.cs.cmu.edu/afs/cs/academic/class/15712-f08/www/readings/Patterson88.pdf).
+
+## Readiness recheck
+
+The diagram review traced connections and signal directions against the course figures, then
+checked the rendered SVGs and timing charts in Chromium. The site uses simplified schematics
+where the point is data flow or control. Use the caption to identify an illustrative configuration
+when the paper gives different widths or component counts.
+
+- Chapter 7's conditional branch example follows Figure 7.17 at microaddresses 25–27.
+  Spring 2024 Q2(b) now follows the source scan and generates the requested `R=B` signal.
+- The Chapter 5 lesson labels the slide's cache timing convention and shows the alternative
+  calculation when the quoted penalty is additional to the cache lookup.
+- The Spring 2023 write waveforms use the event labels and data windows printed in Q3(g).
+- The SCSI example separates consecutive logical addresses from physical sector placement and
+  distinguishes SCSI reselection from DMA over the host bus.
+  [SCSI-2 command and disconnect sequences](https://www.staff.uni-mainz.de/tacke/scsi/SCSI2-07.html)
+  [READ command fields](https://knowledge.seagate.com/files/staticfiles/support/docs/manual/Interface%20manuals/100293068m.pdf)
 
 ## Original source review
 

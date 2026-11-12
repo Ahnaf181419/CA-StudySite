@@ -1,33 +1,21 @@
 import { PAPERS, TOPICS } from '../data/papers/index.js'
 import { MODULES } from '../data/syllabus.js'
 
-const repeatOf = (topicId) => PAPERS.filter((p) => p.questions.some((q) => q.topic === topicId))
-const moduleOf = (topicId) => TOPICS[topicId]?.module
-const notesOf = (topicId) => TOPICS[topicId]?.notes
-
-function heat(n) {
-  if (n >= 4) return 'bg-ink text-paper'
-  if (n === 3) return 'bg-panel2'
-  if (n === 2) return 'bg-panel'
-  return 'bg-paper'
-}
-
 export default function Patterns() {
   const topics = Object.keys(TOPICS)
-    .map((id) => ({ id, ...TOPICS[id], papers: repeatOf(id) }))
+    .map((id) => ({ id, ...TOPICS[id], papers: PAPERS.filter((p) => p.counts[id]) }))
     .sort((a, b) => b.papers.length - a.papers.length || a.name.localeCompare(b.name))
 
   return (
     <div>
       <h1 className="text-[26px] font-semibold tracking-tight">Pattern analysis</h1>
       <p className="text-ash text-[14.5px] mt-2 leading-relaxed">
-        How the six papers in the folder overlap. Each row is a topic; a filled cell means the topic was asked in that paper.
-        Topics at the top are the ones to over-prepare: they repeat across papers, and several were singled out in class.
+        Each cell counts questions tagged with that topic in the available pages. The Papers column counts distinct papers with at least one such question.
       </p>
 
       <section className="mt-8">
         <h2 className="text-[18px] font-semibold tracking-tight border-b border-line pb-2">Topic × paper matrix</h2>
-        <div className="overflow-x-auto mt-4">
+        <div className="overflow-x-auto mt-4" tabIndex={0} role="region" aria-label="Topic by paper">
           <table className="border-collapse text-[12px] w-full">
             <thead>
               <tr>
@@ -46,7 +34,7 @@ export default function Patterns() {
                 const n = t.papers.length
                 return (
                   <tr key={t.id} className="border-t border-line">
-                    <td className="px-2 py-1.5">
+                    <th scope="row" className="px-2 py-1.5 text-left font-normal">
                       <span className="flex items-center gap-2 flex-wrap">
                         <a href={MODULES.find((m) => m.id === t.module) ? `#/lectures/${t.module}` : '#/lectures'} className="press hover:underline underline-offset-2">
                           {t.name}
@@ -54,11 +42,11 @@ export default function Patterns() {
                         {n >= 3 ? <span className="text-[9.5px] font-semibold uppercase tracking-[0.08em] bg-ink text-paper px-1.5 py-0.5">repeat</span> : null}
                         {t.notes ? <span className="text-[9.5px] font-semibold uppercase tracking-[0.08em] border border-line2 bg-panel px-1.5 py-0.5">in notes</span> : null}
                       </span>
-                    </td>
+                    </th>
                     {PAPERS.map((p) => {
-                      const asked = p.questions.some((q) => q.topic === t.id)
+                      const count = p.counts[t.id] ?? 0
                       return (
-                        <td key={p.id} className={`border border-line text-center font-mono ${asked ? heat(n) : 'bg-paper text-transparent'}`}>·</td>
+                        <td key={p.id} className={`border border-line text-center font-mono ${count ? 'bg-panel2' : 'text-ash'}`}>{count}</td>
                       )
                     })}
                     <td className="px-2 py-1.5 text-center font-mono">{n}</td>

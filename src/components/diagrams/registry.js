@@ -30,6 +30,7 @@ export const DIAGRAM_IDS = Object.freeze([
   'daisyChain',
   'prioritizedDaisyChain',
   'dmaSystem',
+  'dmaRegisters',
   'dmaModes',
   'busArbCentralized',
   'distributedArb',
@@ -41,4 +42,5 @@ export const DIAGRAM_IDS = Object.freeze([
   'seqMultiplier',
   'divHardware',
   'fpAdder',
+  'fpAddFlow',
 ])

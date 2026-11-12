@@ -145,6 +145,7 @@ export default {
           'A disk controller can provide **two DMA channels** — two independent sets of the three registers — as if each disk had its own controller.',
           'The DMA interface registers include a **Done flag** (set when the block is finished and the controller is ready for a new command), an **Interrupt-enable bit** (makes the controller raise the interrupt on completion), and the **IRQ bit** (set when the controller has requested an interrupt).',
         ] },
+        { type: 'diagram', id: 'dmaRegisters', caption: 'One DMA channel in the slide example. The CPU sets address, count and direction. IE enables a completion interrupt; the controller reports Done and IRQ.' },
         { type: 'h', text: 'Two ways to share the bus' },
         { type: 'diagram', id: 'dmaModes', caption: 'Cycle stealing vs block/burst mode.' },
         { type: 'list', items: [
@@ -173,7 +174,7 @@ export default {
           'A DMA controller requests the bus by asserting **BR** (bus request).',
           'The processor activates **BG1** — “you may use the bus when free”.',
           'BG1 is connected daisy-chain fashion, so it reaches the requesting controller as **BG2** (any controller closer to the processor that does not need the bus passes it on).',
-          'When **BBSY** indicates the bus is free, the controller that asserted BR acquires control and becomes bus master.',
+          'When **BBSY** is deasserted (1 in the slide’s active-low convention), the requesting controller with the grant can take mastership and assert BBSY (0).',
         ] },
         { type: 'h', text: 'Distributed arbitration — the worked algorithm' },
         { type: 'list', items: [
@@ -182,7 +183,7 @@ export default {
           'Each device compares the line pattern with its own ID **starting from the MSB**; where it detects a difference, it **transmits 0s on that and all lower bit positions**.',
         ] },
         { type: 'diagram', id: 'distributedArb', caption: 'Two devices OR-tied onto the arbitration lines; the highest ID wins bit by bit.' },
-        { type: 'p', text: 'Slide example — device A (ID = 5 = 0101) and device B (ID = 6 = 0110) both request: 0101 OR 0110 = **0111** on the lines. A compares 0101 with 0111, sees a difference at bit position 2, and drops to 0100. Lines now carry 0100 OR 0110 = **0110** — exactly B’s ID → **B wins** and becomes bus master.' },
+        { type: 'p', text: 'Slide example — device A (ID = 5 = 0101) and device B (ID = 6 = 0110) both request: 0101 OR 0110 = **0111** on the lines. A compares 0101 with 0111, sees a difference at bit 1 when numbered 3–0 from the left, and drops to 0100. Lines now carry 0100 OR 0110 = **0110** — exactly B’s ID → **B wins** and becomes bus master.' },
         { type: 'think', text: [
           'Simulation recipe (Fall 2024 Q3(a) asks it for IDs 5, 12, 9): (1) OR **all** competing IDs onto the lines; (2) scan bit positions from MSB to LSB. At each position, a contender driving 0 loses if the line is 1. It stops contributing lower bits before those bits are evaluated. (3) Recompute the OR after each elimination; (4) the one surviving contender takes mastership when the bus is free. The highest ID wins; repeated higher-ID requests can starve a lower-ID device.',
         ] },
@@ -217,17 +218,17 @@ export default {
     {
       heading: 'SCSI: reading scattered disk sectors (applied question)',
       blocks: [
-        { type: 'diagram', id: 'scsiRead', caption: 'Processor (initiator) — SCSI bus — controller (target) — disk.' },
-        { type: 'list', items: [
-          'The processor acts as **initiator**; it sends a command to the SCSI **target controller** identifying the data it wants by logical block numbers.',
-          'The target translates each logical block into physical (cylinder, surface, sector) coordinates and reads them — **even when the sectors are not contiguous** on the disk.',
-          'Each sector read travels target → initiator over the SCSI bus and then into memory (by the DMA capability of the controller).',
-          'Spring 2024’s version adds: the target must first **win the bus** — apply distributed arbitration to that step.',
+        { type: 'diagram', id: 'scsiRead', caption: 'The CPU programs a host adapter. The adapter is the SCSI initiator; the disk controller is the target. The adapter can DMA returned data into RAM.' },
+        { type: 'steps', items: [
+          'The initiator arbitrates for the parallel SCSI bus and selects the target. It sends a READ command with the starting logical block address (LBA) and count.',
+          'The disk controller maps logical blocks to the media. Consecutive LBAs can be physically scattered; one READ covers the logical range. If the requested LBAs themselves are scattered, issue a READ for each contiguous run.',
+          'If the target disconnects while seeking, it later arbitrates for the SCSI bus and reselects the initiator. It may do this again if it disconnects during a longer transfer.',
+          'The target returns data and then status. The host adapter transfers data into RAM, commonly by DMA on the host bus, and signals completion to the CPU.',
         ] },
-        { type: 'think', text: [
-          'Structure the answer as the four handoffs: command (processor → controller), seek/read per sector (controller ↔ disk), data return (controller → memory), and — if asked — bus acquisition before the transfer. Say “non-contiguous sectors are handled one at a time because each logical block maps to its own physical coordinates”.',
+        { type: 'practice', prompt: 'A file occupies LBA 40 and LBA 91 only. How many ordinary READ requests fetch only those blocks? What if they were LBA 40 and 41 but stored far apart on the disk?', blocks: [
+          { type: 'answer', text: 'Two requests of one block each for 40 and 91. For 40 and 41, one READ starting at 40 with count 2 covers the logical range. Physical placement is the target’s responsibility.' },
         ] },
-        { type: 'exam', text: ['Fall 2023 Q1(c) and Spring 2024 Q3(a).'] },
+        { type: 'exam', text: 'Fall 2023 Q1(c) asks for the read sequence. Spring 2024 Q3(a) also asks how a disconnected target wins the bus again. Use the course’s MSB-first distributed-arbitration exercise to illustrate the priority decision.' },
       ],
     },
   ],

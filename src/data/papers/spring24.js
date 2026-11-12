@@ -1,4 +1,6 @@
 // Spring 2024 — full paper, Hamacher track.
+import { branchLessThanTrace } from '../ch7.js'
+
 export default {
   id: 'spring24',
   name: 'Spring 2024',
@@ -10,7 +12,7 @@ export default {
   format: 'Three sections. Q1 concepts/drawings, Q2 long combined questions (mapping, control sequence + gates, derivation), Q3 applied scenarios (SCSI, priorities, division, program-controlled I/O).',
   questions: [
     {
-      id: 'Q1a', topic: 'isa', marks: '[6.5]', flagged: true, repeats: 1,
+      id: 'Q1a', topic: 'isa', marks: '[6.5]', flagged: true,
       q: 'Briefly explain the RISC, CISC instruction set architectures. Explain the effect of CISC and RISC ISAs on T where T = (N × S)/R. Which would be a better choice for improving T?',
       think: [
         'Outside the current slide set (chapter-1/2 material) — answer with the standard comparison and run each ISA through the three variables of T: N (instruction count), S (cycles per instruction), R (clock rate). The interesting point: CISC attacks N, RISC attacks S and R.',
@@ -28,7 +30,7 @@ export default {
       ],
     },
     {
-      id: 'Q1b', topic: 'hazards', marks: '[6.5]', repeats: 4,
+      id: 'Q1b', topic: 'hazards', marks: '[6.5]',
       q: 'Define data hazards in pipelining. Explain how data hazards can be handled in hardware and software using necessary diagrams and examples.',
       pattern: 'Also asked in Fall 2023 Q1(e) and Spring 2023 Q1(a)/(b) — the single most repeated short question in the bank.',
       think: [
@@ -36,22 +38,22 @@ export default {
       ],
       solution: [
         { type: 'p', text: '**Definition.** A data hazard is any condition in which the source or destination operands of an instruction are not available at the time expected in the pipeline, so the instruction is delayed and the pipeline stalls. Classic case: the destination of one instruction is used as a source by the next — `Mul R2, R3, R4` then `Add R5, R4, R6`: the Add decodes R4 before the Mul’s Write stage has stored it.' },
-        { type: 'timing', columns: 9, rows: [
-          { label: 'I1  Mul R2,R3,R4', cells: ['F1', 'D1', 'E1', 'W1', '', '', '', '', ''] },
-          { label: 'I2  Add R5,R4,R6', cells: ['', 'F2', 'D2', { t: 'D2A', box: true }, 'E2', 'W2', '', '', ''] },
-        ], caption: 'Without handling: I2 must re-decode (D2A) until W1 completes.' },
+        { type: 'timing', columns: 7, rows: [
+          { label: 'I1  Mul R2,R3,R4', cells: ['F1', 'D1', 'E1', 'W1', '', '', ''] },
+          { label: 'I2  Add R5,R4,R6', cells: ['', 'F2', 'D2', { t: 'D hold', box: true }, { t: 'D2A', box: true }, 'E2', 'W2'] },
+        ], caption: 'Under the slide timing, W1 writes at the end of cycle 4, so I2 decodes again in cycle 5 and executes in cycle 6. A write-first register file that supports a same-cycle read could save one cycle.' },
         { type: 'h', text: 'Hardware handling — operand forwarding' },
         { type: 'p', text: 'The result is available at the **ALU output at the end of E1**, before it is written back. Route it directly back to the ALU inputs for E2 through forwarding MUXes — the delay is reduced or eliminated.' },
         { type: 'diagram', id: 'forwarding', caption: 'Forwarding datapath: SRC1/SRC2 (part of buffer B2) and RSLT (part of B3); the two feedback paths into the ALU input MUXes are the forwarding connections.' },
         { type: 'h', text: 'Software handling — NOPs / reordering' },
         { type: 'pre', text: 'I1: Mul R2, R3, R4\n    NOP\n    NOP\nI2: Add R5, R4, R6' },
         { type: 'p', text: 'The compiler detects the dependency and inserts the required number of NOP instructions (a two-cycle delay → two NOPs), or moves independent instructions from elsewhere into the gap. No extra hardware, but wasted instruction slots.' },
-        { type: 'note', title: 'The caveat that earns the extra mark', text: ['Forwarding cannot fix a **load-use** hazard: a Load’s result appears only after its memory stage, so even with forwarding the next instruction must stall one cycle (hazard-detection hardware inserts the bubble).'] },
-        { type: 'answer', text: ['Data hazard = operand not ready when expected. Hardware: operand forwarding (ALU output → ALU input). Software: NOP insertion / compiler reordering. Loads still cost one stall even with forwarding.'] },
+        { type: 'note', title: 'The caveat that earns the extra mark', text: ['In the standard five-stage IF/ID/EX/MEM/WB example, an immediately following EX-stage consumer needs one stall after a load even with full forwarding: the load value is ready only at the end of MEM.'] },
+        { type: 'answer', text: ['Data hazard = operand not ready when expected. Hardware: operand forwarding (ALU output → ALU input). Software: NOP insertion / compiler reordering. In the five-stage load-use example, an immediate EX consumer still needs one stall.'] },
       ],
     },
     {
-      id: 'Q1c', topic: 'stack', marks: '[6.5]', flagged: true, repeats: 2,
+      id: 'Q1c', topic: 'stack', marks: '[6.5]', flagged: true,
       q: 'Explain the Stack CPU organization. Evaluate the following expression in an addressing format suitable for the Stack CPU Organization. Make sure to write side notes in assembly language notations.\nZ ← (X + Y) × (A − (B × C) + D)',
       pattern: 'Companion of Fall 2023 Q2(c) (one-address and zero-address evaluation) — the same expression-tree skill in three costumes.',
       think: [
@@ -78,10 +80,10 @@ export default {
       ],
     },
     {
-      id: 'Q1d', topic: 'micro-cu', marks: '[6.5]', inNotes: true, repeats: 2,
+      id: 'Q1d', topic: 'micro-cu', marks: '[6.5]', inNotes: true,
       q: 'Draw the block diagram of a Microprogrammed control unit organization that allows conditional branching in the microprogram. Explain how this organization allows conditional branching with the help of Branch < 0 instruction.',
       think: [
-        'This is Figure 7.18 plus a walkthrough. Key vocabulary: control word, microinstruction, microroutine, control store, µPC, starting-and-branch address generator. For Branch<0, use the condition-code flag N (1 = negative): the branch microinstruction makes the generator check N and either load the branch target into µPC or let µPC+1 run.',
+        'Use Figure 7.18 and trace the two paths in Figure 7.17. Distinguish the control-store address in µPC from the machine-instruction address in PC.',
       ],
       solution: [
         { type: 'diagram', id: 'microCUCond', caption: 'Figure 7.18 — microprogrammed control unit with conditional branching: IR feeds the starting-and-branch address generator; condition codes and external inputs (e.g. MFC) also enter the generator; the clocked µPC addresses the control store, whose CW output drives the datapath.' },
@@ -89,20 +91,14 @@ export default {
           'A **control word (CW)** = one word whose bits are the control signals; one CW per step.',
           'A sequence of CWs for an instruction = a **microroutine**; each CW in it = a **microinstruction**.',
           'All microroutines live in the **control store**; the **µPC** reads them sequentially; a new instruction in IR makes the **starting-address generator** load the microroutine’s first address into µPC.',
-          'The basic organization cannot do conditional branching or act on external inputs — the extended generator (fed by **condition codes** and **external inputs**) adds that ability: if the current microinstruction is a conditional branch, the generator checks the condition and, if necessary, loads a new address into µPC using the offset-address field.',
+          'The extended generator receives condition codes and external inputs. A conditional microinstruction can load a different address into µPC instead of taking the next sequential control word.',
         ] },
-        { type: 'p', text: '**Branch < 0 walkthrough.** The condition-code flag N = 1 when a result is negative, N = 0 when positive. A microroutine containing `Branch < 0, L1`:' },
-        { type: 'steps', items: [
-          'µPC reaches the branch microinstruction in the microroutine (say address 1008).',
-          'The starting-and-branch address generator inspects **N**.',
-          'If **N = 1** (result negative): the generator loads the branch target address **L1** into µPC → the next CW read comes from L1.',
-          'If **N = 0**: no new address is loaded; the clocked µPC simply advances to µPC + 1 — execution continues with the next microinstruction (e.g. microinstruction 0).',
-        ] },
-        { type: 'answer', text: ['Conditional branching works because the address generator can override the µPC’s sequential increment by loading a new address when the tested condition code (N for Branch<0) is true.'] },
+        branchLessThanTrace,
+        { type: 'answer', text: 'At µ25, N = 0 returns µPC to µ0 for the next sequential instruction. With N = 1, µPC advances to µ26 and µ27, which compute and load the ISA branch target into PC. The sequencer then returns to µ0 to fetch at that target.' },
       ],
     },
     {
-      id: 'Q1e', topic: 'single-bus', marks: '[6.5]', inNotes: true, repeats: 1,
+      id: 'Q1e', topic: 'single-bus', marks: '[6.5]', inNotes: true,
       q: 'Consider the single bus CPU organization. Let’s assume that the registers are of 4 bits in this organization. Draw a figure showing input and output gating for the four register bits. Explain how the register is handling inputs and outputs using the figure that you have drawn.',
       think: [
         'This is Figure 7.3 replicated four times side by side with **shared** Riin and Riout lines. Per bit: a 2-to-1 MUX choosing between “hold” (Q fed back) and “load” (bus bit) into the D input, and a tri-state buffer from Q up to the bus bit. Say explicitly: one Riin/Riout for the whole register, per-bit muxes/buffers.',
@@ -116,7 +112,7 @@ export default {
       ],
     },
     {
-      id: 'Q1f', topic: 'bus-arb', marks: '[6.5]', repeats: 3,
+      id: 'Q1f', topic: 'bus-arb', marks: '[6.5]',
       q: 'Explain the centralized bus arbitration technique using relevant diagrams.',
       pattern: 'Paired with the distributed version (Fall 2024 Q3(a)) and asked in Fall 2022 Q6(c) — arbitration is a three-paper staple.',
       think: [
@@ -137,7 +133,7 @@ export default {
       ],
     },
     {
-      id: 'Q2a', topic: 'cache', marks: '[10]', repeats: 5,
+      id: 'Q2a', topic: 'cache', marks: '[10]',
       q: 'Consider a cache consisting of 128 blocks of 16 words each. The main memory is addressable by a 16-bit address and has 4K blocks of 16 words each. A main memory location has the address 1111111100001111. Compare direct and set-associative mapping to determine the block and word position in the cache where this address will be mapped (use necessary diagrams). Also find out how cache hit or miss will be checked in these two mapping functions.',
       think: [
         'Word bits = log2(16) = 4 for both. Direct: block field = log2(128) = 7, tag = 5. Set-associative: the paper does not give blocks-per-set — state the assumption (the slide/book standard is 2 per set → 64 sets → set field 6, tag 6) and solve; also give the general form for k-way. Cross-check each index with block-number mod (lines or sets).',
@@ -162,36 +158,39 @@ export default {
       ],
     },
     {
-      id: 'Q2b', topic: 'control-seq', marks: '[10]', inNotes: true, repeats: 3,
-      q: 'Draw the diagram of three bus CPU organization. Examine all the steps of complete execution of MUL R1, 4(R2) using the three bus CPU organization and generate control sequences for the steps. Sketch the circuit configuration to generate the PCin, R1in, MARin and MDRinE signals for this instruction if a hardwired control unit scheme is used.',
+      id: 'Q2b', topic: 'control-seq', marks: '[10]', inNotes: true,
+      q: 'Draw the diagram of three bus CPU organization. Examine all the steps of complete execution of MUL R1, 4(R2) using the three bus CPU organization and generate control sequences for the steps. Sketch the circuit configuration to generate the PCin, R=B, MARin and MDRinE signals for this instruction if a hardwired control unit scheme is used.',
       pattern: 'The flagship control-sequence question — same family as Fall 2023 SUB (R1),(R2) and Spring 2023 MUL (R1),(R2), plus the gate sketch from the class notes.',
       think: [
-        'The requested R1in signal identifies R1 as the destination here: R1 ← R1 × M[4 + [R2]] (indexed source operand). Standard 3-step fetch, then one step to compute [R2] + 4 straight into MAR (bus B + Constant 4 through the ALU, result on bus C → MARin), wait, then a single multiply step with both operands and the destination in one cycle. For the gates: list which steps assert each signal, then one AND/OR network per signal.',
+        'Use the course’s source-then-destination convention. The indexed operand is read and then written. Trace the instruction fetch, operand read, multiply into MDR, and memory write. Derive the gates from the steps where each requested signal is asserted.',
       ],
       solution: [
         { type: 'diagram', id: 'threeBus', caption: 'Figure 7.8 — three-bus datapath (draw with the direction table: GPR → A,B; GPR ← C; ALU ← (A or 4) and B; ALU → C; PC → B only; IR → A only; MDR → A,B; PC/IR/MDR/MAR ← C).' },
-        { type: 'p', text: 'Semantics: fetch the operand at memory address [R2] + 4, multiply it with R1, store the product in R1.' },
+        { type: 'p', text: 'Let EA = [R2] + 4. Using the course’s source-then-destination convention, the instruction computes M[EA] ← M[EA] × [R1]. MAR keeps EA until the write completes.' },
         { type: 'table', head: ['#', 'Operational step', 'Control signals', 'T'], rows: [
           ['1', 'PC → BusB, ALU passes B to C, BusC → MAR; Read; PC incremented by the incrementer', '`PCout, R=B, MARin, Read, IncPC`', 'T1'],
           ['2', 'Wait for MFC (instruction word arrives into MDR from the external bus)', '`WMFC, MDRinE`', 'T2'],
           ['3', 'MDR → BusB → ALU (pass) → BusC → IR', '`MDRoutB, R=B, IRin`', 'T3'],
           ['4', 'R2 → BusB; MUX selects Constant 4; ALU adds → BusC → MAR; Read (operand address 4+[R2])', '`R2outB, Select4, Add, MARin, Read`', 'T4'],
           ['5', 'Wait for MFC (operand arrives into MDR)', '`WMFC, MDRinE`', 'T5'],
-          ['6', 'MDR → BusB and R1 → BusA into the ALU; multiply; BusC → R1; done', '`MDRoutB, R1outA, SelectA, Mul, R1in, End`', 'T6'],
+          ['6', 'MDR → BusB and R1 → BusA into the ALU; multiply; latch BusC in MDR', '`MDRoutB, R1outA, SelectA, Mul, MDRin`', 'T6'],
+          ['7', 'Start the memory write using MAR and the new MDR value', '`MDRoutE, Write`', 'T7'],
+          ['8', 'Keep the write data available until memory completes', '`MDRoutE, WMFC, End`', 'T8'],
         ], boldFirst: true },
         { type: 'note', title: 'Why the steps fit', text: [
-          'Step 4 is the elegant one: on the three-bus datapath the indexed address needs no separate register — R2 drives bus B, the MUX injects the constant 4, the ALU adds, and bus C delivers the sum straight into MAR, all in one cycle.',
-          'Step 6: both operands (M[4+[R2]] from MDR, R1 from the register file) enter the ALU simultaneously on buses B and A, and R1in loads the product from bus C — one execute cycle, no Y/Z registers.',
+          'At T4, bus B and Constant 4 feed the ALU. The address reaches MAR on bus C in the same step.',
+          'At T6, MDR supplies the old operand to the ALU and captures the product at the clock edge. Start Write after the product is in MDR.',
+          'If a problem explicitly defines destination-first syntax, T6 instead loads R1 and ends the instruction. This paper does not define that alternative.',
         ] },
-        { type: 'h', text: 'Hardwired generation of PCin, R1in, MARin, MDRinE for this instruction' },
+        { type: 'h', text: 'Hardwired generation of PCin, R=B, MARin and MDRinE' },
         { type: 'p', text: 'Fetch happens before IR contains the MUL opcode. Its T1 and T2 terms apply to every instruction. Gate only the execute terms with MUL. In this figure IncPC selects the dedicated increment path. If PCin specifically selects bus C, it stays inactive for this instruction; if PCin is the generic PC write enable, assert it with IncPC in T1.' },
-        { type: 'pre', text: 'IncPC  = T1\nR1in   = T6 · MUL\nMARin  = T1 + T4 · MUL\nMDRinE = T2 + T5 · MUL' },
-        { type: 'diagram', id: 'controlSignalGates', caption: 'Use the pattern from this figure. For MARin, feed T4 and MUL into an AND gate, then OR it with T1. Use T5, MUL and T2 for MDRinE. R1in needs a single AND gate. These equations include common fetch plus MUL execution; other opcodes add their own execute terms.' },
-        { type: 'answer', text: 'R1in = T6·MUL; MARin = T1 + T4·MUL; MDRinE = T2 + T5·MUL. T1 enables the PC increment. Label its separate IncPC and PCin signals according to the datapath convention.' },
+        { type: 'pre', text: 'IncPC  = T1\nR=B    = T1 + T3\nMARin  = T1 + T4 · MUL\nMDRinE = T2 + T5 · MUL\nPCin   = 0 (bus-C input enable) or T1 (shared PC load enable)' },
+        { type: 'diagram', id: 'controlSignalGates', caption: 'Use the sum-of-products pattern in this figure. R=B uses an OR gate for T1 and T3. MARin uses T4 AND MUL, ORed with T1. MDRinE uses T5 AND MUL, ORed with T2. Add execute terms for any other opcodes in the full controller.' },
+        { type: 'answer', text: 'R=B = T1 + T3; MARin = T1 + T4·MUL; MDRinE = T2 + T5·MUL. The incrementer updates PC at T1. For this instruction, PCin is active at T1 if it enables both PC input paths, or inactive if it selects only bus C.' },
       ],
     },
     {
-      id: 'Q2c', topic: 'perf', marks: '[10]', repeats: 3,
+      id: 'Q2c', topic: 'perf', marks: '[10]',
       q: 'Define instruction hazard in pipelining. “As we know, in ideal cases an n-stage pipeline has the potential to increase throughput or performance n times than the processor that uses sequential execution. However, due to different hazards like instruction hazard, the performance gain doesn’t reach the ideal value (n times).” — Justify this statement using mathematical derivation. (Assume the values needed for the derivation.)',
       pattern: 'The derivation variant of the performance question that Fall/Spring 2023 ask with two-level caches — learn one derivation, answer all of them.',
       think: [
@@ -205,40 +204,30 @@ export default {
         { type: 'pre', text: 'Δ = [ (1 − hi) + d·(1 − hd) ] × Mp' },
         { type: 'p', text: 'Assumed values (the slides’ own): d = 30%, hi = 0.95, hd = 0.90, Mp = 17, and a 4-stage pipeline (n = 4):' },
         { type: 'pre', text: 'Δ = (0.05 + 0.3 × 0.1) × 17 = 0.08 × 17 = 1.36 cycles\n\nPipelined:  TI = 1 + Δ = 2.36      → Pp = R / 2.36\nSequential: S  = n + Δ = 5.36     → Ps = R / 5.36\n\nGain = S / TI = 5.36 / 2.36 = 2.27  <  n = 4' },
-        { type: 'p', text: 'The same algebra holds for **any** n: gain = (n + Δ)/(1 + Δ), which is strictly less than n whenever Δ > 0, and grows toward n only as Δ → 0. Filling and draining the pipeline and branch penalties subtract further.' },
-        { type: 'answer', text: ['Because every hazard adds the same per-instruction delay Δ to both machines, the gain becomes (n + Δ)/(1 + Δ) < n — e.g. 2.27 instead of the ideal 4 with the assumed values — which is exactly the statement to justify.'] },
+        { type: 'p', text: 'For n > 1 and Δ > 0, (n + Δ)/(1 + Δ) is strictly less than n. The equal Δ in this calculation assumes comparable cache misses on both machines. If their delays differ, use each machine’s own average CPI and clock rate. A pipeline-only branch penalty, for example, contributes to the pipeline’s CPI.' },
+        { type: 'answer', text: 'With the same clock and the assumed cache-miss cost Δ, gain = (n + Δ)/(1 + Δ). For n = 4 and Δ = 1.36, the result is about 2.27×, below the ideal 4×.' },
       ],
     },
     {
-      id: 'Q3a', topic: 'scsi', marks: '[8]', repeats: 2,
+      id: 'Q3a', topic: 'scsi', marks: '[8]',
       q: 'Apply the concept of SCSI standard interface to explain each step of how a processor reads a block of data from a disk drive. Consider that data is stored in two disk sectors that are not contiguous. Apply distributed bus arbitration technique to explain how the target controller will gain control over the Bus.',
-      think: [
-        'Two halves. SCSI half: initiator sends a command with logical block numbers → target translates each to physical coordinates → seeks and reads each sector separately → data flows to memory. Arbitration half: the target (with its ID) must win the bus before transferring each sector — run the OR-line algorithm on its ID against any competitor, or explain the MSB-dropping rule generically with a worked pair.',
-      ],
+
+      think: 'Follow the command and data first. Then explain target arbitration after a disconnect. Keep the SCSI bus and the host bus used for DMA distinct.',
       solution: [
-        { type: 'diagram', id: 'scsiRead', caption: 'Processor (initiator) — SCSI bus — target controller — disk with non-contiguous sectors.' },
+        { type: 'diagram', id: 'scsiRead', caption: 'The host adapter is the SCSI initiator and the disk controller is the target. The adapter uses the host bus to put the data into RAM.' },
         { type: 'steps', items: [
-          'The processor (initiator) sends the target controller a **command** identifying the data by logical block number(s).',
-          'The **target** translates each logical block into physical coordinates — (cylinder, surface, sector) — so the two non-contiguous sectors are handled as two separate physical reads.',
-          'The controller positions the read head (seek + rotational delay) and reads **sector 1**.',
-          'The target must now drive the system bus to hand the data to memory — it first **wins the bus** by distributed arbitration (below).',
-          'The sector is transferred over the SCSI bus to the initiator and into memory; the controller then seeks and reads **sector 2** and repeats the bus arbitration + transfer.',
-          'When the whole block is transferred, the target returns a **status** message to the processor.',
+          'The initiator arbitrates for the SCSI bus, selects the target and sends a READ with a starting LBA and count.',
+          'The target maps logical blocks to their physical sectors and reads the data. If the LBAs are consecutive, one READ can cover them even when physically scattered. If the LBAs themselves are disjoint, send separate READs.',
+          'To let others use the bus during a seek, the target can disconnect. When it has data, it arbitrates for the SCSI bus, wins access, and reselects the initiator. It need only re-arbitrate after giving up the bus.',
+          'The target transfers data and status to the initiator. The host adapter can DMA the data to RAM and signal completion.',
         ] },
-        { type: 'h', text: 'Distributed arbitration — how the target gains the bus' },
-        { type: 'diagram', id: 'distributedArb', caption: 'Devices with 4-bit IDs OR-tied onto 4 arbitration lines + Start-Arbitration line.' },
-        { type: 'steps', items: [
-          'Every device wanting the bus (including the SCSI target, say ID = 7 = 0111) asserts **Start-Arbitration** and places its 4-bit ID on the arbitration lines.',
-          'The pattern on the lines is the **logical OR of all competing IDs** — e.g. if a network controller (ID 6 = 0110) also requests: 0111 OR 0110 = 0111.',
-          'Each device compares the line pattern with its own ID **from the MSB**. Wherever its bit is 0 while the line shows 1, it transmits 0s on that and all lower positions: here ID 6 sees a difference at bit 0 and drops out.',
-          'The line pattern settles at the highest competing ID — the target (0111) — and since the pattern **equals the target’s own ID**, it has won and becomes the **bus master**.',
-          'The target now drives the bus for the sector transfer and releases it (and re-arbitrates for the next sector).',
-        ] },
-        { type: 'answer', text: ['Read = command → logical→physical translation → per-sector seek/read → bus won by distributed arbitration (highest ID survives the MSB-compare) → transfer → status. Non-contiguity simply means two separate physical reads under one command.'] },
+        { type: 'h', text: 'Apply the course’s distributed-arbitration model' },
+        { type: 'p', text: 'Example: target ID 7 (0111) and another contender ID 6 (0110) both request access. The wired OR is 0111. From the MSB the first difference is at bit 0, where ID 6 has 0 and the line is 1. ID 6 withdraws; ID 7 has highest priority and reselects the initiator. The four-bit wired-OR example illustrates the priority rule; parallel SCSI represents contenders using SCSI-ID bits on its data bus.' },
+        { type: 'answer', text: 'After a disconnect, the target wins arbitration and reselects the initiator. The data returns over SCSI to the adapter and then reaches RAM over the host bus.' },
       ],
     },
     {
-      id: 'Q3b', topic: 'priority', marks: '[8]', repeats: 2,
+      id: 'Q3b', topic: 'priority', marks: '[8]',
       q: 'Consider that four devices (D0…D5) are connected to the processor. Device D0, D1 and D2 have the same priority (say 2) and device D3, D4 and D5 have the same priority (say 1). Multiple devices are requesting interrupt simultaneously. Determine which technique will be used to handle these multiple simultaneous requests using necessary diagrams. Also find which device will be serviced first if (I) D0 and D2 request at the same time, (II) D1 and D3 request at the same time, (III) D1, D2, D3 and D5 request at the same time.',
       think: [
         'Two priority levels with several devices per level and a **shared** request arrangement → the **prioritized daisy chain**: priority arbitration circuit across levels, daisy chain (proximity) inside each level. Then apply two rules in order: higher level wins first; inside a level, closer to the processor wins.',
@@ -260,7 +249,7 @@ export default {
       ],
     },
     {
-      id: 'Q3c', topic: 'multdiv', marks: '[8]', inNotes: true, repeats: 3,
+      id: 'Q3c', topic: 'multdiv', marks: '[8]', inNotes: true,
       q: 'Draw the first version of the Division hardware. Illustrate the step by step process of dividing 7₁₀ by 2₁₀ using the division hardware; considering the Divisor register, ALU, and Remainder register are all 8 bits wide, with only the Quotient register being 4 bits.',
       pattern: 'Multiplication/division hardware appears in Fall 2023 Q1(b), Spring 2023 Q1(b) and here — the arithmetic hardware question is a three-paper fixture.',
       think: [
@@ -281,7 +270,7 @@ export default {
       ],
     },
     {
-      id: 'Q3d', topic: 'prog-io', marks: '[8]', repeats: 2,
+      id: 'Q3d', topic: 'prog-io', marks: '[8]',
       q: 'Consider the figure where a keyboard and display device are connected to the processor via bus. Assume that the SIN, SOUT flags are in the 3rd bit of INSTATUS and OUTSTATUS registers respectively. Write a program to read a line of characters from the keyboard and print them to the display screen applying the concept of program-controlled I/O method. Provide side notes to explain your program. Also determine the problem of this program-controlled I/O method based on your code.',
       think: [
         'Poll input-ready and output-ready for each character, then test for carriage return. State the bit numbering: with bit index 3 the mask is 0x08; if “third bit” counts the least significant bit as the first, use index 2 and mask 0x04. The code below assumes index 3.',

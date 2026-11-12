@@ -10,7 +10,7 @@ export default {
   format: 'Three sections. Q1 concept/figure questions, Q2 small assembly/addressing tasks, Q3 the long numeric set (VM, control sequence, hazards, performance, chip organization, bus timing).',
   questions: [
     {
-      id: 'Q1a', topic: 'forwarding', marks: '[6]', repeats: 4,
+      id: 'Q1a', topic: 'forwarding', marks: '[6]',
       q: 'What is operand forwarding? Illustrate with a figure and explain briefly how it impacts processor design.',
       think: [
         'Definition (route the ALU result straight back into the ALU input), the figure, then “impact on design”: removes most data-hazard stalls without extra instructions, at the cost of forwarding MUXes/paths and hazard-detection logic — and note the load-use exception.',
@@ -27,7 +27,7 @@ export default {
       ],
     },
     {
-      id: 'Q1b', topic: 'multdiv', marks: '[6]', inNotes: true, repeats: 3,
+      id: 'Q1b', topic: 'multdiv', marks: '[6]', inNotes: true,
       q: 'Multiply (31)₁₀ by (13)₁₀ using the Sequential Multiplication Algorithm, with 5-bit numbers.',
       think: '31 = 11111, 13 = 01101 → 10-bit multiplicand register `0000011111`, multiplier `01101`. The multiplier hits 0 after 4 loops (13 = 1101 has bits at 0,2,3).',
       solution: [
@@ -42,7 +42,7 @@ export default {
       ],
     },
     {
-      id: 'Q1c', topic: 'cpu-datapath', marks: '[6]', inNotes: true, repeats: 2,
+      id: 'Q1c', topic: 'cpu-datapath', marks: '[6]', inNotes: true,
       q: 'Illustrate the Three Bus CPU Datapath organization using a figure and briefly explain each component’s purpose.',
       think: 'Draw Figure 7.8 with the direction table beside it, then one line per component: register file (3 ports), buses A/B/C, MUX + Constant 4, ALU (R=A/R=B), incrementer, IR + decoder, MDR, MAR.',
       solution: [
@@ -63,7 +63,7 @@ export default {
       ],
     },
     {
-      id: 'Q1d', topic: 'hazards', marks: '[6]', repeats: 4,
+      id: 'Q1d', topic: 'hazards', marks: '[6]',
       q: 'Demonstrate how “pipelining improves the throughput of a processor but not its latency”, using relevant examples.',
       think: 'One timing table for sequential, one for pipelined, same three instructions. Count cycles: throughput = instructions/cycle; latency = cycles per instruction. The two numbers move differently — that contrast IS the answer.',
       solution: [
@@ -87,7 +87,7 @@ export default {
       ],
     },
     {
-      id: 'Q1e', topic: 'branch', marks: '[6]', inNotes: true, repeats: 3,
+      id: 'Q1e', topic: 'branch', marks: '[6]', inNotes: true,
       q: 'Demonstrate how branch penalty can be reduced in the case of conditional branching using relevant examples.',
       pattern: 'The theory half of Fall 2024’s big Q2(a) — delayed branch and prediction in short form.',
       think: 'Two techniques, two mini-examples: (1) delayed branch — move a safe instruction into the delay slot (the Shift/Dec/Branch loop); (2) branch prediction — predict taken for loop-bottom branches, not-taken for loop-top; mention speculative execution and purging.',
@@ -108,7 +108,7 @@ export default {
       ],
     },
     {
-      id: 'Q1f', topic: 'cache', marks: '[6]', repeats: 5,
+      id: 'Q1f', topic: 'cache', marks: '[6]',
       q: 'Write down short notes on the various mapping functions used for cache memories.',
       pattern: 'The theory half of the mapping staple — Fall 2022, Spring 2022, Fall 2023, Spring 2024, Fall 2024 all have a variant.',
       think: 'Three notes, each: placement rule, address split, hit test, cost/pros/cons. Use the standard example numbers (16-bit address, 4096 blocks × 16 words, 128 cache blocks) so the splits are concrete.',
@@ -123,7 +123,7 @@ export default {
       ],
     },
     {
-      id: 'Q1g', topic: 'priority', marks: '[6]', repeats: 2,
+      id: 'Q1g', topic: 'priority', marks: '[6]',
       q: 'Write down short notes on the various schemes that can be used to handle simultaneous interrupt requests from I/O devices.',
       think: 'Three schemes + the premise: if devices share the IRQ line, who wins? Polling (order = priority), daisy chain (proximity = priority), prioritized daisy chain (groups + chains). One figure reference each.',
       solution: [
@@ -139,7 +139,7 @@ export default {
       ],
     },
     {
-      id: 'Q2a', topic: 'asm', marks: '[5]', flagged: true, repeats: 3,
+      id: 'Q2a', topic: 'asm', marks: '[5]', flagged: true,
       q: 'Write an assembly language program to show how indirect addressing can be used to compute the product of the elements of an array.',
       think: 'Same pointer loop as the average/dot-product programs, with MUL and no divide: product ← product × *(ptr).',
       solution: [
@@ -152,7 +152,7 @@ export default {
       ],
     },
     {
-      id: 'Q2b', topic: 'addressing', marks: '[5]', repeats: 2,
+      id: 'Q2b', topic: 'addressing', marks: '[5]',
       q: 'Determine the addressing modes of each operand of the following instructions:\ni) MOV A, R3  ii) ADD R3, 20(R1, R2)  iii) CLEAR X  iv) ADD #256, R2  v) SUB (R1)+, R2',
       solution: [
         { type: 'table', head: ['Instruction', 'Operand', 'Mode', 'Effective address / value'], rows: [
@@ -170,7 +170,7 @@ export default {
       ],
     },
     {
-      id: 'Q2c', topic: 'asm', marks: '[5]', flagged: true, repeats: 3,
+      id: 'Q2c', topic: 'asm', marks: '[5]', flagged: true,
       q: 'Write an assembly language program to show how parameters can be passed using registers while calculating the average (mean) from a list of numbers.',
       think: 'Parameter passing via registers = the caller loads R0 (list pointer) and R1 (count) before calling; the subroutine uses only those. Show caller + subroutine.',
       solution: [
@@ -180,7 +180,7 @@ export default {
       ],
     },
     {
-      id: 'Q3a', topic: 'vmem', marks: '[6]', repeats: 2,
+      id: 'Q3a', topic: 'vmem', marks: '[6]',
       q: 'Suppose you are constructing a computer. You have a 32-bit processor and a 1 GB main memory. Now consider that you have to run a game of size 3 GB on this computer. Will the processor face any issues while running the game? What technique would you use to solve this potential issue? Show what the memory organization might look like in such a scenario.',
       think: 'Distinguish installed game size, virtual address space and active working set. Under the exercise’s assumption that 3 GB is the program’s virtual footprint, it exceeds installed RAM.',
       solution: [
@@ -196,7 +196,7 @@ export default {
       ],
     },
     {
-      id: 'Q3b', topic: 'single-bus', marks: '[6]', inNotes: true, repeats: 3,
+      id: 'Q3b', topic: 'single-bus', marks: '[6]', inNotes: true,
       q: 'Consider the CPU Architecture given in Fig 3(b)-1 (single-bus CPU organization). Generate the control sequence required for the execution of the following complete instruction in the context of this architecture: MUL (R1), (R2)',
       pattern: 'Twin of Fall 2023 Q3(b) with MUL instead of SUB — identical skeleton.',
       solution: [
@@ -220,7 +220,7 @@ export default {
       ],
     },
     {
-      id: 'Q3c', topic: 'hazards', marks: '[6]', repeats: 4,
+      id: 'Q3c', topic: 'hazards', marks: '[6]',
       q: 'Consider the instructions being executed in a pipeline in the given Fig 3(c)-1 (clock cycles 14–20, instructions I4–I7). Suppose an instruction hazard occurs due to a cache miss while fetching I5, and it subsequently takes 3 clock cycles to fetch I5 from memory. Compare how the execution is affected by the hazard vs. the ideal hazard-free scenario shown in the figure. Show which stages occur during each clock cycle in the two scenarios.',
       think: [
         'Keep the paper’s cycle numbering (14–20). Ideal chart first (copy the figure), then stretch F5 across three cycles (15–17), push I5’s D/E/W right, and let I6/I7 slide behind. Count the extra cycles at the end.',
@@ -244,7 +244,7 @@ export default {
       ],
     },
     {
-      id: 'Q3d', topic: 'perf', marks: '[6]', repeats: 3,
+      id: 'Q3d', topic: 'perf', marks: '[6]',
       q: 'Suppose you have a processor that uses a 4-stage pipeline and a secondary cache memory. In this processor, the critical parameter value is 4 ns. The cache miss penalty for the primary and secondary cache are 15 and 20 clock cycles respectively. The miss ratios for instructions, data, and the secondary cache are 10%, 20% and 30%. Suppose that 22% of instructions access memory. Compare the performance of this processor with a processor of the same configuration that does not implement pipelining, and state which performs better based on throughput.',
       pattern: 'The two-level formula again (Fall 2023 Q3(d) is the sibling) — but the comparison target is sequential execution this time.',
       solution: [
@@ -257,7 +257,7 @@ export default {
       ],
     },
     {
-      id: 'Q3e', topic: 'perf', marks: '[6]', repeats: 2,
+      id: 'Q3e', topic: 'perf', marks: '[6]',
       q: 'Suppose you have a computer with no cache that has a fast processor that takes 11 clock cycles per memory access. You have a second computer that has 2 cache memories with access times of 1 and 5 clock cycles, and a memory access time of 16 clock cycles. The miss rates in the 1st cache for instructions and data are 5% and 9%. The hit rates in the 2nd cache for instructions and data are 65% and 78%. Assume that 25% of the instructions require memory access. Compare the performances of the 2 computers based on time and state which one performs better.',
       solution: [
         { type: 'p', text: 'Using the course’s weighted-path convention, treat 1, 5 and 16 cycles as complete L1-hit, L2-hit and memory-served times. Compute tave per access type, then use per-100-instruction bookkeeping (100 fetches + 25 data accesses):' },
@@ -267,7 +267,7 @@ export default {
       ],
     },
     {
-      id: 'Q3f', topic: 'ram-chip', marks: '[6]', inNotes: true, repeats: 2,
+      id: 'Q3f', topic: 'ram-chip', marks: '[6]', inNotes: true,
       q: 'Illustrate and compare the internal organization of the two following semiconductor memory chip configurations:\ni. Memory chip size 2 KB, where each word consists of 32 bits\nii. Memory chip size 2 KB, where each word consists of 16 bits',
       think: [
         'Same total bits, different word shape: 2 KB = 2^14 bits. (i) 32-bit words → 2^14/2^5 = 2^9 = **512 words × 32 columns**, address bits 9. (ii) 16-bit words → **1024 words × 16 columns**, address bits 10. Same array idea; the decoder width and the number of sense/write circuits swap.',
@@ -288,14 +288,14 @@ export default {
       ],
     },
     {
-      id: 'Q3g', topic: 'bus-timing', marks: '[6]', repeats: 2,
+      id: 'Q3g', topic: 'bus-timing', marks: '[6]',
       q: 'Consider the diagrams given in Fig 3(g)-1 and Fig 3(g)-2. Compare how the timing diagrams for a Write operation using a Synchronous and an Asynchronous Bus vary, using relevant explanations.',
       solution: [
-        { type: 'diagram', id: 'syncBusWrite', caption: 'Synchronous write: the master launches the address, command and data after t0. The slave samples at t2.' },
-        { type: 'diagram', id: 'asyncBusWrite', caption: 'Asynchronous write: address, command and data are valid before Master-ready rises at t0. Slave-ready rises at t1 to acknowledge the write, then both signals return low in order.' },
+        { type: 'diagram', id: 'syncBusWrite', caption: 'Synchronous write in Fig. 3(g)-2: the master launches address, command and data at t0. The data window ends at t1; the address and command remain through the rest of the bus cycle, ending at t2.' },
+        { type: 'diagram', id: 'asyncBusWrite', caption: 'Asynchronous write in Fig. 3(g)-1: address, command and data are driven at t0. Master-ready rises at t1; Slave-ready rises at t2. Master-ready falls at t3, the master releases its lines at t4, and Slave-ready falls at t5.' },
         { type: 'table', head: ['Aspect', 'Synchronous bus (write)', 'Asynchronous bus (write)'], rows: [
           ['Timing source', 'a **common clock** shared by master and slave; the bus cycle spans a fixed number of clock cycles', '**no common clock** — each event is triggered by the previous one (handshake)'],
-          ['Sequence', 'master places address + data at t0 and asserts the write command; the slave stores within the cycle; done by t2 (the next clock edge)', 'master asserts address/data + **Master-ready**; the **slave stores and asserts Slave-ready**; seeing it, the master drops Master-ready; the slave then drops Slave-ready — four ordered events'],
+          ['Sequence', 'master drives address, write command and data at t0; the slave takes the data by t1; the cycle ends at t2', 'master drives address, command and data, then asserts **Master-ready**. The slave takes the data and asserts **Slave-ready**. The master drops Master-ready and releases its lines. The slave drops Slave-ready.'],
           ['Duration', 'fixed, regardless of the slave’s real speed', 'exactly as long as the participating devices need'],
           ['Strength / weakness', 'simple, few lines — but the clock must be slowed to the **slowest** device and suffers skew on long buses', 'any device speed may participate — at the cost of two extra control lines and accumulated handshake delays'],
         ] },

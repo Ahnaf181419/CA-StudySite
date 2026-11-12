@@ -1,91 +1,91 @@
 import { Svg, Box, T, W, Bus } from './base.jsx'
 
 // Slide 2 — accessing I/O devices over a bus.
+
 export function IoBus() {
   return (
-    <Svg vb="0 0 720 315">
-      <Box x={60} y={30} w={160} h={60} label="Processor" />
-      <Box x={480} y={30} w={160} h={60} label="Memory" />
-      <Box x={100} y={200} w={130} h={60} label="I/O device 1" fs={11.5} />
-      <Box x={290} y={200} w={130} h={60} label="…" fill="var(--dg-panel)" />
-      <Box x={480} y={200} w={140} h={60} label="I/O device n" fs={11.5} />
-      <Bus x1={200} y1={60} x2={480} y2={60} w={6} />
-      <W d="M140,90 V170" />
-      <W d="M165,200 V170" arrow={false} />
-      <W d="M350,200 V170" arrow={false} /><W d="M355,200 V170" arrow={false} />
-      <W d="M550,200 V170" arrow={false} /><W d="M555,200 V170" arrow={false} />
-      <W d="M480,60 V170" arrow={false} />
-      <Bus x1={140} y1={170} x2={560} y2={170} w={6} />
-      <T x={250} y={140} fs={11} bold>Bus</T>
-      <T x={200} y={158} fs={10.5}>address · data · control lines</T>
-      <T x={60} y={286} fs={11}>Each device has a unique address; the device that recognizes its address</T>
-      <T x={60} y={300} fs={11}>responds to the control signals.</T>
+    <Svg vb="0 0 640 245">
+      <Box x={105} y={22} w={150} h={54} label="Processor" />
+      <Box x={385} y={22} w={150} h={54} label="Memory" />
+      <W d="M180,76 V126 M460,76 V126" arrow={false} />
+      <Bus x1={46} y1={126} x2={594} y2={126} w={5} />
+      <T x={320} y={114} anchor="middle">Address · data · control</T>
+      <W d="M140,126 V174 M500,126 V174" arrow={false} />
+      <Box x={62} y={174} w={156} h={50} label="I/O device 1" />
+      <T x={320} y={204} anchor="middle">…</T>
+      <Box x={422} y={174} w={156} h={50} label="I/O device n" />
     </Svg>
   )
 }
 
 // Slide 3 — I/O interface circuit.
+
 export function IoInterface() {
   return (
-    <Svg vb="0 0 720 330">
-      <Box x={60} y={40} w={150} h={220} fill="none" dashed />
-      <T x={75} y={62} fs={11.5} bold>I/O interface</T>
-      <Box x={85} y={75} w={100} h={44} label="Address" sub="decoder" fs={10.5} />
-      <Box x={85} y={140} w={100} h={44} label="Control" sub="circuits" fs={10.5} />
-      <Box x={85} y={205} w={100} h={44} label="Data + status" sub="registers" fs={10.5} />
-      <W d="M160,40 H300" arrow={false} /><T x={310} y={36} fs={11}>Address lines</T>
-      <W d="M300,60 H185" arrow={false} /><W d="M185,60 H160" open /><T x={310} y={58} fs={11}>Data lines</T>
-      <W d="M300,90 H185" arrow={false} /><W d="M185,90 H162" open /><T x={310} y={88} fs={11}>Control lines</T>
-      <W d="M135,260 V300" arrow={false} /><T x={90} y={318} fs={11}>Input device</T>
-      <T x={60} y={345} fs={11} hidden={false}></T>
+    <Svg vb="0 0 640 315">
+      <Bus x1={28} y1={32} x2={480} y2={32} w={2} />
+      <Bus x1={28} y1={61} x2={480} y2={61} w={2} />
+      <Bus x1={28} y1={90} x2={480} y2={90} w={2} />
+      <T x={492} y={37}>Address lines</T>
+      <T x={492} y={66}>Data lines</T>
+      <T x={492} y={95}>Control lines</T>
+      <Box x={28} y={127} w={584} h={93} fill="none" dashed />
+      <T x={496} y={146}>I/O interface</T>
+      <Box x={46} y={156} w={148} h={49} label="Address decoder" />
+      <Box x={246} y={156} w={148} h={49} label="Control circuits" />
+      <Box x={446} y={156} w={148} h={49} label="Data and status" sub="registers" />
+      <W d="M120,32 V156" />
+      <W d="M320,90 V156" both />
+      <W d="M471,61 V156" both />
+      <W d="M194,181 H246" />
+      <W d="M394,181 H446" />
+      <Box x={246} y={263} w={348} h={38} label="Input device" />
+      <W d="M320,263 V205" both />
+      <W d="M520,263 V205" />
     </Svg>
   )
 }
 
 // Slide 9 — interrupt and the interrupt-service routine.
+
 export function IsrFlow() {
   return (
-    <Svg vb="0 0 760 345">
-      <T x={80} y={40} fs={12} bold>Program 1</T>
-      {['1', '2', '⋮', 'i', 'i+1', '⋮', 'M'].map((s, i) => (
-        <Box key={i} x={110} y={55 + i * 32} w={110} h={26} label={s} fill="var(--dg-panel)" fs={11} />
-      ))}
-      <T x={140} y={185} fs={11} anchor="middle">← interrupt occurs here</T>
-      <W d="M140,175 V187" arrow={false} />
-      <T x={480} y={40} fs={12} bold>Interrupt-service routine</T>
-      {['1', '2', '⋮', 'return'].map((s, i) => (
-        <Box key={i} x={510} y={55 + i * 32} w={130} h={26} label={s} fill="var(--dg-panel)" fs={11} />
-      ))}
-      <W d="M222,151 H510" />
-      <T x={280} y={144} fs={11}>save PC (i+1) on the stack, branch to ISR</T>
-      <W d="M575,177 V310 H165 V213" />
-      <T x={300} y={330} fs={11}>return-from-interrupt restores PC → resume at i+1</T>
-      <T x={80} y={296} fs={11}>The ISR is defined by the OS or the device manufacturer; it may share</T>
-      <T x={80} y={310} fs={11}>nothing with the program it interrupts, so condition codes and registers</T>
-      <T x={80} y={324} fs={11}>must also be saved, not just the PC.</T>
+    <Svg vb="0 0 650 275">
+      <T x={108} y={26} bold anchor="middle">Interrupted program</T>
+      <T x={540} y={26} bold anchor="middle">Interrupt-service routine</T>
+      <Box x={27} y={49} w={162} h={42} label="Instruction i" />
+      <Box x={27} y={186} w={162} h={42} label="Next instruction" sub="saved PC" />
+      <Box x={459} y={49} w={162} h={42} label="ISR entry" />
+      <Box x={459} y={186} w={162} h={42} label="Return from interrupt" fs={11} />
+      <W d="M189,70 H459" />
+      <T x={324} y={57} anchor="middle">Save PC and status</T>
+      <W d="M540,91 V186" />
+      <T x={550} y={139} fs={11}>Service device</T>
+      <W d="M459,207 H189" />
+      <T x={324} y={194} anchor="middle">Restore PC and status</T>
     </Svg>
   )
 }
 
 // Slide 24 — priority-structured interrupts.
+
 export function PriorityStructure() {
   return (
-    <Svg vb="0 0 720 320">
-      <Box x={250} y={30} w={220} h={90} label="Processor" sub="+ priority arbitration circuit" fs={11} />
-      {[0, 1, 2].map((i) => (
-        <g key={i}>
-          <Box x={230 + i * 90} y={180} w={70} h={60} label={`Device ${i}`} fs={11} />
-          <W d={`M${265 + i * 90},180 V120`} />
-          <T x={225 + i * 90} y={172} fs={10}>IRQ</T>
-          <W d={`M${305 + i * 90},120 V180`} dash />
-          <T x={312 + i * 90} y={172} fs={10}>INTA</T>
-        </g>
-      ))}
-      <T x={230} y={108} fs={10.5}>priority level 2</T>
-      <T x={410} y={108} fs={10.5}>priority level 0</T>
-      <T x={60} y={286} fs={11}>Each device has its own IRQ and INTA lines with a different priority;</T>
-      <T x={60} y={300} fs={11}>a request is accepted only if its priority is higher than the processor's</T>
-      <T x={60} y={314} fs={11}>current priority (raised to the device's level while servicing it).</T>
+    <Svg vb="0 0 640 300">
+      <Box x={48} y={24} w={544} h={62} label="Processor" sub="priority arbitration circuit" />
+      {[0, 1, 2].map(i => {
+        const x = 48 + i * 183
+        return (
+          <g key={i}>
+            <Box x={x} y={189} w={150} h={58} label={`Device ${i + 1}`} sub={`priority ${3 - i}`} />
+            <W d={`M${x + 47},189 V86`} />
+            <W d={`M${x + 104},86 V189`} />
+            <T x={x + 39} y={140} fs={10} anchor="end">IRQ</T>
+            <T x={x + 112} y={140} fs={10}>INTA</T>
+          </g>
+        )
+      })}
+      <T x={320} y={279} anchor="middle">Each device has its own request and acknowledge pair.</T>
     </Svg>
   )
 }
@@ -96,6 +96,7 @@ export function DaisyChain() {
     <Svg vb="0 0 760 300">
       <Box x={40} y={100} w={110} h={80} label="Processor" fs={12} />
       <Bus x1={150} y1={110} x2={680} y2={110} w={4} />
+      <W d="M166,110 H150" />
       <T x={560} y={102} fs={11} bold>INTR (shared)</T>
       {[0, 1, 2].map((i) => (
         <g key={i}>
@@ -103,11 +104,10 @@ export function DaisyChain() {
           <W d={`M${275 + i * 160},160 V110`} />
         </g>
       ))}
-      <W d="M150,170 H210" />
+      <W d="M150,178 H210" />
       <W d="M340,178 H370" />
       <W d="M500,178 H530" />
       <T x={160} y={192} fs={11} bold>INTA</T>
-      <T x={360} y={156} fs={10.5}>INTA passed along the chain</T>
       <T x={40} y={270} fs={11}>Devices share the INTR line; INTA propagates from the electrically closest device onwards. The closest</T>
       <T x={40} y={288} fs={11}>device that needs service keeps the acknowledge and is serviced first — priority = electronic proximity.</T>
     </Svg>
@@ -115,56 +115,70 @@ export function DaisyChain() {
 }
 
 // Slide 28 — prioritized daisy chain.
+
 export function PrioritizedDaisyChain() {
   return (
-    <Svg vb="0 0 760 380">
-      <Box x={40} y={120} w={110} h={110} label="Processor" fs={12} />
-      <Box x={220} y={90} w={200} h={54} label="Priority arbitration" sub="circuit" fs={11} />
-      <W d="M150,140 H220" />
-      <Bus x1={420} y1={100} x2={690} y2={100} w={4} />
-      <T x={580} y={92} fs={10.5} bold>INTR1 (level 1)</T>
-      <Bus x1={420} y1={260} x2={690} y2={260} w={4} />
-      <T x={580} y={252} fs={10.5} bold>INTR2 (level 2)</T>
-      {[0, 1].map((i) => (
-        <g key={i}>
-          <Box x={460 + i * 130} y={130} w={110} h={60} label={`Device ${i + 1}`} fs={11} />
-          <W d={`M${515 + i * 130},130 V100`} />
-        </g>
-      ))}
-      {[2, 3].map((i) => (
-        <g key={i}>
-          <Box x={460 + (i - 2) * 130} y={290} w={110} h={60} label={`Device ${i + 1}`} fs={11} />
-          <W d={`M${515 + (i - 2) * 130},290 V260`} />
-        </g>
-      ))}
-      <W d="M570,160 H590" />
-      <W d="M570,320 H590" />
-      <T x={30} y={375} fs={10.5}>Groups get different priority levels; inside a group, daisy-chain proximity decides.</T>
+    <Svg vb="0 0 660 325">
+      <Box x={24} y={43} w={164} h={226} label="Processor" sub="priority arbitration" />
+      {[0, 1].map(i => {
+        const y = 59 + i * 141
+        return (
+          <g key={i}>
+            <W d={`M626,${y} H188`} />
+            <T x={205} y={y - 10}>INTR{i + 1} (priority {i + 1})</T>
+            <Box x={297} y={y + 36} w={132} h={49} label={`Device ${i * 2 + 1}`} />
+            <Box x={494} y={y + 36} w={132} h={49} label={`Device ${i * 2 + 2}`} />
+            <W d={`M363,${y + 36} V${y} M560,${y + 36} V${y}`} arrow={false} />
+            <W d={`M188,${y + 61} H297`} />
+            <W d={`M429,${y + 61} H494`} />
+            <T x={208} y={y + 50}>INTA{i + 1}</T>
+          </g>
+        )
+      })}
+      <T x={330} y={311} anchor="middle">Compare priorities across groups, then follow the selected acknowledge chain.</T>
     </Svg>
   )
 }
 
 // Slide 34 — DMA in a computer system.
+
 export function DmaSystem() {
   return (
-    <Svg vb="0 0 760 380">
-      <Box x={70} y={30} w={150} h={60} label="Processor" />
-      <Box x={520} y={30} w={150} h={60} label="Main memory" />
-      <Bus x1={220} y1={60} x2={520} y2={60} w={6} />
-      <T x={300} y={52} fs={11} bold>System bus</T>
-      <Box x={170} y={150} w={150} h={60} label="Disk DMA" sub="controller" fs={11} />
-      <Box x={380} y={150} w={150} h={60} label="DMA controller" sub="(network)" fs={11} />
-      <W d="M245,150 V66" /><W d="M455,150 V66" />
-      <Box x={40} y={270} w={100} h={50} label="Disk 1" fs={11} />
-      <Box x={160} y={270} w={100} h={50} label="Disk 2" fs={11} />
-      <Box x={390} y={270} w={120} h={50} label="Network" sub="interface" fs={11} />
-      <Box x={560} y={270} w={110} h={50} label="Keyboard" fs={11} />
-      <W d="M90,270 V225" arrow={false} /><W d="M90,270 V220 H225" />
-      <W d="M210,270 V210" />
-      <W d="M450,270 V210" />
-      <W d="M615,270 V180 H530" />
-      <T x={40} y={345} fs={11}>The DMA controller supplies the memory address and control signals for every word, increments the address</T>
-      <T x={40} y={363} fs={11}>and counts words — the processor only starts the transfer and gets an interrupt when the block is done.</T>
+    <Svg vb="0 0 660 316">
+      <Box x={116} y={20} w={155} h={49} label="Processor" />
+      <Box x={389} y={20} w={155} h={49} label="Main memory" />
+      <W d="M193,69 V118 M466,69 V118" arrow={false} />
+      <Bus x1={26} y1={118} x2={634} y2={118} />
+      <T x={330} y={107} anchor="middle">System bus</T>
+      <W d="M130,118 V167 M330,118 V167 M514,118 V167" arrow={false} />
+      <Box x={42} y={167} w={176} h={50} label="Disk DMA controller" sub="two independent channels" />
+      <Box x={252} y={167} w={156} h={50} label="Network DMA" />
+      <Box x={447} y={167} w={134} h={50} label="Keyboard I/O" />
+      <W d="M76,217 V257 M178,217 V257 M330,217 V257" arrow={false} />
+      <Box x={31} y={257} w={90} h={40} label="Disk 1" />
+      <Box x={133} y={257} w={90} h={40} label="Disk 2" />
+      <Box x={252} y={257} w={156} h={40} label="Network interface" />
+    </Svg>
+  )
+}
+
+// DMA channel register layout in the course's example interface.
+export function DmaRegisters() {
+  return (
+    <Svg vb="0 0 640 230">
+      <T x={24} y={71}>Status / control</T>
+      <Box x={160} y={46} w={75} h={41} label="IRQ" />
+      <Box x={235} y={46} w={75} h={41} label="IE" />
+      <Box x={310} y={46} w={146} h={41} label="…" />
+      <Box x={456} y={46} w={75} h={41} label="R/W̄" />
+      <Box x={531} y={46} w={75} h={41} label="Done" />
+      {[['31', 198], ['30', 273], ['1', 494], ['0', 569]].map(([bit, x]) => (
+        <T key={bit} x={x} y={35} anchor="middle">bit {bit}</T>
+      ))}
+      <T x={24} y={134}>Start address</T>
+      <Box x={160} y={110} w={446} h={41} label="Memory address for transfer" />
+      <T x={24} y={198}>Word count</T>
+      <Box x={160} y={174} w={446} h={41} label="Number of words to transfer" />
     </Svg>
   )
 }
@@ -174,10 +188,10 @@ export function DmaModes() {
   return (
     <Svg vb="0 0 760 240">
       <T x={40} y={30} fs={12} bold>Cycle stealing</T>
-      {['CPU', 'DMA', 'CPU', 'DMA', 'CPU', 'DMA', 'CPU'].map((s, i) => (
+      {['CPU', 'DMA', 'CPU', 'DMA', 'CPU', 'CPU', 'DMA'].map((s, i) => (
         <Box key={i} x={40 + i * 98} y={42} w={90} h={34} label={s} fill={s === 'DMA' ? 'var(--dg-panel2)' : 'var(--dg-panel)'} fs={11} />
       ))}
-      <T x={40} y={98} fs={11}>one bus cycle at a time is "stolen" between processor accesses</T>
+      <T x={40} y={98} fs={11}>Example bus ownership. A DMA cycle may interrupt CPU access.</T>
 
       <T x={40} y={140} fs={12} bold>Block / burst</T>
       <Box x={40} y={152} w={110} h={34} label="CPU" fs={11} />
@@ -189,58 +203,56 @@ export function DmaModes() {
 }
 
 // Slide 37 — centralized bus arbitration.
+
 export function BusArbCentralized() {
   return (
-    <Svg vb="0 0 760 330">
-      <Box x={280} y={20} w={160} h={70} label="Processor /" sub="bus arbiter" fs={11.5} />
-      <Bus x1={200} y1={130} x2={600} y2={130} w={4} />
-      <T x={610} y={134} fs={11} bold>BBSY</T>
-      <Bus x1={200} y1={170} x2={600} y2={170} w={4} />
-      <T x={610} y={174} fs={11} bold>BR</T>
-      <W d="M360,90 V130" /><W d="M400,90 V170" />
-      <Box x={190} y={230} w={170} h={60} label="DMA controller 1" fs={11.5} />
-      <Box x={430} y={230} w={170} h={60} label="DMA controller 2" fs={11.5} />
-      <W d="M360,170 V230" />
-      <W d="M360,230 V190" arrow={false} /><W d="M360,190 V174" />
-      <W d="M470,170 V230" />
-      <W d="M470,230 V190" arrow={false} /><W d="M470,190 V174" />
-      <W d="M360,260 H390" /><T x={398} y={264} fs={11} bold>BG1</T>
-      <W d="M430,260 H460" />
-      <W d="M470,270 H500" /><T x={505} y={298} fs={11} bold>BG2</T>
-      <T x={40} y={320} fs={11}>BG1 is daisy-chained: it reaches DMA controller 2 as BG2 only if controller 1 does not need the bus.</T>
+    <Svg vb="0 0 690 299">
+      <Box x={27} y={150} w={165} h={66} label="Processor" sub="central bus arbiter" />
+      <Box x={270} y={150} w={160} h={66} label="DMA controller 1" />
+      <Box x={510} y={150} w={160} h={66} label="DMA controller 2" />
+      <Bus x1={62} y1={47} x2={638} y2={47} w={3} />
+      <Bus x1={125} y1={92} x2={598} y2={92} w={3} />
+      <T x={345} y={36} anchor="middle">BBSY (active low)</T>
+      <T x={345} y={80} anchor="middle">BR (shared requests)</T>
+      <W d="M62,150 V47 M303,150 V47 M551,150 V47" arrow={false} />
+      <W d="M125,92 V150" />
+      <W d="M383,150 V92" />
+      <W d="M598,150 V92" />
+      <W d="M192,183 H270" />
+      <W d="M430,183 H510" />
+      <T x={231} y={174} anchor="middle">BG1</T>
+      <T x={470} y={174} anchor="middle">BG2</T>
+      <T x={345} y={252} anchor="middle">Controller 1 passes BG2 only when it does not request the bus.</T>
+      <T x={345} y={276} anchor="middle">A requesting controller waits until BBSY is deasserted.</T>
     </Svg>
   )
 }
 
 // Slides 39-42 — distributed bus arbitration.
+
 export function DistributedArb() {
   return (
-    <Svg vb="0 0 780 360">
-      {[['A', '0101', 60], ['B', '0110', 330]].map(([n, id, x], i) => (
-        <g key={i}>
-          <Box x={x} y={40} w={180} h={80} label={`Device ${n}`} sub={`ID = ${id}`} fs={12} />
-          <W d={`M${x + 90},120 V170`} />
-        </g>
-      ))}
-      <g>
-        <ellipse cx={390} cy={185} rx={60} ry={26} style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
-        <T x={390} y={190} fs={11} anchor="middle">logical OR</T>
-      </g>
-      <W d="M150,120 V185 H330" />
-      <W d="M420,120 V185 H450" />
-      <W d="M450,185 H510" />
-      <T x={130} y={240} fs={11}>4 arbitration lines carry the OR of all competing IDs</T>
-      <T x={130} y={258} fs={11}>+ 1 Start-Arbitration line (5 lines total)</T>
-
-      <T x={130} y={300} fs={11} bold>Bit-by-bit, MSB first:</T>
-      <T x={130} y={320} fs={11}>A sees 0111 ≠ 0101 at bit 2 → drops to 0100 → line becomes 0100 OR 0110 = 0110 = ID of B → B wins.</T>
+    <Svg vb="0 0 660 280">
+      <Box x={62} y={116} w={190} h={71} label="Device A" sub="drive and compare ID 0101" />
+      <Box x={408} y={116} w={190} h={71} label="Device B" sub="drive and compare ID 0110" />
+      <Bus x1={41} y1={40} x2={619} y2={40} w={4} />
+      <Bus x1={41} y1={81} x2={619} y2={81} w={2} />
+      <T x={330} y={29} anchor="middle">Arbitration bits [3:0] · wired OR</T>
+      <T x={330} y={71} anchor="middle">Start-Arbitration</T>
+      <W d="M98,81 V116 M444,81 V116" arrow={false} />
+      <W d="M212,40 V116" both />
+      <W d="M558,40 V116" both />
+      <T x={330} y={220} anchor="middle">First: 0101 OR 0110 = 0111</T>
+      <T x={330} y={242} anchor="middle">A loses at bit 1 (zero-based) and drops bits 1 and 0.</T>
+      <T x={330} y={264} anchor="middle">After: 0100 OR 0110 = 0110. Device B wins.</T>
     </Svg>
   )
 }
 
 // Synchronous bus timing (book 4.5.1), one transfer per clock period.
 export function SyncBus({ write = false }) {
-  const dataStart = write ? 200 : 355
+  const dataStart = write ? 180 : 355
+  const dataEnd = write ? 355 : 560
   return (
     <Svg vb="0 0 640 236">
       {[180, 355, 530].map(x => (
@@ -253,63 +265,70 @@ export function SyncBus({ write = false }) {
       <W d="M180,104 L193,116 H518 L530,104" arrow={false} />
       <T x={355} y={109} anchor="middle">valid for transfer</T>
       <T x={16} y={149}>{write ? 'Write data' : 'Read data'}</T>
-      <W d={`M145,152 H${dataStart} L${dataStart + 13},140 H548 L560,152 H602`} arrow={false} />
-      <W d={`M${dataStart},152 L${dataStart + 13},164 H548 L560,152`} arrow={false} />
-      <T x={445} y={156} anchor="middle">valid before sample</T>
+      <W d={`M145,152 H${dataStart} L${dataStart + 13},140 H${dataEnd - 12} L${dataEnd},152 H602`} arrow={false} />
+      <W d={`M${dataStart},152 L${dataStart + 13},164 H${dataEnd - 12} L${dataEnd},152`} arrow={false} />
+      <T x={write ? 267 : 445} y={156} anchor="middle">valid before sample</T>
       <T x={180} y={191} anchor="middle">t0 · launch</T>
-      <T x={355} y={191} anchor="middle">{write ? 't1 · mid-cycle' : 't1 · data available'}</T>
-      <T x={530} y={191} anchor="middle">t2 · sample</T>
+      <T x={355} y={191} anchor="middle">{write ? 't1 · sample' : 't1 · data available'}</T>
+      <T x={530} y={191} anchor="middle">{write ? 't2 · end' : 't2 · sample'}</T>
       <W d="M180,210 H530" both />
       <T x={355} y={230} anchor="middle">one bus clock period</T>
     </Svg>
   )
 }
 
-// Asynchronous read timing, with each ready transition tied to its event.
+// The write variant follows the six event labels printed in Spring 2023 Q3(g).
 export function AsyncBus({ write = false }) {
-  const dataStart = write ? 187 : 320
+  const ticks = write ? [175, 248, 321, 394, 467, 550] : [205, 338, 460, 565]
+  const addressStart = write ? ticks[0] : 188
+  const addressEnd = write ? ticks[4] : ticks[2]
+  const dataStart = write ? ticks[0] : 320
+  const dataEnd = ticks[write ? 4 : 3]
+  const [masterOn, masterOff] = write ? [ticks[1], ticks[3]] : [ticks[0], ticks[2]]
+  const [slaveOn, slaveOff] = write ? [ticks[2], ticks[5]] : [ticks[1], ticks[3]]
+
   return (
     <Svg vb="0 0 640 258">
-      {[205, 338, 460, 565].map(x => (
-        <line key={x} x1={x} y1={16} x2={x} y2={217} style={{ stroke: 'var(--dg-line)' }} strokeDasharray="4 3" />
+      {ticks.map((x, i) => (
+        <g key={x}>
+          <line x1={x} y1={16} x2={x} y2={217} style={{ stroke: 'var(--dg-line)' }} strokeDasharray="4 3" />
+          <T x={x} y={236} anchor="middle">t{i}</T>
+        </g>
       ))}
       <T x={16} y={46}>Address / command</T>
-      <W d="M145,46 H188 L200,34 H448 L460,46 H615" arrow={false} />
-      <W d="M188,46 L200,58 H448 L460,46" arrow={false} />
+      <W d={`M145,46 H${addressStart} L${addressStart + 12},34 H${addressEnd - 12} L${addressEnd},46 H615`} arrow={false} />
+      <W d={`M${addressStart},46 L${addressStart + 12},58 H${addressEnd - 12} L${addressEnd},46`} arrow={false} />
       <T x={16} y={94}>{write ? 'Write data' : 'Read data'}</T>
-      <W d={`M145,94 H${dataStart} L${dataStart + 12},82 H553 L565,94 H615`} arrow={false} />
-      <W d={`M${dataStart},94 L${dataStart + 12},106 H553 L565,94`} arrow={false} />
+      <W d={`M145,94 H${dataStart} L${dataStart + 12},82 H${dataEnd - 12} L${dataEnd},94 H615`} arrow={false} />
+      <W d={`M${dataStart},94 L${dataStart + 12},106 H${dataEnd - 12} L${dataEnd},94`} arrow={false} />
       <T x={16} y={148}>Master-ready</T>
-      <W d="M145,152 H205 V130 H460 V152 H615" arrow={false} />
+      <W d={`M145,152 H${masterOn} V130 H${masterOff} V152 H615`} arrow={false} />
       <T x={16} y={198}>Slave-ready</T>
-      <W d="M145,202 H338 V180 H565 V202 H615" arrow={false} />
-      <T x={205} y={236} anchor="middle">t0</T>
-      <T x={338} y={236} anchor="middle">t1</T>
-      <T x={460} y={236} anchor="middle">t2</T>
-      <T x={565} y={236} anchor="middle">t3</T>
+      <W d={`M145,202 H${slaveOn} V180 H${slaveOff} V202 H615`} arrow={false} />
     </Svg>
   )
 }
 
 // SCSI read of non-contiguous sectors (Fall 2023 / Spring 2024 question).
+
 export function ScsiRead() {
   return (
-    <Svg vb="0 0 760 330">
-      <Box x={40} y={60} w={170} h={70} label="Processor" sub="(initiator)" fs={11.5} />
-      <Box x={300} y={60} w={180} h={70} label="SCSI controller" sub="(target)" fs={11.5} />
-      <W d="M210,85 H300" /><W d="M300,110 H210" open />
-      <T x={214} y={78} fs={10.5}>command</T>
-      <T x={214} y={124} fs={10.5}>data + status</T>
-      <Box x={560} y={40} w={150} h={130} fill="var(--dg-panel)" />
-      <T x={635} y={62} fs={11} anchor="middle">Disk</T>
-      {['sector 5', '', 'sector 9', '', 'sector 12'].map((s, i) => (
-        s ? <Box key={i} x={585} y={70 + i * 20} w={100} h={18} label={s} fill="var(--dg-panel2)" fs={10} /> : <T key={i} x={635} y={84 + i * 20} fs={10} anchor="middle">·</T>
-      ))}
-      <W d="M480,95 H560" />
-      <T x={40} y={206} fs={11}>The OS tells the SCSI controller which logical block it needs; the target</T>
-      <T x={40} y={220} fs={11}>translates this to (cylinder, surface, sector) coordinates, seeks, and reads</T>
-      <T x={40} y={234} fs={11}>each sector — even when the sectors are scattered across the disk. Each</T>
-      <T x={40} y={248} fs={11}>sector read is transferred over the SCSI bus and then into memory.</T>
+    <Svg vb="0 0 710 286">
+      <Box x={18} y={21} w={171} h={54} label="CPU / OS" sub="programs the host adapter" />
+      <Box x={18} y={112} w={171} h={58} label="Host adapter" sub="SCSI initiator" />
+      <Box x={311} y={112} w={156} h={58} label="Disk controller" sub="SCSI target" />
+      <Box x={550} y={112} w={142} h={58} label="Disk media" />
+      <W d="M103,75 V112" />
+      <W d="M189,131 H311" />
+      <W d="M311,153 H189" />
+      <T x={250} y={120} anchor="middle" fs={11}>READ request</T>
+      <T x={250} y={177} anchor="middle" fs={11}>data + status</T>
+      <W d="M467,141 H550" both />
+      <Box x={18} y={213} w={171} h={49} label="RAM buffer" />
+      <W d="M103,170 V213" />
+      <T x={113} y={198} fs={11}>DMA</T>
+      <T x={240} y={229}>The target locates the requested logical blocks.</T>
+      <T x={240} y={251}>The host adapter places the returned data in RAM.</T>
     </Svg>
   )
 }

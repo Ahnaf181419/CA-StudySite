@@ -6,11 +6,11 @@ A self-contained study site for the faculty slides, class notes and six past fin
 Start with Foundations, work through the six course modules, then use the older-paper supplement
 for MIPS, error correction and system-design questions.
 
-- **Lectures** teach the course with diagrams, worked traces, 36 checkpoints with hidden worked
+- **Lectures** teach the course with diagrams, worked traces, 37 checkpoints with hidden worked
   answers, and past-paper questions grouped by topic. The core Chapter 7 module starts at multibus.
 - **Question bank** contains 92 questions from the available paper pages, with separately
   revealable hints and solutions and links back to the relevant lectures.
-- **Patterns** — topic × paper matrix with repeat counts, notes-priority markers and per-topic
+- **Patterns** — topic × paper matrix with per-paper question counts, notes-priority markers and per-topic
   trend notes, so preparation effort can be aimed where it repeats.
 
 ## Run locally

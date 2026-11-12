@@ -11,7 +11,7 @@ export default {
   format: 'Three sections: concepts (Q1), long worked problems (Q2), short applications (Q3). The long questions in Q2 (branch penalty, cache mapping) are the ones to master first — they repeat across papers.',
   questions: [
     {
-      id: 'Q1a', topic: 'interrupts', marks: '[6]', inNotes: true, repeats: 1,
+      id: 'Q1a', topic: 'interrupts', marks: '[6]', inNotes: true,
       q: 'When a device asserts an interrupt request (IRQ) signal, it holds the signal active until the processor acknowledges it. If not properly controlled, this may generate repeated interrupts, causing the system to enter an infinite loop. Explain all the approaches available to prevent repeated interrupts from the same request, using proper examples.',
       think: [
         'The question gives you the fear — “the line stays high, so the processor re-enters the ISR forever”. Each approach is just a different place to break that loop: software ordering, a status bit, or the signal edge itself. Structure the answer as three numbered approaches, each with one concrete example sentence.',
@@ -27,7 +27,7 @@ export default {
       ],
     },
     {
-      id: 'Q1b', topic: 'ram-chip', marks: '[6]', inNotes: true, repeats: 2,
+      id: 'Q1b', topic: 'ram-chip', marks: '[6]', inNotes: true,
       q: 'Consider a 1 kB RAM chip where each word consists of 16 bits. Illustrate the internal organization of this RAM memory chip showing how the memory cells are arranged into rows and columns. If the 8th word is to be read from this RAM, demonstrate step by step how the address decoder selects the word and how the data is made available at the output.',
       pattern: 'Same figure as Spring 2023 Q3(f)(i) with different numbers — draw it once, learn it twice.',
       think: [
@@ -48,7 +48,7 @@ export default {
       ],
     },
     {
-      id: 'Q1c', topic: 'bus-timing', marks: '[6]', repeats: 2,
+      id: 'Q1c', topic: 'bus-timing', marks: '[6]',
       q: 'Explain the timing of an input data transfer in a synchronous bus (assuming that one data transfer takes one clock cycle) using necessary figures. Identify the limitations of this timing mechanism and explain how to overcome these limitations using necessary figures and mechanisms.',
       pattern: 'Paired with Spring 2023 Q3(g) — sync vs async timing is a stable two-paper topic.',
       think: [
@@ -71,7 +71,7 @@ export default {
       ],
     },
     {
-      id: 'Q1d', topic: 'hardwired-cu', marks: '[6]', inNotes: true, repeats: 2,
+      id: 'Q1d', topic: 'hardwired-cu', marks: '[6]', inNotes: true,
       q: 'Illustrate the block diagram of a Hardwired control unit organization. Consider that the processor can handle 16 instructions in total. Currently the 4th instruction is being executed which has a total of 8 steps. Explain how this Hardwired control unit organization will generate different control signals based on different steps of the instruction.',
       think: [
         'The block diagram is fixed (Fig 7.13-style); the numbers just set the widths: 16 instructions → the instruction decoder emits INS1…INS16; an 8-step instruction → the step counter counts T1…T8. Then explain the encoder: each control signal = OR of AND terms (Ti · INSj). Give one concrete signal as an example — that is the “explain” part.',
@@ -92,7 +92,7 @@ export default {
       ],
     },
     {
-      id: 'Q2a', topic: 'branch', marks: '[10: 2+2+4+2]', inNotes: true, repeats: 3,
+      id: 'Q2a', topic: 'branch', marks: '[10: 2+2+4+2]', inNotes: true,
       q: `Consider the following program.
 LOOP   ADD R1, R2
        SHIFT LEFT R2
@@ -152,7 +152,7 @@ NEXT   SHIFT RIGHT R2
       ],
     },
     {
-      id: 'Q2b', topic: 'cache', marks: '[10]', repeats: 5,
+      id: 'Q2b', topic: 'cache', marks: '[10]',
       q: 'Consider a cache consisting of 128 blocks of 32 words each. The main memory is word addressable, addressable by an 18-bit address, and it has 8K blocks of 32 words each. A main memory location has the address 111111110000111100. Determine the cache position where this address maps using Direct, Associative and Set-Associative mapping (4 blocks per set). Illustrate how the 18-bit address divides into tag, block/set and word for each technique and identify the exact mapped location.',
       pattern: 'THE most repeated question in the bank — Fall 22, Spring 22, Fall 23, Spring 24 and here. Only the numbers change; the field-splitting method is identical every time.',
       think: [
@@ -180,7 +180,7 @@ NEXT   SHIFT RIGHT R2
       ],
     },
     {
-      id: 'Q3a', topic: 'bus-arb', marks: '[4]', inNotes: true, repeats: 3,
+      id: 'Q3a', topic: 'bus-arb', marks: '[4]', inNotes: true,
       q: 'Define bus arbitration. Let’s assume that three devices with IDs 5, 12 and 9 are connected to a bus and all of them are requesting the bus. If a distributed bus arbitration technique is used, determine which device will win and become the Bus Master by simulating each step of the process. Also draw the distributed arbitration scheme using these three devices.',
       pattern: 'Distributed arbitration was simulated twice in the class notes (D5/D6/D7 → D7 wins) — same drill, new IDs.',
       think: [
@@ -205,7 +205,7 @@ NEXT   SHIFT RIGHT R2
       ],
     },
     {
-      id: 'Q3b', topic: 'hazards', marks: '[4]', repeats: 4,
+      id: 'Q3b', topic: 'hazards', marks: '[4]',
       q: 'Identify if the following two instructions will cause a data hazard in a four-stage pipelining by drawing necessary figures.\nSUB R1, R3, R2\nMUL R2, R3, R4\nIf it causes a data hazard, explain how it can be handled in hardware. (The explanation must be related to the given instructions.)',
       pattern: 'The same forwarding method as the Chapter 8 MUL→ADD example. Identify the producer and consumer from the operand convention.',
 
@@ -224,7 +224,7 @@ NEXT   SHIFT RIGHT R2
       ],
     },
     {
-      id: 'Q3c', topic: 'cache-rw', marks: '[4]', repeats: 1,
+      id: 'Q3c', topic: 'cache-rw', marks: '[4]',
       q: 'Explain how the processor handles read hit, write hit and read miss, write miss in cache memory. Discuss all possible techniques.',
       think: 'Two axes: hit/miss × read/write. The read column is one line each; the write column is where the marks are — write-through vs write-back for hits, and write-allocate vs no-write-allocate on misses.',
       solution: [
@@ -240,7 +240,7 @@ NEXT   SHIFT RIGHT R2
       ],
     },
     {
-      id: 'Q3d', topic: 'prog-io', marks: '[4]', repeats: 2,
+      id: 'Q3d', topic: 'prog-io', marks: '[4]',
       q: 'Explain the concept of program-controlled I/O method using proper examples. Also identify the disadvantage of this program-controlled I/O method and suggest a solution to this problem.',
       think: [
         'Definition + a tiny polling loop + the one disadvantage every text repeats: the processor is **busy-waiting**. The solution is the interrupt — the device announces readiness and the processor uses the wait time for useful work.',
