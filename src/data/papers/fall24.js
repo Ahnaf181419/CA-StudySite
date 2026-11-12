@@ -6,7 +6,7 @@ export default {
   short: 'F24',
   date: '09/11/2025',
   marks: '50 · 2h30m',
-  note: 'Closest to the current slide set — every question maps onto Chapters 4, 5, 7, 8 directly. Treat this as the model paper.',
+  note: 'Closest to the current slide set — every question maps onto Chapters 4, 5, 7, 8 directly. Treat this as the model paper. The two scanned pages are pages 5–6 of a combined multi-subject paper; the CA part is complete.',
   instruction: 'Q1 any 3 of 4 × 6 = 18 · Q2 both × 10 = 20 · Q3 any 3 of 4 × 4 = 12.',
   format: 'Three sections: concepts (Q1), long worked problems (Q2), short applications (Q3). The long questions in Q2 (branch penalty, cache mapping) are the ones to master first — they repeat across papers.',
   questions: [

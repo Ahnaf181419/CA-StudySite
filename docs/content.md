@@ -51,7 +51,7 @@ here first.
 |---|---|---|
 | `Slides/` | 6 decks (Arithmetic pointer, Ch 7, Ch 8 pt 1+2, Ch 5, Ch 4 I/O), 216 pages | **the lecture content** — every topic, definition, figure and worked number |
 | `Classnotes/CA Final Note.pdf` | 49 handwritten pages with Bengali margin notes | three-bus control sequences, exam pointers, priority signals, the multiplication worked table |
-| `QuestionBank/` | Fall 22, Spring 22 (partial), Fall 23, Spring 23, Spring 24, Fall 24 (pp. 5–6) | every question, verbatim, plus marks and figures |
+| `QuestionBank/` | Fall 22, Spring 22 (partial), Fall 23, Spring 23, Spring 24, Fall 24 (its CA pages only — the other pages of that combined paper were another subject) | every question, verbatim, plus marks and figures |
 
 The folders themselves are gitignored (never commit the PDFs) — a fresh clone gets the site, not
 the sources. This file is the map back to them.
