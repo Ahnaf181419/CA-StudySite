@@ -113,7 +113,7 @@ export default function Diagram({ id, caption }) {
         <button
           ref={trigger}
           onClick={() => setMounted(true)}
-          className="press shrink-0 underline underline-offset-4 hover:text-ink"
+          className="press shrink-0 inline-flex min-h-11 items-center underline underline-offset-4 hover:text-ink"
         >
           Expand
         </button>
@@ -128,13 +128,13 @@ export default function Diagram({ id, caption }) {
           aria-label={label}
           onClick={() => setShown(false)}
         >
-          <div className="min-h-dvh w-full max-w-[1180px] mx-auto p-4 md:p-8" onClick={(e) => e.stopPropagation()}>
+          <div className="min-h-dvh w-full max-w-[1180px] mx-auto px-4 md:px-8 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] md:pt-8 md:pb-8" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="text-[13px] text-ash leading-snug">{caption}</div>
               <button
                 ref={closer}
                 onClick={() => setShown(false)}
-                className="press shrink-0 text-[12.5px] border border-line2 px-3 py-2 text-ash hover:text-ink"
+                className="press shrink-0 inline-flex min-h-11 items-center text-[12.5px] border border-line2 px-3 text-ash hover:text-ink"
               >
                 Close (Esc)
               </button>

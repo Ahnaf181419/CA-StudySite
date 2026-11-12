@@ -23,7 +23,7 @@ function Question({ q, paperId, open, onToggle, done, onDone, target }) {
         <button
           onClick={() => onDone(qkey(paperId, q.id))}
           aria-pressed={done}
-          className={`press shrink-0 text-[11.5px] border px-2 py-1 whitespace-nowrap print:hidden ${done ? 'border-ink bg-ink text-paper' : 'border-line2 text-ash hover:text-ink'}`}
+          className={`press shrink-0 min-h-11 text-[11.5px] border px-2.5 whitespace-nowrap print:hidden ${done ? 'border-ink bg-ink text-paper' : 'border-line2 text-ash hover:text-ink'}`}
         >
           {done ? '✓ reviewed' : 'mark reviewed'}
         </button>
@@ -148,10 +148,10 @@ export default function QuestionBank({ paperId, qId }) {
 
   return (
     <article>
-      <a href="#/qb" className="press text-[12.5px] text-ash print:hidden">← All papers</a>
+      <a href="#/qb" className="press inline-flex min-h-11 items-center text-[12.5px] text-ash print:hidden">← All papers</a>
       <div className="flex flex-wrap items-end justify-between gap-3 mt-3">
         <h1 className="text-[26px] font-semibold tracking-tight">{p.name}</h1>
-        <button onClick={printPaper} className="press text-[12.5px] border border-line2 px-3 py-2 text-ash hover:text-ink print:hidden">
+        <button onClick={printPaper} className="press inline-flex min-h-11 items-center text-[12.5px] border border-line2 px-3 text-ash hover:text-ink print:hidden">
           Print paper with solutions
         </button>
       </div>

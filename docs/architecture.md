@@ -150,6 +150,32 @@ line   #2c2d33   borders
 `color-scheme: dark` is set on `:root` (scrollbars, form controls), plus a `theme-color` meta
 and an inline SVG favicon in `index.html`.
 
+## Mobile
+
+The site is a scrolling document, so the mobile work is the platform layer, not a redesign:
+
+- **Viewport** — `width=device-width, viewport-fit=cover, interactive-widget=resizes-content`
+  (`index.html`), plus `<meta name="color-scheme" content="dark">` so the UA paints form controls
+  and scrollbars dark before the CSS loads.
+- **No tap flash / no font inflation** — `-webkit-tap-highlight-color: transparent` and
+  `text-size-adjust: 100%` on `html`.
+- **Native-speed taps** — `touch-action: manipulation` on buttons, links and summaries (kills the
+  300 ms double-tap wait); press feedback comes from the existing `.press:active` rule.
+- **No long-press selection on controls** — `user-select: none` on buttons and summaries only.
+  Links and body text stay selectable, because that text is content the reader may want to copy.
+- **No input zoom** — the search field is 16 px, so iOS Safari does not zoom the page on focus.
+- **Safe areas** — `env(safe-area-inset-*)` on the sticky header, the footer and the diagram
+  overlay; these only resolve because `viewport-fit=cover` is set.
+- **No layout shift when the overlay locks scrolling** — `scrollbar-gutter: stable` on `html`.
+- **Tap targets** — every standalone control is at least 44 px tall (`min-h-11`); the only
+  sub-24 px targets left are inline links inside a sentence, which WCAG 2.2 exempts.
+- **Narrow screens** — the tab bar scrolls horizontally below ~330 px (four text tabs do not fit
+  a 320 px phone); the page itself never scrolls sideways at any width.
+
+Verified by measurement at 320 / 375 / 390 / 430 / 768 / 1280 px: zero horizontal overflow, zero
+console errors, no undersized tap targets. Emulation cannot reproduce sticky hover, tap delay,
+rubber-banding or safe areas — those need a real phone.
+
 ## Build, test, deploy
 
 - `npm test` — 22 checks: content integrity (diagram refs, questions, module shape, topic links,

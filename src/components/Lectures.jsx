@@ -55,7 +55,7 @@ export default function Lectures({ moduleId, sectionId }) {
 
   return (
     <article>
-      <a href="#/lectures" className="press text-[12.5px] text-ash">← All lectures</a>
+      <a href="#/lectures" className="press inline-flex min-h-11 items-center text-[12.5px] text-ash">← All lectures</a>
       <div className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ash">{m.chapter}</div>
       <h1 className="text-[26px] font-semibold tracking-tight mt-1">{m.title}</h1>
       <div className="text-[14px] text-ash mt-2 leading-relaxed">{md(m.blurb)}</div>
@@ -117,8 +117,8 @@ export default function Lectures({ moduleId, sectionId }) {
           const prev = MODULES[i - 1], next = MODULES[i + 1]
           return (
             <>
-              {prev ? <a className="press text-ash hover:text-ink" href={`#/lectures/${prev.id}`}>← {prev.title}</a> : <span />}
-              {next ? <a className="press text-ash hover:text-ink" href={`#/lectures/${next.id}`}>{next.title} →</a> : <span />}
+              {prev ? <a className="press inline-flex min-h-11 items-center text-ash hover:text-ink" href={`#/lectures/${prev.id}`}>← {prev.title}</a> : <span />}
+              {next ? <a className="press inline-flex min-h-11 items-center text-ash hover:text-ink" href={`#/lectures/${next.id}`}>{next.title} →</a> : <span />}
             </>
           )
         })()}

@@ -36,7 +36,7 @@ export default function Patterns() {
                   <tr key={t.id} className="border-t border-line">
                     <th scope="row" className="px-2 py-1.5 text-left font-normal">
                       <span className="flex items-center gap-2 flex-wrap">
-                        <a href={MODULES.find((m) => m.id === t.module) ? `#/lectures/${t.module}` : '#/lectures'} className="press hover:underline underline-offset-2">
+                        <a href={MODULES.find((m) => m.id === t.module) ? `#/lectures/${t.module}` : '#/lectures'} className="press inline-flex min-h-11 items-center hover:underline underline-offset-2">
                           {t.name}
                         </a>
                         {n >= 3 ? <span className="text-[9.5px] font-semibold uppercase tracking-[0.08em] bg-ink text-paper px-1.5 py-0.5">repeat</span> : null}
@@ -81,7 +81,7 @@ export default function Patterns() {
           {PAPERS.map((p) => (
             <div key={p.id} className="border border-line p-4">
               <div className="flex items-baseline justify-between gap-3">
-                <a href={`#/qb/${p.id}`} className="press font-semibold text-[15px] hover:underline underline-offset-2">{p.name}</a>
+                <a href={`#/qb/${p.id}`} className="press inline-flex min-h-11 items-center font-semibold text-[15px] hover:underline underline-offset-2">{p.name}</a>
                 <span className="text-[11.5px] text-ash font-mono">{p.date}</span>
               </div>
               <p className="text-[13.5px] text-ash mt-1.5 leading-[1.7]">{p.format}</p>

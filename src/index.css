@@ -24,6 +24,12 @@
 
 html {
   scroll-behavior: smooth;
+  /* no grey tap flash, no font inflation in landscape */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* reserve the scrollbar so locking body scroll (diagram overlay) doesn't shift the layout */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -32,6 +38,32 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* controls behave like native ones: instant tap, no long-press selection */
+button,
+a,
+summary,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+summary,
+[role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* safe areas — viewport-fit=cover is set in index.html, otherwise these are 0 */
+header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+footer > div {
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
 }
 
 ::selection {
