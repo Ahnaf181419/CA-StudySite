@@ -4,6 +4,7 @@ export default function Nav({ route }) {
     ['lectures', 'Lectures'],
     ['qb', 'Question bank'],
     ['patterns', 'Patterns'],
+    ['search', 'Search'],
   ]
   return (
     <header className="border-b border-line sticky top-0 z-10 bg-paper/95 backdrop-blur">

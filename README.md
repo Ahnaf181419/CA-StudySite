@@ -3,7 +3,7 @@
 **Live site: https://ahnaf181419.github.io/CA-StudySite/**
 
 A self-contained study site for the faculty slides, class notes and six past finals (2022–2024).
-Start with Foundations, work through the six course modules, then use the older-paper supplement
+Start with Foundations, work through the course modules, then use the older-paper supplement
 for MIPS, error correction and system-design questions.
 
 - **Lectures** teach the course with diagrams, worked traces, 37 checkpoints with hidden worked
@@ -12,6 +12,12 @@ for MIPS, error correction and system-design questions.
   revealable hints and solutions and links back to the relevant lectures.
 - **Patterns** — topic × paper matrix with per-paper question counts, notes-priority markers and per-topic
   trend notes, so preparation effort can be aimed where it repeats.
+- **Search** finds any section or question by wording — the fastest way back to a topic at 2 a.m.
+
+Study tools: every question has a deep link (`#/qb/fall24/Q2a`) and every lecture section does
+too (`#/lectures/ch5/sec-4`); "In the exam" callouts link straight to the question they name;
+questions can be ticked off as reviewed (kept in your browser); and any paper prints as a clean
+black-on-white sheet with all solutions expanded.
 
 ## Run locally
 

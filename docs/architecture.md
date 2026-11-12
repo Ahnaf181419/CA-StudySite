@@ -103,12 +103,38 @@ Foundations uses the single-bus and register-gating figures. The same registry s
 
 ## Routing and views
 
-Hash routing in `App.jsx` (`#/lectures[/:module[/:section]]`, `#/qb[/:paper[/:question]]`, `#/patterns`) — no history
-API, so the site works from any static host including `file://` builds.
+Hash routing in `App.jsx` — no history API, so the site works from any static host including
+`file://` builds.
+
+| Route | Lands on |
+|---|---|
+| `#/lectures` | module cards |
+| `#/lectures/<module>` | module page |
+| `#/lectures/<module>/sec-<n>` | module page scrolled to section *n* (0-based — matches the `id` of its `<h2>`) |
+| `#/qb` | paper list with review counters |
+| `#/qb/<paper>` | one paper's questions |
+| `#/qb/<paper>/<qid>` | the same page scrolled to that question (its border is highlighted) |
+| `#/patterns` | topic × paper matrix |
+| `#/search` | client-side search over sections and questions |
 
 - `Lectures.jsx` — module cards → module contents, practice links and previous/next navigation
-- `QuestionBank.jsx` — paper cards → question list; each question has native `<details>` controls for its hint and solution
+- `QuestionBank.jsx` — paper cards → question list; each question is a `<button aria-expanded>`
+  with `aria-controls` that reveals the hint and the solution
 - `Patterns.jsx` — the derived matrix and trend cards
+- `Search.jsx` — a text box over a flat index
+
+## Study features
+
+| Feature | Where | Notes |
+|---|---|---|
+| Search | `src/lib/search.js`, `Search.jsx` | flat index over section headings, block text, question text and solution text; all terms must match, title matches rank first |
+| Review marks | `src/lib/progress.js` | `localStorage` map keyed `q:<paper>:<qid>`; per-question toggle plus per-paper and overall counters on the question-bank list |
+| Print | `@media print` in `src/index.css` | the dark palette inverts through the same tokens, so figures stay legible; the "Print paper with solutions" button expands every solution first |
+| Diagram zoom | `Diagram.jsx` | "Expand" opens a modal overlay (opacity + scale 0.96→1, 190 ms, `--ease-out`); Esc or backdrop closes it, the body scroll is locked, focus returns to the trigger; motion is dropped under `prefers-reduced-motion` |
+| Cross-links | `src/lib/paperrefs.js` | "Fall 2024 Q1(a)" inside an `exam` block becomes a link to that question; `splitRefs` resolves the paper and question ids from the data |
+
+Links work in both directions: a lecture's "In the exam" callout links to the question, and the
+question's "Study <topic>" link goes back to the lecture module.
 
 ## Theming
 
@@ -126,7 +152,9 @@ and an inline SVG favicon in `index.html`.
 
 ## Build, test, deploy
 
-- `npm test` — 9 content-integrity checks, including question deep-link IDs, worked checkpoints and timing chart widths
+- `npm test` — 21 checks: content integrity (diagram refs, questions, module shape, topic links,
+  counts, checkpoints, timing widths) plus the search index, review marks and paper-reference
+  resolver
 - `npm run build` — single-chunk bundle (~580 kB / ~185 kB gzip); the size warning is expected
   and accepted
 - `.github/workflows/deploy.yml` — on push to `main`: test → build → GitHub Pages.

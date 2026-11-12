@@ -23,7 +23,9 @@ function ModuleCard({ m, i }) {
   )
 }
 
-export default function Lectures({ moduleId }) {
+export default function Lectures({ moduleId, sectionId }) {
+  const m = MODULES.find((x) => x.id === moduleId)
+
   if (!moduleId) {
     return (
       <div>
@@ -38,7 +40,6 @@ export default function Lectures({ moduleId }) {
     )
   }
 
-  const m = MODULES.find((x) => x.id === moduleId)
   if (!m) return null
 
   const practiceTopics = Object.entries(TOPICS)

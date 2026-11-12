@@ -19,6 +19,7 @@
   --dg-panel: #1a1b1f;
   --dg-line: #41434c;
   --dg-panel2: #232429;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 html {
@@ -54,4 +55,42 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .press { transition: none; }
+}
+
+/* diagram zoom overlay — opacity + scale only, one transition, no layout shift */
+.zoom-overlay {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 190ms var(--ease-out), transform 190ms var(--ease-out);
+}
+.zoom-overlay[data-open="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .zoom-overlay { transition: none; transform: none; }
+}
+
+/* print: the dark palette inverts through the same tokens, so figures stay legible */
+@media print {
+  :root {
+    color-scheme: light;
+    --color-paper: #ffffff;
+    --color-panel: #ffffff;
+    --color-panel2: #f2f2f2;
+    --color-line: #b0b0b0;
+    --color-line2: #6f6f6f;
+    --color-ash: #333333;
+    --color-ink: #000000;
+    --dg-ink: #000000;
+    --dg-panel: #ffffff;
+    --dg-panel2: #f2f2f2;
+    --dg-line: #6f6f6f;
+  }
+  html, body { background: #fff !important; color: #000 !important; }
+  header, footer { display: none !important; }
+  main { max-width: none !important; padding: 0 !important; }
+  figure, table, tr { break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; }
+  a { color: inherit; text-decoration: none; }
 }

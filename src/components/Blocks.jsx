@@ -1,5 +1,26 @@
 import { md } from '../lib/md.jsx'
+import { splitRefs, refHref } from '../lib/paperrefs.js'
 import Diagram from './Diagram.jsx'
+
+// "Fall 2024 Q1(a)" becomes a link to that question in the question bank
+function ExamText({ text }) {
+  return (
+    <>
+      {splitRefs(text).map((part, i) => {
+        if (part.kind === 'text') {
+          const body = md(part.text)
+          return part.bold ? <strong key={i}>{body}</strong> : <span key={i}>{body}</span>
+        }
+        const link = (
+          <a href={refHref(part)} className="press underline underline-offset-4 hover:text-ink">
+            {part.text}
+          </a>
+        )
+        return part.bold ? <strong key={i}>{link}</strong> : <span key={i}>{link}</span>
+      })}
+    </>
+  )
+}
 
 function Timing({ block }) {
   // Pipeline / timing chart: rows of labelled cells. cell = '' | string | {t, dim, box}
@@ -115,7 +136,7 @@ const Block = ({ b }) => {
       return (
         <aside className="my-5 border-l-[3px] border-ink bg-panel px-4 py-3">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ash mb-1">In the exam</div>
-          <div className="leading-[1.7] text-[14.5px]">{(Array.isArray(b.text) ? b.text : [b.text]).map((t, i) => <p key={i} className="my-1">{md(t)}</p>)}</div>
+          <div className="leading-[1.7] text-[14.5px]">{(Array.isArray(b.text) ? b.text : [b.text]).map((t, i) => <p key={i} className="my-1"><ExamText text={t} /></p>)}</div>
         </aside>
       )
     case 'pre':

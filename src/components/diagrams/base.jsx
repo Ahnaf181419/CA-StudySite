@@ -8,11 +8,18 @@ const INK = 'var(--dg-ink)'
 const PANEL = 'var(--dg-panel)'
 const LINE = 'var(--dg-line)'
 const MarkerContext = createContext(null)
+const LabelContext = createContext(null)
+
+// lets the figure caption name the SVG for screen readers
+export function LabelProvider({ label, children }) {
+  return <LabelContext.Provider value={label}>{children}</LabelContext.Provider>
+}
 
 export function Svg({ vb = '0 0 760 420', maxw = 760, children }) {
   const id = useId()
+  const label = useContext(LabelContext)
   return (
-    <svg viewBox={vb} role="img" style={{ maxWidth: maxw + 'px', width: '100%', height: 'auto' }} className="select-none">
+    <svg viewBox={vb} role="img" aria-label={label || undefined} style={{ maxWidth: maxw + 'px', width: '100%', height: 'auto' }} className="select-none">
       <defs>
         <marker id={`${id}-arrow`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" style={{ fill: INK }} />
