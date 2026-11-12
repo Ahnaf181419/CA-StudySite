@@ -61,7 +61,7 @@ export default {
       heading: 'Array loops and passing parameters in registers',
       blocks: [
         { type: 'p', text: 'Before writing code, assign registers for the pointer, the number of elements left, the accumulator and the current value. The loop invariant for a sum is: after k iterations, the accumulator equals the sum of the first k elements, the pointer is base + k×stride, and the counter is n−k. Save n separately if you need it after the loop.' },
-        { type: 'example', title: 'Sum n positive-count, 4-byte elements by register-indirect addressing', blocks: [
+        { type: 'example', title: 'Sum an array of n 4-byte elements (n > 0) by register-indirect addressing', blocks: [
           { type: 'pre', text: 'Input: R1 = base, R2 = n > 0; output: R0 = sum\n        CLEAR R0\nLOOP:   ADD (R1)+, R0\n        DEC R2\n        BNE LOOP\n        RETURN', caption: 'DEC sets the flags for BNE. If n may be zero, test it before entering the loop. Callers put base and count in the agreed registers before CALL and read the return value in R0.' },
           { type: 'list', items: ['Mean: save the original count, sum, then divide by that saved value. State integer division if used.', 'Product: initialize the accumulator to 1, then multiply by each element.', 'Dot product: advance two pointers, multiply the two current elements, and add that product to an accumulator initialized to 0.'] },
         ] },

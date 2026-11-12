@@ -25,7 +25,7 @@ export default {
           '**Left-shift the multiplicand** (it doubles, ready for the next bit).',
           '**Right-shift the multiplier** (bring the next bit to the LSB).',
         ] },
-        { type: 'p', text: 'The slide algorithm runs **n rounds for an n-bit multiplier**: test one bit per round. If the hardware explicitly supports early termination, it may stop once the multiplier becomes 0, since all remaining rounds would skip the add. Use n rounds when tracing the slide flowchart.' },
+        { type: 'p', text: 'Each round tests one multiplier bit. **Course convention (class notes): stop as soon as the multiplier register becomes 0**, since every remaining round would only skip the add and shift. All worked tables on this site follow that rule. The flowchart’s fixed version runs all n rounds for an n-bit multiplier; if a question explicitly asks for n rounds, add the remaining skip rows. The product is the same either way.' },
         { type: 'p', text: 'Register widths for 32 × 32 → 64-bit product (from the notes): multiplier 32 bits; multiplicand zero-extended to 64 bits before shifts; product 64 bits, because (2^32 − 1)² < 2^64.' },
         { type: 'diagram', id: 'seqMultiplier', caption: 'Sequential multiplication hardware: multiplicand (shift left), ALU, product (accumulates without shifting), multiplier (shift right), control tests the multiplier LSB.' },
       ],
@@ -33,7 +33,7 @@ export default {
     {
       heading: 'Multiplication worked example: 4 × 3 in 4 bits (class notes)',
       blocks: [
-        { type: 'p', text: 'Multiplicand 0100 (4), multiplier 0011 (3), product starts 0000 0000. This class-notes trace stops early after two right shifts make the multiplier 0.' },
+        { type: 'p', text: 'Multiplicand 0100 (4), multiplier 0011 (3), product starts 0000 0000. Following the course rule, the trace stops once two right shifts have made the multiplier 0.' },
         { type: 'table', head: ['Step', 'Multiplier', 'Multiplicand', 'Product'], rows: [
           ['initial', '0011', '0000 0100', '0000 0000'],
           ['L1: LSB = 1 → add', '0011', '0000 0100', '0000 0100'],

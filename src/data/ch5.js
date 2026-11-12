@@ -33,7 +33,7 @@ export default {
       heading: 'Semiconductor RAM: cells, chips, SRAM vs DRAM',
       blocks: [
         { type: 'list', items: [
-          'RAM allows direct selection of an arbitrary address without scanning or moving a disk head. The course model treats access as uniform, though actual DRAM timing can vary, for example with an already-open row.',
+          '**Random access**: any location can be selected directly by its address, in the same access time, without scanning or moving a disk head.',
           'Each memory cell holds **one bit**; in the simple word-organized diagram, **one row is one word**. DRAM chips can organize many words in a row and use a separate column selection.',
           'All cells of a row connect to a common **word line**, driven by the **address decoder**; **sense/write circuits** connect to the data input/output lines.',
         ] },
@@ -139,8 +139,7 @@ export default {
         ] },
         { type: 'list', items: [
           'A **valid bit** per block: 1 if the block holds valid data. All valid bits are 0 at power-on; set to 1 when a block is first loaded.',
-          'A DMA transfer may bypass the CPU cache. With non-coherent DMA, software must arrange for stale CPU copies to be invalidated and dirty data written back when needed; coherent systems handle the relevant snoops in hardware.',
-          '**Cache coherence problem**: with write-back, the cached copy and the memory copy differ (memory does not reflect cache changes). If a disk transfer reads that block from memory, it gets stale data. One option: **write back the dirty data before a non-coherent device reads the RAM buffer**.',
+          '**Cache coherence problem**: with write-back, the cached copy and the memory copy can differ (memory does not yet reflect the cache changes). A DMA transfer to disk reads memory directly, bypassing the cache, so it would get stale data. The fix: **write the dirty blocks back to memory before the DMA transfer** (and invalidate cached copies of memory that DMA overwrites).',
         ] },
         { type: 'think', text: [
           'Write-through sends each write to the next level, increasing traffic. Write-back can combine repeated stores to one block. The dirty bit tells the cache whether it needs to write that block back. For a single-level exam model, the next level is main memory.',
@@ -196,9 +195,10 @@ export default {
           'Direct-mapped: position is fixed → replacement is trivial.',
           'Associative / set-associative: flexibility → a real choice. Locality suggests replacing the block that has gone **longest without being referenced** — the **Least Recently Used (LRU)** block. LRU is used extensively but performs poorly in some cases; adding a little randomness can improve it.',
           'FIFO evicts the block loaded earliest. A hit changes LRU order but leaves FIFO order unchanged. Which policy gets more hits depends on the access sequence.',
+          '**MRU** evicts the most recently used block — useful when the newest block is the one least likely to be needed again soon.',
         ] },
         { type: 'note', title: 'From the class notes', text: [
-          'The notes compare **LRU, MRU** and a **fetch-time-based** rule on one worked block diagram — a row of resident blocks annotated with their fetch times and their last-access times. Conclusion written in the notes: fetch-time-based replacement is **not as efficient as the others**, while LRU gives better efficiency — **but not always**; “it depends on the requirements”. MRU evicts the most recently used block. It can help on repeated scans where older entries will be needed before the newest one. Use the reference trace to compare policies.',
+          'The notes compare **LRU, MRU** and a **fetch-time-based** rule on one worked block diagram — a row of resident blocks annotated with their fetch times and their last-access times. Conclusion written in the notes: fetch-time-based replacement is **not as efficient as the others**, while LRU gives better efficiency — **but not always**; “it depends on the requirements”.',
         ] },
         { type: 'think', text: [
           'Simulating LRU by hand: write the reference string, and after each access keep the list of resident blocks ordered by last use. On a hit, move the referenced block to the tail. On a miss, fill an invalid way first or evict the head if the set is full, then insert at the tail. Count hits at the end — the question almost always wants the hit count per algorithm compared.',
@@ -244,23 +244,21 @@ export default {
       heading: 'Virtual memory',
       blocks: [
         { type: 'list', items: [
-          'In most modern systems, physical main memory is **smaller than the address space** the processor can issue (32-bit byte addresses span at most 4 GiB; installed RAM is a separate quantity).',
-          'With demand paging, the virtual address space is divided into fixed-size **pages** and RAM into equal-size **frames**. Code and data need physical frames when accessed. A valid page may be backed by an executable file, swap or zero-filled memory before first use.',
-          'The OS manages mappings and can move eligible pages between RAM and backing storage as needed. A file-backed page can be reloaded from its file, and some newly allocated pages start filled with zeros.',
-          'A **virtual address space** can exceed installed RAM. Only resident virtual pages map to RAM frames. Parts of the address space can be unmapped or protected.',
-          'The binary addresses the processor issues are **virtual (logical) addresses**, translated into **physical addresses** by a combination of hardware and software. With a valid resident mapping, the physical address goes to the cache or memory system. A valid nonresident reference can trigger a page fault so the OS can supply the page and retry.',
+          'In most modern systems, physical main memory is **smaller than the address space** the processor can issue (a 32-bit address can name 4 GB, but far less RAM may be installed).',
+          'Programs therefore work in a **virtual address space**. It is divided into fixed-size **pages**; physical memory is divided into **frames** of the same size. Only the pages currently in use need to be in main memory; the rest stay on the disk.',
+          'The binary addresses the processor issues are **virtual (logical) addresses**, translated into **physical addresses** by a combination of hardware (the MMU) and software (the OS).',
+          'If the addressed page is in main memory, the physical address goes to the cache/memory as usual. If it is not, a **page fault** occurs: the OS brings the page in from disk (replacing another page if memory is full) and the instruction is retried.',
         ] },
-        { type: 'diagram', id: 'virtualMemory', caption: 'The MMU translates virtual to physical addresses. When a valid page is not resident, a page fault lets the OS bring it in before retrying the instruction.' },
+        { type: 'diagram', id: 'virtualMemory', caption: 'The MMU translates virtual to physical addresses. When the page is not in memory, a page fault lets the OS bring it in before retrying the instruction.' },
         { type: 'note', title: 'From the class notes', text: [
-          'Worked frame: a 20-bit address → 2^20 = 1 MB address space, but only 512 KB of real memory (plus the hard disk). The address space can name 1 MiB, while 512 KiB of RAM holds the currently resident pages. Unmapped and protected pages still cause faults. The exam version of this (Fall/Spring 2023 Q3a): “64-bit processor, 2 GB memory, 5 GB game — any issue? which technique? draw the organization.”',
+          'Worked frame: a 20-bit address → 2^20 = 1 MB address space, but only 512 KB of real memory (plus the hard disk). The exam version of this (Fall/Spring 2023 Q3a): “64-bit processor, 2 GB memory, 5 GB game — any issue? which technique? draw the organization.”',
         ] },
         { type: 'think', text: [
-          'Answer shape for the “big game, small memory” question: (1) program or install size alone does not determine whether it will run; a process may use more virtual memory than installed RAM if the OS can back its pages; (2) the technique is virtual memory with paging/segmentation managed by the OS; (3) the drawing is processor → virtual address → MMU → cache → physical memory (2 GB) ↔ backing storage; (4) one line on why it works — only referenced pages need to be resident. A working set that persistently exceeds RAM may cause frequent faults and thrashing.',
+          'Answer shape for the “big game, small memory” question: (1) yes, the 5 GB program cannot fit in 2 GB of RAM all at once; (2) the technique is **virtual memory** (paging) managed by the MMU + OS; (3) the drawing is processor → virtual address → MMU → physical address → cache/main memory (2 GB) ↔ disk; (4) one line on why it works — **locality**: only the pages in use need to be resident. If the active pages do not fit, the system pages constantly (thrashing).',
         ] },
-        { type: 'steps', items: ['Split a virtual address into page number and page offset. For 4 KiB pages, the offset is 12 bits.', 'The MMU checks a cached translation (TLB). On a TLB miss, consult the page table; a resident mapping can still exist.', 'For a valid resident page, substitute its physical frame number and preserve the offset. For a legal but absent page, the OS handles the page fault, allocates a frame or evicts a victim, installs the mapping, and retries. A protection or invalid-address fault may instead terminate the access.'] },
-        { type: 'note', text: 'A physically tagged cache compares physical identities even if its set index is taken from unchanged page-offset bits. Page translation, cache lookup and fetching a nonresident page solve different problems.' },
-        { type: 'practice', prompt: 'With 4 KiB pages, virtual address 0x3456 belongs to virtual page 3, mapped to frame 0xA. What is the physical address? If the TLB misses but the page is resident, must the OS read the page from disk?', blocks: [
-          { type: 'answer', text: 'Offset is 0x456; physical address is 0xA456. A TLB miss alone requires finding the translation. A resident page already has a frame.' },
+        { type: 'steps', items: ['Split the virtual address into **page number** and **offset**. For 4 KB pages, the offset is 12 bits.', 'The MMU looks up the page number (first in the TLB, its cache of recent translations, then in the page table).', 'Page in memory: replace the page number with its frame number and keep the offset. Page not in memory: page fault — the OS loads the page, updates the page table, and the access is retried.'] },
+        { type: 'practice', prompt: 'With 4 KB pages, virtual address 0x3456 belongs to virtual page 3, mapped to frame 0xA. What is the physical address? If the TLB misses but the page is in memory, must the OS read the page from disk?', blocks: [
+          { type: 'answer', text: 'Offset is 0x456; physical address is 0xA456. No: a TLB miss only means the translation is looked up in the page table. The page is already in a frame, so there is no page fault.' },
         ] },
       ],
     },

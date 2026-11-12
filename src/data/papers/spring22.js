@@ -32,10 +32,14 @@ export default {
         'The displayed 8-bit strings are payloads. Eight payload bits need four Hamming check bits. State the assumption that the parity bits computed for the original payload were received unchanged.',
       ],
       solution: [
+        { type: 'note', title: 'Which reading? Test the transmitted word first', text: [
+          'As an 8-bit SECDED codeword, 10100110 fails the checks (p1 over positions 1, 3, 5, 7 sums to 3, which is odd). So it is not a codeword: it is the 8-bit **payload**, and the four parity bits must be added first.',
+          'Contrast Fall 2022 Q4(c), where the transmitted 00110011 already passes every check and is used directly as the codeword.',
+        ] },
         { type: 'p', text: 'Use even parity and number codeword positions 1…12 from the left. Put the payload in positions 3, 5, 6, 7, 9, 10, 11, 12 and reserve 1, 2, 4, 8 for parity. Original payload 10100110 gives parity bits P1=0, P2=0, P4=1, P8=0 and codeword 001101000110.' },
         { type: 'p', text: 'With the received payload 10110110 and those parity bits, the received codeword is 001101100110. Checks 1, 2 and 4 fail; check 8 passes. The syndrome 0111₂ = 7 points to **codeword position 7**, which holds the fourth payload bit.' },
         { type: 'p', text: 'For SECDED, append one overall parity bit to the entire Hamming codeword. Nonzero syndrome with odd overall parity indicates a single error in the Hamming portion. Zero syndrome with odd parity points to the overall parity bit. Nonzero syndrome with even overall parity signals a double error: report it without flipping a bit.' },
-        { type: 'answer', text: 'Flip codeword position 7 (payload bit 4) to recover 10100110. The syndrome needs the parity bits; here they were reconstructed from the given original payload.' },
+        { type: 'answer', text: 'Syndrome 0111 = 7 → the error is in codeword position 7 (payload bit 4). Flip it: payload 10110110 → **10100110**. Double errors: with an extra overall parity bit, nonzero syndrome + even overall parity = double error, detected but not corrected.' },
       ],
     },
     {
@@ -109,6 +113,7 @@ export default {
     {
       id: 'Q4c', topic: 'misc', marks: '[4]', flagged: true,
       q: 'Compare the performance of write operations achieved by a RAID level 5 organization with that achieved by a RAID level 1 organization.',
+      think: 'Compare the two on the case that matters for writes: a small single-block update. RAID 1 writes two copies; RAID 5 must also update parity (read old data + old parity, write both). Then contrast full-stripe writes, where RAID 5 needs no reads.',
       solution: [
         { type: 'table', head: ['', 'RAID 1 (mirroring)', 'RAID 5 (distributed parity)'], rows: [
           ['Layout', 'every disk has a full mirror copy', 'parity blocks striped across all disks'],
@@ -124,15 +129,17 @@ export default {
     {
       id: 'Q5a', topic: 'perf', marks: '[4]',
       q: 'Assuming that N instructions are executed, and all N instructions are load (lw) instructions, each stage has fixed clock length (3 ns), evaluate the speedup of a pipelined implementation without any hazard when compared to a single-cycle implementation.',
+      think: 'With equal 3 ns stages, a single-cycle lw needs all five stages in one long cycle (15 ns). The pipeline pays 5 cycles for the first load, then one 3 ns cycle per further load. Write both times, divide, and take N → ∞.',
       solution: [
-        { type: 'pre', text: 'single-cycle:  T_single = N × 5 × 3 ns = 15N ns\npipelined:     T_pipe  = 5 × 3 + (N − 1) × 3 = (3N + 12) ns\n\nspeedup = 15N / (3N + 12) = 5N / (N + 2)·2 → simplify: = 5N/(N+4)' },
-        { type: 'p', text: 'Careful arithmetic: T_pipe = 15 + 3(N−1) = 3N + 12 → speedup = 15N/(3N+12) = 5N/(N+4). For N → ∞ the speedup → **5** (the number of stages); e.g. N = 100 → 500/104 ≈ 4.8.' },
+        { type: 'pre', text: 'single-cycle:  T_single = N × 5 × 3 ns = 15N ns\npipelined:     T_pipe  = 5 × 3 + (N − 1) × 3 = (3N + 12) ns\n\nspeedup = 15N / (3N + 12) = 5N / (N + 4)   (divide top and bottom by 3)' },
+        { type: 'p', text: 'For N → ∞ the speedup → **5** (the number of stages); e.g. N = 100 → 500/104 ≈ 4.8.' },
         { type: 'answer', text: ['Speedup = 5N/(N + 4), approaching 5× for large N; slightly less for small N because of the pipeline fill time.'] },
       ],
     },
     {
       id: 'Q5b', topic: 'mips', marks: '[6]', flagged: true,
       q: 'You are asked to design a new instruction in MIPS that performs arithmetic addition between the contents of three registers and stores the result back to the destination register. For example, add3 $t0, $t1, $t2, $t3 fetches $t1, $t2, $t3, adds them and writes the result to $t0. Each such instruction can potentially eliminate the need for two add instructions. Examine Figure 1 (single-cycle datapath with control signals) and identify the required changes, especially in the register file and the ALU.',
+      think: 'Walk the single-cycle datapath stage by stage and ask which part cannot handle a third source: the register file (two read ports), the R-type format (two source fields) and the 2-input ALU. Everything else stays.',
       solution: [
         { type: 'steps', items: [
           '**Register file:** needs a **third read port** — $t1, $t2, $t3 must be read simultaneously (currently two: rs and rt). The third source field comes from a widened instruction format.',
@@ -148,6 +155,7 @@ export default {
     {
       id: 'Q5c', topic: 'mips', marks: '[4]', flagged: true,
       q: 'Examine the datapath and control signals in Figure 1, where the Main Control Unit creates a 2-bit ALUOp signal sent to the ALU Control Unit, which generates 3-bit ALU control signals. You are asked to build a new datapath that does not include the ALU Control Unit — the 3-bit ALU signals will be generated directly by the Main Control Unit. Write the contents of your analysis report evaluating the advantages and disadvantages of both models.',
+      think: 'Write down what each design has to decode: the two-level scheme splits it (main CU → ALUOp, ALU CU → funct), the single-level one puts it all in the main CU. Compare size, speed and modularity, then pick one.',
       solution: [
         { type: 'table', head: ['', 'Two-level (current: Main CU → ALUOp → ALU CU)', 'Single-level (Main CU drives ALU control directly)'], rows: [
           ['Signals', 'Main CU outputs 2 bits; ALU CU expands them + funct field to 3 bits', 'Main CU must output the full 3-bit ALU control per instruction'],
@@ -163,6 +171,7 @@ export default {
     {
       id: 'Q6a', topic: 'dma', marks: '[4]',
       q: 'The processor initiates the communication with the DMA. Explain what necessary information is required from the processor to start transferring data from memory to an I/O device.',
+      think: 'The processor programs three things into the DMA controller’s registers: where the block starts, how many words it holds, and which direction to move them. Name all three, then say what the controller does on its own afterwards.',
       solution: [
         { type: 'steps', items: [
           '**Starting address** of the memory block to transfer.',
@@ -176,6 +185,7 @@ export default {
     {
       id: 'Q6b', topic: 'fp', marks: '[6]', flagged: true,
       q: 'Given the bit pattern 10101101 11110010 00000000 00000000, determine their representation assuming it is (a) a two’s complement integer, (b) an unsigned integer, (c) a single precision floating-point number.',
+      think: 'One bit pattern, three readings. Two’s complement: MSB = 1, so invert + 1 for the magnitude. Unsigned: plain hex value (check it against 2^32 − magnitude). IEEE: split 1-8-23, E − 127, hidden 1.',
       solution: [
         { type: 'steps', items: [
           '**Two’s complement:** MSB = 1 → negative. Magnitude = invert + 1 = `01010010 00001110 00000000 00000000` = 0x520E0000 = 1,376,649,216 → value = **−1,376,649,216**.',
@@ -188,6 +198,7 @@ export default {
     {
       id: 'Q6c', topic: 'ram-chip', marks: '[4]',
       q: 'The size of a DRAM memory is 64K×1. Identify the total number of bits for the row number, the total number of bits for the column numbers, and the highest address that the refresh counter generates.',
+      think: '64K × 1 = 2^16 cells. A DRAM array is square: 2^8 rows × 2^8 columns, so 8 row bits and 8 column bits. Refresh visits every row, so the counter goes 0 … 255.',
       solution: [
         { type: 'steps', items: [
           '64K cells = 2^16, arranged as a square array: 256 × 256 (2^8 × 2^8).',
@@ -200,6 +211,7 @@ export default {
     {
       id: 'Q6d', topic: 'ram-chip', marks: '[4]',
       q: 'Identify the reasons why DRAM is an analog device and SRAM is a digital device.',
+      think: 'Compare the cells: SRAM is a flip-flop with two stable logic states (digital); DRAM is charge on a capacitor that leaks and must be sensed and refreshed (analog).',
       solution: [
         { type: 'list', items: [
           '**SRAM cell = a flip-flop**: two cross-coupled inverters holding one of **two stable voltage states** — a genuinely digital storage element; readout is a logic level.',
@@ -228,6 +240,7 @@ export default {
     {
       id: 'Q6f', topic: 'misc', marks: '[4]', flagged: true,
       q: 'The rate of improvement in processor speed (55% per year) is much higher than the improvement in memory speed (7% per year). Express your opinion in the context of reducing the improvement gap between processor and memory speed.',
+      think: 'Quantify the gap first: (1.55/1.07)^n ≈ 1.45^n, so it compounds. Then give the architectural answers: memory hierarchy and caches, faster DRAM interfaces, prefetching and latency hiding.',
       solution: [
         { type: 'steps', items: [
           'Quantify the gap: after n years the processor/memory speed ratio grows by (1.55 / 1.07)^n ≈ **1.45^n** — the gap **compounds**, so memory becomes the bottleneck at an accelerating rate.',

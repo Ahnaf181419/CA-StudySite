@@ -53,13 +53,13 @@ export default {
       q: 'Given the C code: while (A[i] == k) { i = i + 1; } — translate to MIPS code. Assume i is in $s3, k in $s5, and the base address of the integer array A is in $s6.',
       think: 'Loop: compute &A[i] = $s6 + 4i (shift + add), load, compare with $s5, exit when different, else increment i and jump back.',
       solution: [
-        { type: 'pre', text: 'Loop: sll  $t1, $s3, 2      # byte offset: 4 × i\n      addu $t1, $t1, $s6   # address of A[i]\n      lw   $t0, 0($t1)     # load A[i]\n      bne  $t0, $s5, Exit  # exit if A[i] differs from k\n      nop                  # branch delay slot\n      addi $s3, $s3, 1     # increment on the fall-through path\n      j    Loop\n      nop                  # jump delay slot\nExit: …' },
+        { type: 'pre', text: 'Loop: sll  $t1, $s3, 2      # $t1 = 4 × i (byte offset)\n      add  $t1, $t1, $s6   # $t1 = address of A[i]\n      lw   $t0, 0($t1)     # $t0 = A[i]\n      bne  $t0, $s5, Exit  # leave the loop if A[i] != k\n      addi $s3, $s3, 1     # i = i + 1\n      j    Loop            # test again\nExit: …' },
         { type: 'list', items: [
           'Integers are 4 bytes, so the index scales by 4 with `sll … 2`.',
           'The C `while` is tested **before** the body: branch out on the failure condition (`bne`), fall through into the body.',
-          'Of the input registers, only $s3 (i) changes. On a classic MIPS implementation, the branch delay slot executes on either path, so the increment must follow the NOP. If the course simulator disables delay slots, omit both NOPs.',
+          'This is the standard P&H translation, which ignores branch delay slots.',
         ] },
-        { type: 'answer', text: 'Compute &A[i], load A[i], and branch out on inequality. Increment i only on equality, then jump back. Include the two NOPs when delay slots are enabled.' },
+        { type: 'answer', text: 'Six instructions: compute &A[i] (sll, add), load A[i], `bne` to Exit when A[i] ≠ k, otherwise increment i and `j Loop`.' },
       ],
     },
     {
@@ -251,13 +251,17 @@ export default {
           'Flip bit 4 of 00100011 → **00110011** — the transmitted word ✓.',
         ] },
         { type: 'p', text: '**Double-error detection:** with the extra overall parity bit: if the syndrome is **non-zero but the overall parity is even**, two bits are wrong — detected but **not correctable** (the syndrome of two errors XORs into a third position that cannot be trusted). Syndrome zero + odd overall parity means only the parity bit itself flipped.' },
-        { type: 'note', text: 'If both 8-bit strings are payloads, use four Hamming checks in a 12-bit codeword. Original payload 00110011 encodes as 010101100011. With the original parity and the altered payload, the word is 010101000011. Syndrome 0111 points to codeword bit 7, the fourth payload bit. The corrected payload is the same under both readings.' },
+        { type: 'note', title: 'Which reading? Test the transmitted word first', text: [
+          'Check whether the transmitted string already satisfies the Hamming checks. Here 00110011 does: p1, p2 and p4 are even and the overall parity is even. So it is a valid SECDED(8,4) **codeword**, and the received string can be checked directly, as above.',
+          'In Spring 2022 Q3(a) the transmitted 10100110 fails the checks, so it must be the **payload**: you add four parity bits (12-bit codeword) first. Same algorithm, different starting point.',
+        ] },
         { type: 'answer', text: ['In the SECDED(8,4) reading, syndrome 100 → error at bit 4 → corrected word 00110011. Double errors: syndrome ≠ 0 with even overall parity → detected, uncorrectable.'] },
       ],
     },
     {
       id: 'Q5a', topic: 'prog-io', marks: '[4]',
       q: 'Contrast a memory map system with an isolated I/O system.',
+      think: 'Same table as the Chapter 4 lecture: compare the two on address space, instructions, software, address lines and why you would choose each. “Contrast” means every row needs both columns.',
       solution: [
         { type: 'table', head: ['', 'Memory-mapped I/O', 'Isolated (I/O-mapped) I/O'], rows: [
           ['Address space', 'I/O registers share the **memory** address space', 'separate I/O address space'],
@@ -297,6 +301,7 @@ export default {
     {
       id: 'Q5c', topic: 'misc', marks: '[4]', flagged: true,
       q: 'Explain the necessity of differential signaling in the Quick Path Interconnection (QPI) bus system.',
+      think: 'Start from what differential signaling is (a wire pair, the receiver reads the difference), then link each property to what QPI needs: noise rejection, small fast swings and low EMI on high-speed point-to-point links.',
       solution: [
         { type: 'list', items: [
           '**Differential signaling** transmits each bit as a **pair** of wires (D+ and D−) carrying opposite voltages; the receiver reads the **difference**.',
@@ -310,6 +315,7 @@ export default {
     {
       id: 'Q6a', topic: 'fp', marks: '[4]', flagged: true,
       q: 'Explain how a denormalized number is represented. Provide the highest positive, lowest positive, highest negative, and lowest negative single precision denormalized numbers.',
+      think: 'Exponent field 0 means no hidden 1 and a fixed exponent of −126. The four extremes come from F = all 1s (largest magnitude) and F = 0…01 (smallest), each with S = 0 and S = 1.',
       solution: [
         { type: 'p', text: 'When the exponent field is all zeros and the fraction is non-zero, the IEEE single-precision number is **denormalized**: there is **no hidden 1**, and the exponent is fixed at the minimum, −126:' },
         { type: 'pre', text: 'value = (−1)^S × 0.F × 2^(−126)' },
@@ -343,6 +349,7 @@ export default {
     {
       id: 'Q6c', topic: 'bus-arb', marks: '[4]',
       q: 'Explain the necessity of bus arbitration in computer organization. Distinguish between centralized and distributed arbitration processes with proper examples.',
+      think: 'Necessity first (many possible masters, one bus), then a two-column table. Give one worked example per side: the BR/BG/BBSY grant chain, and the 4-bit OR-ed ID elimination.',
       solution: [
         { type: 'p', text: '**Necessity:** more than one unit can initiate bus transfers — the processor and every DMA controller — but the bus (address/data/control lines) can serve only **one master at a time**; two drivers would corrupt every transfer. Arbitration selects the next master and hands over mastership.' },
         { type: 'table', head: ['', 'Centralized', 'Distributed'], rows: [
@@ -359,6 +366,7 @@ export default {
     {
       id: 'Q7a', topic: 'misc', marks: '[4]', flagged: true,
       q: 'The most recent advancements in the ROM and RAM families are Flash memory and Resistive Random-Access Memory (RRAM). Assume you need to update the BIOS memory on your machine. Compare the efficiency of both memories as BIOS memory.',
+      think: 'Define efficiency for a BIOS update: how fast, how fine-grained and how low-energy the rewrite is. Compare the two cells on exactly those points, then give one verdict.',
       solution: [
         { type: 'table', head: ['', 'Flash (NOR flash typically)', 'RRAM (ReRAM)'], rows: [
           ['Cell', 'floating-gate transistor', 'resistive element that switches between high/low resistance'],
@@ -367,8 +375,8 @@ export default {
           ['Endurance', '~10^5–10^6 program/erase cycles', 'higher endurance demonstrated in research devices'],
           ['Maturity', 'extremely mature, cheap, ubiquitous as firmware storage', 'emerging technology — cost and consistency still catching up'],
         ] },
-        { type: 'p', text: 'For BIOS specifically: updates are rare and small — Flash’s coarse erase granularity and write speed are perfectly adequate, and its maturity, density and cost make it the practical choice today. RRAM would give faster, finer-grained, lower-power updates — the better **efficiency** if available at BIOS scale — but the practical winner remains flash until RRAM matures.' },
-        { type: 'answer', text: 'Flash: mature, cheap, block-granular writes — today’s BIOS standard. RRAM: faster bit-level writes and lower power, but emerging; choose flash for a real BIOS update, RRAM on efficiency grounds if both are available.' },
+        { type: 'p', text: 'For a BIOS update, efficiency means how fast and how cheaply (in energy and wear) the new image is written. Flash must erase whole blocks before rewriting them, which is slow and wears the cells. RRAM rewrites individual bits directly, quickly and at low energy. Flash’s advantage is maturity and cost, not efficiency.' },
+        { type: 'answer', text: 'RRAM is the more efficient BIOS memory: bit-wise, fast, low-energy writes with no block erase, and higher endurance. Flash is slower to update (block erase, limited erase cycles); it is used today because it is mature and cheap, not because it is more efficient.' },
       ],
     },
     {
@@ -390,6 +398,7 @@ export default {
     {
       id: 'Q7c', topic: 'misc', marks: '[4]', flagged: true,
       q: 'Building a new computer architecture requires focusing on its Microarchitecture and Instruction Set Architecture (ISA). Explain their interrelationships and how they influence computer architecture design.',
+      think: 'ISA = *what* the machine does (visible to software); microarchitecture = *how* the hardware does it. Then the two-way link: one ISA, many implementations; ISA choices constrain the implementation.',
       solution: [
         { type: 'list', items: [
           '**ISA** = the programmer-visible contract: the instruction set, registers, data types, addressing modes, interrupts behaviour — *what* the machine does.',

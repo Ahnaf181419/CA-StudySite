@@ -32,12 +32,12 @@ export default {
       think: '31 = 11111, 13 = 01101 → 10-bit multiplicand register `0000011111`, multiplier `01101`. The multiplier hits 0 after 4 loops (13 = 1101 has bits at 0,2,3).',
       solution: [
         { type: 'diagram', id: 'seqMultiplier', caption: 'Sequential multiplication hardware.' },
-        { type: 'table', head: ['Loop', 'Multiplier LSB', 'Action', 'Multiplicand (10-bit)', 'Multiplier after ≫1', 'Product (10-bit)'], rows: [
-          ['1', '1', 'Product += Multiplicand', '0000011111 (31)', '0110 (6)', '0000011111 (31)'],
-          ['2', '0', 'no operation', '0000111110 (62)', '0011 (3)', '0000011111 (31)'],
-          ['3', '1', 'Product += Multiplicand', '0001111100 (124)', '0001 (1)', '0010011011 (155)'],
-          ['4', '1', 'Product += Multiplicand', '0011111000 (248)', '0000 (0) → stop', '0110010011 (403)'],
-        ], caption: '31 × 13 = 403 ✓ (loop 2 skips the add because the multiplier bit is 0 — but the shifts still happen).' },
+        { type: 'table', head: ['Loop', 'Multiplier LSB', 'Action', 'Multiplicand tested (10-bit)', 'Multiplier after ≫1 (5-bit)', 'Product (10-bit)'], rows: [
+          ['1', '1', 'Product += Multiplicand', '0000011111 (31)', '00110 (6)', '0000011111 (31)'],
+          ['2', '0', 'no operation', '0000111110 (62)', '00011 (3)', '0000011111 (31)'],
+          ['3', '1', 'Product += Multiplicand', '0001111100 (124)', '00001 (1)', '0010011011 (155)'],
+          ['4', '1', 'Product += Multiplicand', '0011111000 (248)', '00000 (0) → stop', '0110010011 (403)'],
+        ], caption: '31 × 13 = 403 ✓. After each test the multiplicand shifts left (next row) and the multiplier shifts right. Loop 2 skips the add because the multiplier bit is 0, but the shifts still happen.' },
         { type: 'answer', text: ['After 4 loops the multiplier register is 0 → stop; Product = 0110010011₂ = 403₁₀ ✓'] },
       ],
     },
@@ -154,6 +154,7 @@ export default {
     {
       id: 'Q2b', topic: 'addressing', marks: '[5]',
       q: 'Determine the addressing modes of each operand of the following instructions:\ni) MOV A, R3  ii) ADD R3, 20(R1, R2)  iii) CLEAR X  iv) ADD #256, R2  v) SUB (R1)+, R2',
+      think: 'Read each operand against the mode list: plain register, plain label (direct), # (immediate), (R)+ (auto-increment) and X(Ri,Rj) (index with displacement). State the effective address where memory is involved.',
       solution: [
         { type: 'table', head: ['Instruction', 'Operand', 'Mode', 'Effective address / value'], rows: [
           ['i) MOV A, R3', 'A (source)', 'direct (absolute)', 'memory location A'],
@@ -182,23 +183,24 @@ export default {
     {
       id: 'Q3a', topic: 'vmem', marks: '[6]',
       q: 'Suppose you are constructing a computer. You have a 32-bit processor and a 1 GB main memory. Now consider that you have to run a game of size 3 GB on this computer. Will the processor face any issues while running the game? What technique would you use to solve this potential issue? Show what the memory organization might look like in such a scenario.',
-      think: 'Distinguish installed game size, virtual address space and active working set. Under the exercise’s assumption that 3 GB is the program’s virtual footprint, it exceeds installed RAM.',
+      think: 'Same four moves as Fall 2023 Q3(a): yes, there is an issue (3 GB > 1 GB of RAM); the fix is virtual memory; draw processor → MMU → main memory ↔ disk; explain why it works with locality. Note that a 32-bit address can still name the 3 GB (2^32 = 4 GB).',
       solution: [
-        { type: 'p', text: 'Assume the game needs 3 GB of virtual mappings. It cannot all be resident in 1 GB of RAM. A 32-bit byte address spans at most 4 GiB, but the operating system may leave less than that for one process.' },
-        { type: 'p', text: '**Technique: demand-paged virtual memory.** Resident virtual pages map to frames. On a valid nonresident access, the OS loads or initializes the page, updates the page table and retries the instruction. If needed, it first evicts an existing page.' },
-        { type: 'diagram', id: 'virtualMemory', caption: 'Organization: processor → 32-bit virtual addresses → MMU → physical address → 1 GB main memory; access to a valid but absent page faults so the OS can bring that page into RAM.' },
+        { type: 'p', text: '**Issue:** yes. A 32-bit processor can address 2^32 bytes = 4 GB, so the 3 GB game fits in its address space, but only 1 GB of physical main memory exists. The whole game cannot be loaded at once.' },
+        { type: 'p', text: '**Technique: virtual memory (paging).** The game’s address space is split into pages kept on the disk. Only the pages currently in use are brought into frames of main memory. When the game touches a page that is not in memory, a **page fault** makes the OS load it from disk (replacing an old page if memory is full), and the instruction is retried.' },
+        { type: 'diagram', id: 'virtualMemory', caption: 'Organization: processor → 32-bit virtual addresses → MMU → physical address → 1 GB main memory; pages not in memory are brought in from the disk on a page fault.' },
         { type: 'list', items: [
           'Virtual (logical) addresses are translated to physical addresses by hardware (MMU) + software (OS).',
-          'If the referenced item is already resident it is accessed immediately; otherwise it is brought in before use, replacing another block.',
-          'Locality can keep the active set small. If that set exceeds available frames, frequent paging can make execution slow.',
+          'If the referenced page is in memory it is accessed immediately; otherwise it is brought in from disk first, replacing another page.',
+          'This works because of **locality of reference**: the game uses a small set of pages at a time.',
         ] },
-        { type: 'answer', text: ['Issue: 3 GB game > 1 GB physical memory. Solution: virtual memory — demand paging can keep only the needed pages resident, assuming enough usable virtual space and backing storage.'] },
+        { type: 'answer', text: ['Issue: the 3 GB game exceeds the 1 GB main memory (though it fits the 4 GB address space). Solution: virtual memory — the MMU translates addresses and only the pages in use are kept in RAM, the rest on disk.'] },
       ],
     },
     {
       id: 'Q3b', topic: 'single-bus', marks: '[6]', inNotes: true,
       q: 'Consider the CPU Architecture given in Fig 3(b)-1 (single-bus CPU organization). Generate the control sequence required for the execution of the following complete instruction in the context of this architecture: MUL (R1), (R2)',
       pattern: 'Twin of Fall 2023 Q3(b) with MUL instead of SUB — identical skeleton.',
+      think: 'Same skeleton as Fall 2023 Q3(b): the 3-step fetch, read the destination operand and park it in Y, read the source, Y × MDR into Z, then re-address [R2] and write Z back through MDR. One bus output per step.',
       solution: [
         { type: 'diagram', id: 'singleBus', caption: 'Single-bus datapath of the given figure.' },
         { type: 'p', text: 'Semantics: `M[[R2]] ← M[[R2]] × M[[R1]]` — multiply the two memory operands and store the product at the second operand’s address (Hamacher source, destination convention).' },
@@ -236,9 +238,9 @@ export default {
         { type: 'timing', start: 14, columns: 9, rows: [
           { label: 'I4', cells: ['F4', 'D4', 'E4', 'W4', '', '', '', '', ''] },
           { label: 'I5', cells: ['', 'F5', { t: 'F5' }, { t: 'F5' }, 'D5', 'E5', 'W5', '', ''] },
-          { label: 'I6', cells: ['', '', { t: 'idle', dim: true }, { t: 'idle', dim: true }, 'F6', 'D6', 'E6', 'W6', ''] },
-          { label: 'I7', cells: ['', '', '', { t: 'idle', dim: true }, { t: 'idle', dim: true }, 'F7', 'D7', 'E7', 'W7'] },
-        ], caption: 'Cycles 14–22: F5 occupies 15–17; every later stage of I5 shifts right by 2, and the fetch unit cannot start I6 until I5 is available, so I6 begins in cycle 18 (idle in 16–17) and I7 in cycle 19. I7 finishes W in cycle 22.' },
+          { label: 'I6', cells: ['', '', '', '', 'F6', 'D6', 'E6', 'W6', ''] },
+          { label: 'I7', cells: ['', '', '', '', '', 'F7', 'D7', 'E7', 'W7'] },
+        ], caption: 'Cycles 14–22: F5 occupies 15–17; every later stage of I5 shifts right by 2, and the fetch unit cannot start I6 until I5 is available, so I6 is fetched in cycle 18 instead of 16, and I7 in cycle 19 instead of 17. I7 finishes W in cycle 22.' },
         { type: 'p', text: 'The idle periods are **stalls/bubbles**: once created they move downstream (D idles while F is stuck, then E, then W) until they drain out of the last stage. Total: 9 cycles versus the ideal 7. The 2 extra cycles come from the extra fetch time.' },
         { type: 'answer', text: ['Affected execution needs cycles 14–22 (vs 14–20 ideal); F5 = cycles 15–17, I6 starts in cycle 18 and I7 in cycle 19; the bubbles propagate toward the W stage as shown.'] },
       ],
@@ -247,6 +249,7 @@ export default {
       id: 'Q3d', topic: 'perf', marks: '[6]',
       q: 'Suppose you have a processor that uses a 4-stage pipeline and a secondary cache memory. In this processor, the critical parameter value is 4 ns. The cache miss penalty for the primary and secondary cache are 15 and 20 clock cycles respectively. The miss ratios for instructions, data, and the secondary cache are 10%, 20% and 30%. Suppose that 22% of instructions access memory. Compare the performance of this processor with a processor of the same configuration that does not implement pipelining, and state which performs better based on throughput.',
       pattern: 'The two-level formula again (Fall 2023 Q3(d) is the sibling) — but the comparison target is sequential execution this time.',
+      think: 'Two-level miss formula: Δ = [(1−hi) + d(1−hd)] × [hs·Ms + (1−hs)·Mp]. The pipeline has TI = 1 + Δ; the non-pipelined machine needs S = 4 + Δ (4 stages run one after another). Throughput = R / cycles per instruction.',
       solution: [
         { type: 'p', text: 'Clock: critical parameter 4 ns → R = 1/4 ns = 250 MHz. Read the numbers: hi = 0.90, hd = 0.80, hs = 0.70, Ms = 15, Mp = 20, d = 22%.' },
         { type: 'h', text: 'Pipelined processor (with the secondary cache)' },
@@ -259,6 +262,7 @@ export default {
     {
       id: 'Q3e', topic: 'perf', marks: '[6]',
       q: 'Suppose you have a computer with no cache that has a fast processor that takes 11 clock cycles per memory access. You have a second computer that has 2 cache memories with access times of 1 and 5 clock cycles, and a memory access time of 16 clock cycles. The miss rates in the 1st cache for instructions and data are 5% and 9%. The hit rates in the 2nd cache for instructions and data are 65% and 78%. Assume that 25% of the instructions require memory access. Compare the performances of the 2 computers based on time and state which one performs better.',
+      think: 'Computer 1 has no cache: every one of the 125 references (100 fetches + 25 data) costs 11 cycles. Computer 2: average time per access with the two-level weighted-path formula, separately for instructions and data, then multiply by 100 and 25.',
       solution: [
         { type: 'p', text: 'Using the course’s weighted-path convention, treat 1, 5 and 16 cycles as complete L1-hit, L2-hit and memory-served times. Compute tave per access type, then use per-100-instruction bookkeeping (100 fetches + 25 data accesses):' },
         { type: 'pre', text: 'instructions:  tave,I = 0.95×1 + 0.05×(0.65×5 + 0.35×16) = 0.95 + 0.4425 = 1.3925\ndata:          tave,D = 0.91×1 + 0.09×(0.78×5 + 0.22×16) = 0.91 + 0.6678 = 1.5778\n\ncomputer 2:  100 × 1.3925 + 25 × 1.5778 ≈ 178.7 cycles / 100 instructions\ncomputer 1:  125 × 11 = 1375 cycles / 100 instructions' },
@@ -290,6 +294,7 @@ export default {
     {
       id: 'Q3g', topic: 'bus-timing', marks: '[6]',
       q: 'Consider the diagrams given in Fig 3(g)-1 and Fig 3(g)-2. Compare how the timing diagrams for a Write operation using a Synchronous and an Asynchronous Bus vary, using relevant explanations.',
+      think: 'Write: the master drives the data, not the slave. Synchronous: everything is fixed by the clock edges t0–t2. Asynchronous: Master-ready and Slave-ready form a handshake. Compare the two on timing source, sequence, duration, and strength/weakness.',
       solution: [
         { type: 'diagram', id: 'syncBusWrite', caption: 'Synchronous write in Fig. 3(g)-2: the master launches address, command and data at t0. The data window ends at t1; the address and command remain through the rest of the bus cycle, ending at t2.' },
         { type: 'diagram', id: 'asyncBusWrite', caption: 'Asynchronous write in Fig. 3(g)-1: address, command and data are driven at t0. Master-ready rises at t1; Slave-ready rises at t2. Master-ready falls at t3, the master releases its lines at t4, and Slave-ready falls at t5.' },

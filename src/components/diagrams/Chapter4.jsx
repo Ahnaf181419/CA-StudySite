@@ -314,21 +314,21 @@ export function AsyncBus({ write = false }) {
 export function ScsiRead() {
   return (
     <Svg vb="0 0 710 286">
-      <Box x={18} y={21} w={171} h={54} label="CPU / OS" sub="programs the host adapter" />
-      <Box x={18} y={112} w={171} h={58} label="Host adapter" sub="SCSI initiator" />
-      <Box x={311} y={112} w={156} h={58} label="Disk controller" sub="SCSI target" />
-      <Box x={550} y={112} w={142} h={58} label="Disk media" />
+      <Box x={18} y={21} w={171} h={54} label="Processor" sub="issues read; gets interrupt" />
+      <Box x={18} y={112} w={171} h={58} label="SCSI controller" sub="initiator" />
+      <Box x={311} y={112} w={156} h={58} label="Disk controller" sub="target" />
+      <Box x={550} y={112} w={142} h={58} label="Disk drive" sub="sectors 1 and 2" />
       <W d="M103,75 V112" />
       <W d="M189,131 H311" />
       <W d="M311,153 H189" />
-      <T x={250} y={120} anchor="middle" fs={11}>READ request</T>
-      <T x={250} y={177} anchor="middle" fs={11}>data + status</T>
+      <T x={250} y={120} anchor="middle" fs={11}>read command</T>
+      <T x={250} y={177} anchor="middle" fs={11}>data, per sector</T>
       <W d="M467,141 H550" both />
-      <Box x={18} y={213} w={171} h={49} label="RAM buffer" />
+      <Box x={18} y={213} w={171} h={49} label="Main memory" />
       <W d="M103,170 V213" />
       <T x={113} y={198} fs={11}>DMA</T>
-      <T x={240} y={229}>The target locates the requested logical blocks.</T>
-      <T x={240} y={251}>The host adapter places the returned data in RAM.</T>
+      <T x={240} y={229}>Target disconnects for each seek, then reselects.</T>
+      <T x={240} y={251}>Initiator stores data by DMA, then interrupts.</T>
     </Svg>
   )
 }

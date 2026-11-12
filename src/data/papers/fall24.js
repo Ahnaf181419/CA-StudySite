@@ -214,13 +214,17 @@ NEXT   SHIFT RIGHT R2
       ],
       solution: [
         { type: 'p', text: 'SUB R1,R3,R2 writes R2 ← R1 − R3. MUL R2,R3,R4 reads R2 and R3 and writes R4. The shared R2 gives a **read-after-write** dependency. In an unmodified pipeline, MUL decodes in cycle 3 while SUB has yet to write R2.' },
-        { type: 'timing', columns: 6, rows: [
-          { label: 'SUB', cells: ['F', 'D', 'E', 'W', '', ''] },
-          { label: 'MUL without forwarding', cells: ['', 'F', 'D', { t: 'D (retry)', box: true }, 'E', 'W'] },
-          { label: 'MUL with forwarding', cells: ['', 'F', 'D', { t: 'E (bypass R2)', box: true }, 'W', ''] },
-        ], caption: 'Without forwarding, this chart assumes a register write is visible to Decode in the same cycle. With forwarding, the subtraction result produced at the end of cycle 3 bypasses the register file and feeds MUL’s ALU in cycle 4.' },
-        { type: 'diagram', id: 'forwarding', caption: 'Compare SUB’s destination to both MUL source register numbers. Select the buffered subtraction result for the ALU input that needs R2.' },
-        { type: 'answer', text: 'There is a RAW hazard on R2 with the course’s destination-last syntax. Forward SUB’s E-stage result to MUL’s E input to avoid a stall. If the examiner explicitly specifies destination-first syntax, these operands instead produce a WAR dependency on R2, which is safe in this in-order pipeline.' },
+        { type: 'timing', columns: 7, rows: [
+          { label: 'SUB R1,R3,R2', cells: ['F1', 'D1', 'E1', 'W1', '', '', ''] },
+          { label: 'MUL without forwarding', cells: ['', 'F2', 'D2', { t: 'hold', box: true }, { t: 'D2A', box: true }, 'E2', 'W2'] },
+          { label: 'MUL with forwarding', cells: ['', 'F2', 'D2', { t: 'E2 (R2 forwarded)', box: true }, 'W2', '', ''] },
+        ], caption: 'Same timing as the Chapter 8 slide. Without forwarding, SUB writes R2 at the end of cycle 4, so MUL holds in Decode and reads R2 again in cycle 5 (D2A): a 2-cycle stall, E2 in cycle 6. With forwarding, the subtraction result in RSLT at the end of cycle 3 feeds MUL’s ALU directly in cycle 4: no stall.' },
+        { type: 'diagram', id: 'forwarding', caption: 'Forwarding datapath. The hazard logic compares SUB’s destination (R2) with MUL’s source registers; on a match, the MUX at that ALU input selects the forwarded result instead of SRC1.' },
+        { type: 'steps', items: [
+          '**Cycle 3** — MUL is decoded and the dependency on R2 is detected. The operand not involved, R3, is read into SRC2.',
+          '**Cycle 4** — SUB’s result (new R2) is in RSLT. The forwarding path sends it to MUL’s ALU input, and E2 multiplies new R2 × R3 without waiting for W1.',
+        ] },
+        { type: 'answer', text: 'Yes: a data (RAW) hazard on R2 — SUB writes R2 and MUL reads it next. Without forwarding MUL stalls 2 cycles. In hardware, operand forwarding sends SUB’s ALU result from RSLT straight to MUL’s ALU input in cycle 4, so MUL proceeds with no stall.' },
       ],
     },
     {

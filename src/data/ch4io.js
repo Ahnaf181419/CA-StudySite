@@ -1,4 +1,19 @@
 // Chapter 4 — Input/Output Organization. From slides 9_(chapter4) and class notes pp. 41–49.
+
+// Hamacher §4.7.2: reading a block stored in two non-contiguous disk sectors over SCSI.
+// Shared by the lecture and the Fall 2023 / Spring 2024 solutions.
+export const scsiReadSteps = [
+  'The processor’s SCSI controller, the **initiator**, contends for control of the SCSI bus (arbitration).',
+  'Having won, the initiator **selects the target** (the disk controller) and hands control of the bus to it.',
+  'The target starts an output operation (initiator → target); in response the initiator sends the **command** specifying the required read.',
+  'The target sees it must first perform a **seek**, sends the initiator a message that it will **temporarily suspend the connection**, and releases the bus.',
+  'The target commands the drive to move the head to the **first sector**, reads that sector into its data buffer, then requests the bus; after **winning arbitration it reselects the initiator**, restoring the suspended connection.',
+  'The target transfers the buffer contents to the initiator (8 or 16 bits in parallel, depending on bus width), then **suspends the connection again**.',
+  'The target commands a **second seek**, reads the **second sector**, reconnects in the same way and transfers it. At the end of this transfer the logical connection between the two controllers is **terminated**.',
+  'As the initiator receives the data, it stores them in **main memory using DMA**.',
+  'The SCSI controller sends an **interrupt** to the processor to report that the requested operation is complete.',
+]
+
 export default {
   id: 'ch4io',
   chapter: 'Chapter 4 · Slides 9',
@@ -218,17 +233,19 @@ export default {
     {
       heading: 'SCSI: reading scattered disk sectors (applied question)',
       blocks: [
-        { type: 'diagram', id: 'scsiRead', caption: 'The CPU programs a host adapter. The adapter is the SCSI initiator; the disk controller is the target. The adapter can DMA returned data into RAM.' },
-        { type: 'steps', items: [
-          'The initiator arbitrates for the parallel SCSI bus and selects the target. It sends a READ command with the starting logical block address (LBA) and count.',
-          'The disk controller maps logical blocks to the media. Consecutive LBAs can be physically scattered; one READ covers the logical range. If the requested LBAs themselves are scattered, issue a READ for each contiguous run.',
-          'If the target disconnects while seeking, it later arbitrates for the SCSI bus and reselects the initiator. It may do this again if it disconnects during a longer transfer.',
-          'The target returns data and then status. The host adapter transfers data into RAM, commonly by DMA on the host bus, and signals completion to the CPU.',
+        { type: 'p', text: 'The processor wants a block of data that is stored in **two disk sectors that are not contiguous**. The processor’s SCSI controller acts as the **initiator**; the disk controller is the **target**. The bus is kept free while the slow seeks happen by **disconnecting** and later **reselecting**:' },
+        { type: 'diagram', id: 'scsiRead', caption: 'Initiator (processor’s SCSI controller) and target (disk controller) on the SCSI bus. The initiator moves the received data into main memory by DMA.' },
+        { type: 'steps', items: scsiReadSteps },
+        { type: 'h', text: 'How the target regains the bus: SCSI distributed arbitration' },
+        { type: 'list', items: [
+          'Each controller has a unique ID (0–7) tied to one data line. A controller that wants the bus waits until it is free, asserts **BSY** and **its own ID line**.',
+          'After a fixed arbitration delay, each contender reads the data lines. If **no higher-numbered ID line** is asserted, it wins; otherwise it withdraws. **Highest ID wins**, the same rule as the 4-bit scheme above.',
+          'The winning target then **reselects** the initiator by asserting SEL and placing both its own ID and the initiator’s ID on the data lines.',
         ] },
-        { type: 'practice', prompt: 'A file occupies LBA 40 and LBA 91 only. How many ordinary READ requests fetch only those blocks? What if they were LBA 40 and 41 but stored far apart on the disk?', blocks: [
-          { type: 'answer', text: 'Two requests of one block each for 40 and 91. For 40 and 41, one READ starting at 40 with count 2 covers the logical range. Physical placement is the target’s responsibility.' },
+        { type: 'practice', prompt: 'During the two-sector read, how many times must the target win arbitration? Target ID 5 and a device with ID 2 request the bus at the same moment — who wins?', blocks: [
+          { type: 'answer', text: 'Twice: once to reconnect after each seek (sector 1, then sector 2). The initiator wins once at the start. ID 5 wins because DB5 is the highest asserted line, so the device with ID 2 withdraws.' },
         ] },
-        { type: 'exam', text: 'Fall 2023 Q1(c) asks for the read sequence. Spring 2024 Q3(a) also asks how a disconnected target wins the bus again. Use the course’s MSB-first distributed-arbitration exercise to illustrate the priority decision.' },
+        { type: 'exam', text: 'Fall 2023 Q1(c) asks for the read sequence. Spring 2024 Q3(a) adds how the target wins the bus back after disconnecting. Answer with the nine steps above and the BSY/ID-line arbitration.' },
       ],
     },
   ],

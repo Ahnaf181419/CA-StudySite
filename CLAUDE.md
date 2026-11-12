@@ -37,7 +37,8 @@ lecture explanations and question-bank analysis only.
 - `src/data/ch*.js`, `arith.js` — one file per module: `{ id, chapter, title, blurb, tags, prereq,
   sections: [{ heading, blocks }] }`. Block types: `p`, `list`, `table`, `note`, `think`
   (how-to-think callout), `exam`, `pre`, `timing` (pipeline charts), `diagram`, `answer`,
-  `example`, `steps`, `h`. Text supports `**bold**`, `*em*`, `` `code` ``, `^{sup}`, `_{sub}`.
+  `example`, `steps`, `h`, `practice` (try-it checkpoint with a hidden worked answer; every
+  module needs one). A test rejects unknown types. Text supports `**bold**`, `*em*`, `` `code` ``, `^{sup}`, `_{sub}`.
 - `src/data/papers/*.js` — one file per paper: `{ questions: [{ id, topic, marks, q, pattern,
   think, solution, repeats, inNotes, flagged }] }`.
 - `src/data/topics.js` — topic registry: module link + the class-notes signal per topic.

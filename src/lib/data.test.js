@@ -76,6 +76,32 @@ test('paper question IDs can be used as unique deep links', () => {
   }
 })
 
+// Blocks.jsx renders unknown types as nothing, so a typo would silently drop content.
+const BLOCK_TYPES = new Set(['h', 'p', 'list', 'table', 'note', 'think', 'exam', 'pre', 'timing', 'diagram', 'answer', 'example', 'steps', 'practice'])
+
+test('every content block has a type the renderer knows', () => {
+  const bad = []
+  const check = (blocks, where) => {
+    for (const b of blocks || []) {
+      if (!BLOCK_TYPES.has(b.type)) bad.push(`${where}: ${b.type}`)
+      if (b.blocks) check(b.blocks, where)
+    }
+  }
+  for (const m of MODULES) for (const s of m.sections) check(s.blocks, m.id)
+  for (const p of PAPERS) for (const q of p.questions) check(q.solution, `${p.id} ${q.id}`)
+  assert.deepEqual(bad, [])
+})
+
+test('every paper question has a think box and a boxed answer', () => {
+  const answered = (blocks) => blocks.some((b) => b.type === 'answer' || (b.blocks && answered(b.blocks)))
+  for (const p of PAPERS) {
+    for (const q of p.questions) {
+      assert.ok(q.think && q.think.length > 0, `${p.id} ${q.id} missing think box`)
+      assert.ok(answered(q.solution), `${p.id} ${q.id} missing boxed answer`)
+    }
+  }
+})
+
 test('each timing chart has one cell per declared clock cycle', () => {
   const check = (blocks, where) => {
     for (const b of blocks) {

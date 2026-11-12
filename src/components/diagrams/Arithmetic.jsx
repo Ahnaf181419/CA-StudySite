@@ -18,7 +18,7 @@ export function SeqMultiplier() {
       <W d="M592,147 H609 V60 H592" dash />
       <W d="M382,167 H289 V249 H242" dash />
       <T x={382} y={215}>Shift operands every round</T>
-      <T x={382} y={234}>Repeat n rounds (or stop at zero)</T>
+      <T x={382} y={234}>Stop when the multiplier is 0</T>
     </Svg>
   )
 }

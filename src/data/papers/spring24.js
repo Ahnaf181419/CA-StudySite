@@ -1,5 +1,6 @@
 // Spring 2024 — full paper, Hamacher track.
 import { branchLessThanTrace } from '../ch7.js'
+import { scsiReadSteps } from '../ch4io.js'
 
 export default {
   id: 'spring24',
@@ -25,8 +26,8 @@ export default {
           ['R (clock rate)', 'decode and execution design can constrain the clock', 'regular stages can help shorten the clock period'],
           ['Control unit', 'often microprogrammed', 'usually hardwired'],
         ] },
-        { type: 'p', text: 'A RISC implementation wins when its lower cycles per instruction or faster clock more than compensate for any increase in instruction count. Conversely a smaller dynamic instruction count can make a CISC implementation faster at the same throughput per instruction.' },
-        { type: 'answer', text: 'For a design with a regular pipeline and comparable workload, RISC can improve T through S and R. The ISA label alone does not determine the winner. Compare measured N×S/R for each implementation.' },
+        { type: 'p', text: 'CISC reduces **N**, but each complex instruction raises **S** and its decoding limits **R**. RISC accepts a somewhat larger **N**, but its simple, uniform instructions pipeline well, so **S approaches 1**, and its short hardwired stages allow a higher **R**. The gains in S and R usually outweigh the larger N.' },
+        { type: 'answer', text: '**RISC** is the better choice for improving T = N × S / R. N rises a little, but pipelining brings S close to 1 and the simpler hardware permits a faster clock R, so N × S / R falls overall.' },
       ],
     },
     {
@@ -183,10 +184,10 @@ export default {
           'If a problem explicitly defines destination-first syntax, T6 instead loads R1 and ends the instruction. This paper does not define that alternative.',
         ] },
         { type: 'h', text: 'Hardwired generation of PCin, R=B, MARin and MDRinE' },
-        { type: 'p', text: 'Fetch happens before IR contains the MUL opcode. Its T1 and T2 terms apply to every instruction. Gate only the execute terms with MUL. In this figure IncPC selects the dedicated increment path. If PCin specifically selects bus C, it stays inactive for this instruction; if PCin is the generic PC write enable, assert it with IncPC in T1.' },
-        { type: 'pre', text: 'IncPC  = T1\nR=B    = T1 + T3\nMARin  = T1 + T4 · MUL\nMDRinE = T2 + T5 · MUL\nPCin   = 0 (bus-C input enable) or T1 (shared PC load enable)' },
-        { type: 'diagram', id: 'controlSignalGates', caption: 'Use the sum-of-products pattern in this figure. R=B uses an OR gate for T1 and T3. MARin uses T4 AND MUL, ORed with T1. MDRinE uses T5 AND MUL, ORed with T2. Add execute terms for any other opcodes in the full controller.' },
-        { type: 'answer', text: 'R=B = T1 + T3; MARin = T1 + T4·MUL; MDRinE = T2 + T5·MUL. The incrementer updates PC at T1. For this instruction, PCin is active at T1 if it enables both PC input paths, or inactive if it selects only bus C.' },
+        { type: 'p', text: 'Fetch happens before IR contains the MUL opcode. Its T1 and T2 terms apply to every instruction. Gate only the execute terms with MUL. PC is written only once in this instruction: in T1 it latches the incremented address from the incrementer, so PCin is asserted together with IncPC in T1. MUL itself never writes PC.' },
+        { type: 'pre', text: 'PCin   = T1\nR=B    = T1 + T3\nMARin  = T1 + T4 · MUL\nMDRinE = T2 + T5 · MUL' },
+        { type: 'diagram', id: 'controlSignalGates', caption: 'Use the sum-of-products pattern in this figure. PCin is the T1 line alone (a buffer). R=B uses an OR gate for T1 and T3. MARin uses T4 AND MUL, ORed with T1. MDRinE uses T5 AND MUL, ORed with T2. Add execute terms for any other opcodes in the full controller.' },
+        { type: 'answer', text: 'PCin = T1; R=B = T1 + T3; MARin = T1 + T4·MUL; MDRinE = T2 + T5·MUL.' },
       ],
     },
     {
@@ -212,18 +213,19 @@ export default {
       id: 'Q3a', topic: 'scsi', marks: '[8]',
       q: 'Apply the concept of SCSI standard interface to explain each step of how a processor reads a block of data from a disk drive. Consider that data is stored in two disk sectors that are not contiguous. Apply distributed bus arbitration technique to explain how the target controller will gain control over the Bus.',
 
-      think: 'Follow the command and data first. Then explain target arbitration after a disconnect. Keep the SCSI bus and the host bus used for DMA distinct.',
+      think: 'Same nine-step sequence as Fall 2023 Q1(c): one command, then disconnect → seek → reconnect → transfer for **each** sector, then DMA and an interrupt. The arbitration part happens at every **reconnect**: the target must win the bus before it can reselect the initiator.',
       solution: [
-        { type: 'diagram', id: 'scsiRead', caption: 'The host adapter is the SCSI initiator and the disk controller is the target. The adapter uses the host bus to put the data into RAM.' },
-        { type: 'steps', items: [
-          'The initiator arbitrates for the SCSI bus, selects the target and sends a READ with a starting LBA and count.',
-          'The target maps logical blocks to their physical sectors and reads the data. If the LBAs are consecutive, one READ can cover them even when physically scattered. If the LBAs themselves are disjoint, send separate READs.',
-          'To let others use the bus during a seek, the target can disconnect. When it has data, it arbitrates for the SCSI bus, wins access, and reselects the initiator. It need only re-arbitrate after giving up the bus.',
-          'The target transfers data and status to the initiator. The host adapter can DMA the data to RAM and signal completion.',
+        { type: 'diagram', id: 'scsiRead', caption: 'The processor’s SCSI controller (initiator) and the disk controller (target) on the SCSI bus; the initiator moves the data into main memory by DMA.' },
+        { type: 'steps', items: scsiReadSteps },
+        { type: 'h', text: 'How the target gains control of the bus (distributed arbitration)' },
+        { type: 'list', items: [
+          'SCSI arbitration is **distributed**: there is no central arbiter. Each controller has a unique ID (0–7) tied to one data line DB0–DB7.',
+          'When the bus is free, the target asserts **BSY** and **its own ID line**. Any other contender does the same at the same time.',
+          'After a fixed arbitration delay, every contender reads the data lines. A controller that sees a **higher-numbered ID line** asserted withdraws; the one with the **highest ID** wins.',
+          'The winning target **reselects** the initiator: it asserts SEL and places both its own ID and the initiator’s ID on the data lines, restoring the suspended connection.',
         ] },
-        { type: 'h', text: 'Apply the course’s distributed-arbitration model' },
-        { type: 'p', text: 'Example: target ID 7 (0111) and another contender ID 6 (0110) both request access. The wired OR is 0111. From the MSB the first difference is at bit 0, where ID 6 has 0 and the line is 1. ID 6 withdraws; ID 7 has highest priority and reselects the initiator. The four-bit wired-OR example illustrates the priority rule; parallel SCSI represents contenders using SCSI-ID bits on its data bus.' },
-        { type: 'answer', text: 'After a disconnect, the target wins arbitration and reselects the initiator. The data returns over SCSI to the adapter and then reaches RAM over the host bus.' },
+        { type: 'p', text: 'Example: the target has ID 5 and another device with ID 2 contends. Lines DB5 and DB2 are both asserted. The device with ID 2 sees DB5 (higher) and withdraws; the target with ID 5 wins and reselects the initiator.' },
+        { type: 'answer', text: 'One read command; the target disconnects for each seek and, to send each sector, wins distributed arbitration (asserts BSY + its ID line, highest ID wins) and reselects the initiator. The initiator stores the data in memory by DMA and interrupts the processor at the end.' },
       ],
     },
     {
