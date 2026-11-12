@@ -7,7 +7,7 @@ export function IoBus() {
       <Box x={60} y={30} w={160} h={60} label="Processor" />
       <Box x={480} y={30} w={160} h={60} label="Memory" />
       <Box x={100} y={200} w={130} h={60} label="I/O device 1" fs={11.5} />
-      <Box x={290} y={200} w={130} h={60} label="…" fill="#fbfbfa" />
+      <Box x={290} y={200} w={130} h={60} label="…" fill="var(--dg-panel)" />
       <Box x={480} y={200} w={140} h={60} label="I/O device n" fs={11.5} />
       <Bus x1={200} y1={60} x2={480} y2={60} w={6} />
       <W d="M140,90 V170" />
@@ -48,13 +48,13 @@ export function IsrFlow() {
     <Svg vb="0 0 760 330">
       <T x={80} y={40} fs={12} bold>Program 1</T>
       {['1', '2', '⋮', 'i', 'i+1', '⋮', 'M'].map((s, i) => (
-        <Box key={i} x={110} y={55 + i * 32} w={110} h={26} label={s} fill="#fbfbfa" fs={11} />
+        <Box key={i} x={110} y={55 + i * 32} w={110} h={26} label={s} fill="var(--dg-panel)" fs={11} />
       ))}
       <T x={140} y={185} fs={11} anchor="middle">← interrupt occurs here</T>
       <W d="M140,175 V187" arrow={false} />
       <T x={480} y={40} fs={12} bold>Interrupt-service routine</T>
       {['1', '2', '⋮', 'return'].map((s, i) => (
-        <Box key={i} x={510} y={55 + i * 32} w={130} h={26} label={s} fill="#fbfbfa" fs={11} />
+        <Box key={i} x={510} y={55 + i * 32} w={130} h={26} label={s} fill="var(--dg-panel)" fs={11} />
       ))}
       <W d="M222,151 H510" />
       <T x={280} y={144} fs={11}>save PC (i+1) on the stack, branch to ISR</T>
@@ -175,13 +175,13 @@ export function DmaModes() {
     <Svg vb="0 0 760 240">
       <T x={40} y={30} fs={12} bold>Cycle stealing</T>
       {['CPU', 'DMA', 'CPU', 'DMA', 'CPU', 'DMA', 'CPU'].map((s, i) => (
-        <Box key={i} x={40 + i * 98} y={42} w={90} h={34} label={s} fill={s === 'DMA' ? '#ececea' : '#f3f3f1'} fs={11} />
+        <Box key={i} x={40 + i * 98} y={42} w={90} h={34} label={s} fill={s === 'DMA' ? 'var(--dg-panel2)' : 'var(--dg-panel)'} fs={11} />
       ))}
       <T x={40} y={98} fs={11}>one bus cycle at a time is "stolen" between processor accesses</T>
 
       <T x={40} y={140} fs={12} bold>Block / burst</T>
       <Box x={40} y={152} w={110} h={34} label="CPU" fs={11} />
-      <Box x={158} y={152} w={380} h={34} label="DMA  DMA  DMA  DMA" fill="#ececea" fs={11} />
+      <Box x={158} y={152} w={380} h={34} label="DMA  DMA  DMA  DMA" fill="var(--dg-panel2)" fs={11} />
       <Box x={546} y={152} w={110} h={34} label="CPU" fs={11} />
       <T x={40} y={208} fs={11}>Burst: the DMA controller is the bus master for the whole block, then hands the bus back.</T>
     </Svg>
@@ -223,7 +223,7 @@ export function DistributedArb() {
         </g>
       ))}
       <g>
-        <ellipse cx={390} cy={185} rx={60} ry={26} fill="#f3f3f1" stroke="#17171a" strokeWidth="1.4" />
+        <ellipse cx={390} cy={185} rx={60} ry={26} style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
         <T x={390} y={190} fs={11} anchor="middle">logical OR</T>
       </g>
       <W d="M150,120 V185 H330" />
@@ -252,7 +252,7 @@ export function SyncBus() {
   return (
     <Svg vb="0 0 780 400">
       <T x={60} y={30} fs={11.5} bold>Clock</T>
-      <path d={wave(160, 700, 40)} fill="none" stroke="#17171a" strokeWidth="1.6" />
+      <path d={wave(160, 700, 40)} fill="none" style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1.6" />
       <T x={60} y={110} fs={11.5}>Address / command</T>
       <W d="M200,120 H460" />
       <T x={60} y={180} fs={11.5}>Data</T>
@@ -260,12 +260,12 @@ export function SyncBus() {
       <T x={470} y={114} fs={10.5}>valid from t0</T>
       <T x={630} y={184} fs={10.5}>slave places data</T>
       {[240, 400, 560].map((x, i) => (
-        <line key={i} x1={x} y1={20} x2={x} y2={280} stroke="#c4c4c0" strokeDasharray="4 3" />
+        <line key={i} x1={x} y1={20} x2={x} y2={280} style={{ stroke: 'var(--dg-line)' }} strokeDasharray="4 3" />
       ))}
       <T x={232} y={300} fs={11} anchor="middle">t0</T>
       <T x={392} y={300} fs={11} anchor="middle">t1</T>
       <T x={552} y={300} fs={11} anchor="middle">t2</T>
-      <path d="M240,320 H560" stroke="#17171a" strokeWidth="1.2" markerStart="url(#ah-open)" markerEnd="url(#ah)" />
+      <path d="M240,320 H560" style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1.2" markerStart="url(#ah-open)" markerEnd="url(#ah)" />
       <T x={340} y={340} fs={11}>one bus cycle = fixed number of clock cycles</T>
       <T x={60} y={376} fs={11}>Everything happens at clock edges, so every device must be fast enough —</T>
       <T x={60} y={390} fs={11}>the clock is set for the slowest slave.</T>
@@ -282,11 +282,11 @@ export function AsyncBus() {
       <T x={60} y={100} fs={11.5} bold>Data</T>
       <W d="M300,110 H560" />
       <T x={60} y={160} fs={11.5} bold>Master-ready</T>
-      <path d="M200,170 h100 v-24 h200 v24 h100" fill="none" stroke="#17171a" strokeWidth="1.6" />
+      <path d="M200,170 h100 v-24 h200 v24 h100" fill="none" style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1.6" />
       <T x={60} y={230} fs={11.5} bold>Slave-ready</T>
-      <path d="M340,240 h110 v-24 h110" fill="none" stroke="#17171a" strokeWidth="1.6" />
+      <path d="M340,240 h110 v-24 h110" fill="none" style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1.6" />
       {[220, 320, 420, 470, 570].map((x, i) => (
-        <line key={i} x1={x} y1={14} x2={x} y2={290} stroke="#c4c4c0" strokeDasharray="4 3" />
+        <line key={i} x1={x} y1={14} x2={x} y2={290} style={{ stroke: 'var(--dg-line)' }} strokeDasharray="4 3" />
       ))}
       <T x={212} y={310} fs={11} anchor="middle">t0</T>
       <T x={312} y={310} fs={11} anchor="middle">t1</T>
@@ -308,10 +308,10 @@ export function ScsiRead() {
       <W d="M210,85 H300" /><W d="M300,110 H210" open />
       <T x={214} y={78} fs={10.5}>command</T>
       <T x={214} y={124} fs={10.5}>data + status</T>
-      <Box x={560} y={40} w={150} h={130} fill="#fbfbfa" />
+      <Box x={560} y={40} w={150} h={130} fill="var(--dg-panel)" />
       <T x={635} y={62} fs={11} anchor="middle">Disk</T>
       {['sector 5', '', 'sector 9', '', 'sector 12'].map((s, i) => (
-        s ? <Box key={i} x={585} y={70 + i * 20} w={100} h={18} label={s} fill="#ececea" fs={10} /> : <T key={i} x={635} y={84 + i * 20} fs={10} anchor="middle">·</T>
+        s ? <Box key={i} x={585} y={70 + i * 20} w={100} h={18} label={s} fill="var(--dg-panel2)" fs={10} /> : <T key={i} x={635} y={84 + i * 20} fs={10} anchor="middle">·</T>
       ))}
       <W d="M480,95 H560" />
       <T x={40} y={206} fs={11}>The OS tells the SCSI controller which logical block it needs; the target</T>

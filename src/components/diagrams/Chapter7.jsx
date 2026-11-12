@@ -78,9 +78,9 @@ export function RegisterGating() {
       <W d="M230,70 V118" />
       <Box x={190} y={120} w={80} h={40} label="Ri" />
       <T x={285} y={98} fs={11}>Riout</T>
-      <path d="M281,74 L295,80 L281,86 Z" fill="#17171a" />
+      <path d="M281,74 L295,80 L281,86 Z" style={{ fill: 'var(--dg-ink)' }} />
       <T x={252} y={112} fs={11}>Riin</T>
-      <path d="M256,118 L262,104 L268,118 Z" fill="#17171a" />
+      <path d="M256,118 L262,104 L268,118 Z" style={{ fill: 'var(--dg-ink)' }} />
 
       {/* Y, MUX, ALU, Z below the bus */}
       <W d="M420,70 V140" />
@@ -117,7 +117,7 @@ export function RegisterBit() {
 
       {/* tri-state output buffer: Q drives the bus only when Riout = 1 */}
       <W d="M268,230 V144" arrow={false} />
-      <path d="M258,144 L278,144 L268,124 Z" fill="#f3f3f1" stroke="#17171a" strokeWidth="1.4" />
+      <path d="M258,144 L278,144 L268,124 Z" style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
       <W d="M268,124 V60" />
       <T x={286} y={132} fs={11}>Riout (enable buffer)</T>
 
@@ -335,7 +335,7 @@ export function CompleteProcessor() {
 export function ControlSignalGates() {
   const AndGate = ({ x, y }) => (
     <g>
-      <path d={`M${x},${y} h18 a18,18 0 0 1 0,36 h-18 z`} fill="#f3f3f1" stroke="#17171a" strokeWidth="1.4" />
+      <path d={`M${x},${y} h18 a18,18 0 0 1 0,36 h-18 z`} style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
       <T x={x + 14} y={y + 23} fs={10}>AND</T>
     </g>
   )
@@ -347,7 +347,7 @@ export function ControlSignalGates() {
       {/* T1 term: always on → straight through a buffer into the OR gate */}
       <T x={40} y={120} fs={12}>T1</T>
       <W d="M70,116 H230" arrow={false} />
-      <path d="M160,110 L172,116 L160,122 Z" fill="#f3f3f1" stroke="#17171a" strokeWidth="1.4" />
+      <path d="M160,110 L172,116 L160,122 Z" style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
 
       {/* T6 · ADD */}
       <T x={40} y={105} fs={12}>T6</T><W d="M85,109 H150" />
@@ -362,7 +362,7 @@ export function ControlSignalGates() {
       <W d="M186,228 H230 V166" />
 
       <g>
-        <path d="M230,118 h14 a24,24 0 0 1 0,48 h-14 z" fill="#f3f3f1" stroke="#17171a" strokeWidth="1.4" />
+        <path d="M230,118 h14 a24,24 0 0 1 0,48 h-14 z" style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
         <T x={244} y={146} fs={10}>OR</T>
       </g>
       <W d="M268,142 H330" />

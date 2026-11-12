@@ -32,7 +32,7 @@ export function Pipe4Buffers() {
           <Box x={50 + i * 190} y={70} w={130} h={70} label={l} sub={sub} fs={12} />
           {i < 3 && (
             <g>
-              <rect x={185 + i * 190} y={78} width={38} height={54} fill="#f3f3f1" stroke="#17171a" strokeWidth="1.4" />
+              <rect x={185 + i * 190} y={78} width={38} height={54} style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
               <T x={204 + i * 190} y={109} fs={12} anchor="middle" bold>{`B${i + 1}`}</T>
               <W d={`M${180 + i * 190},105 H${185 + i * 190}`} arrow={false} />
               <W d={`M${223 + i * 190},105 H${240 + i * 190}`} />

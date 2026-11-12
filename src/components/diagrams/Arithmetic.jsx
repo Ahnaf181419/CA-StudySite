@@ -17,7 +17,7 @@ export function SeqMultiplier() {
       <Box x={620} y={120} w={100} h={44} label="Multiplier" sub="shift right" fs={10.5} />
       <W d="M620,142 H540" arrow={false} />
       <g>
-        <ellipse cx={510} cy={142} rx={34} ry={24} fill="#f3f3f1" stroke="#17171a" strokeWidth="1.4" />
+        <ellipse cx={510} cy={142} rx={34} ry={24} style={{ fill: 'var(--dg-panel)', stroke: 'var(--dg-ink)' }} strokeWidth="1.4" />
         <T x={510} y={147} fs={10} anchor="middle">control</T>
       </g>
       <W d="M476,142 H420 V295" arrow={false} /><W d="M476,142 H424 V295" open />

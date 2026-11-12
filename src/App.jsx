@@ -35,7 +35,7 @@ export default function App() {
     <div className="min-h-screen flex flex-col">
       <Nav route={route} />
       <main className="flex-1 w-full max-w-[860px] mx-auto px-5 md:px-8 py-8 md:py-12">
-        {view === 'qb' && !PAPERS.find((p) => p.id === arg) ? (
+        {view === 'qb' && arg && !PAPERS.find((p) => p.id === arg) ? (
           <p className="text-ash">Unknown paper.</p>
         ) : view === 'lectures' && arg && !moduleTitle ? (
           <p className="text-ash">Unknown module.</p>

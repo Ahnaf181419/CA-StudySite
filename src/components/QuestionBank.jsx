@@ -18,7 +18,7 @@ function Question({ q }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="border border-line bg-paper">
-      <button className="press w-full text-left p-4 md:p-5" onClick={() => setOpen(!open)}>
+      <button className="press w-full text-left p-4 md:p-5" onClick={() => setOpen(!open)} aria-expanded={open}>
         <div className="flex items-start gap-3">
           <span className="font-mono text-[12.5px] text-ash pt-0.5 shrink-0">{q.id}</span>
           <div className="flex-1">

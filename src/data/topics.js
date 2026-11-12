@@ -2,7 +2,7 @@
 // notes → the class-notes signal for this topic (why it is exam-priority).
 export const TOPICS = {
   'control-seq': { name: 'Control sequences (datapath steps + signals)', module: 'ch7', notes: 'The class notes work three full examples (Add (R1),R2 · Add R1,(R2) · Add R1,(R2)+,R3) with the merge rules — clearly the lecturer’s favourite.' },
-  'cpu-datapath': { name: 'Draw CPU datapath / register gating', module: 'ch7', notes: 'Figures 7.1, 7.2/7.3 and 7.8 all drawn repeatedly in the notes.' },
+  'cpu-datapath': { name: 'Draw CPU datapath / register gating', module: 'ch7', notes: 'Figures 7.8 (and 7.2/7.3 for gating) drawn repeatedly in the notes. Current syllabus starts at multibus (slide 30); single-bus figures survive through the 2023–24 papers.' },
   'hardwired-cu': { name: 'Hardwired control unit', module: 'ch7', notes: 'Notes draw the AND/OR gate networks for PCout, R2in, MDRinE, MARin.' },
   'micro-cu': { name: 'Microprogrammed control unit', module: 'ch7', notes: 'Control-word table, µPC, starting-address generator and the Branch<0 microroutine all appear in the notes.' },
   multdiv: { name: 'Sequential multiplication / division', module: 'arith', notes: 'Notes pages 1–4: full 4×3 worked table + hardware datapath. Also “Exercise for final: 3.27, 3.29 (Imp)”.' },

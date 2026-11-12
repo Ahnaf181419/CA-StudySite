@@ -28,7 +28,7 @@ export default function Lectures({ moduleId }) {
       <div>
         <h1 className="text-[26px] font-semibold tracking-tight">Lectures</h1>
         <p className="text-ash text-[14.5px] mt-2 leading-relaxed">
-          Every topic in the slide set, explained from the prerequisites up, in teaching order. Each section ends with the way you should
+          Every exam-syllabus topic in the slide set, explained from the prerequisites up, in teaching order (Chapter 7 starts at multibus, slide 30, per the course scope). Each section ends with the way you should
           think about that topic when a question asks it. The arithmetic module covers the self-study part the slides point to.
         </p>
         <div className="mt-7">

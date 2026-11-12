@@ -6,7 +6,7 @@ export default {
   blurb: 'Why pipelining raises throughput but never shortens one instruction, how the stage table is read, and the three hazards that stall the pipe — with the timing charts the exam always asks you to draw.',
   tags: ['throughput', 'latency', 'interstage buffer', 'data hazard', 'structural hazard', 'instruction hazard', 'forwarding', 'superscalar'],
   prereq: [
-    'The fetch–execute cycle and the F/D/E/W meaning (Fetch, Decode + fetch operands, Execute, Write result) from Chapter 7.',
+    'The fetch–execute cycle and the F/D/E/W meaning (Fetch, Decode + fetch operands, Execute, Write result).',
     'Cache vs main memory access time — Chapter 5; pipelining only reaches its ideal rate if fetches hit the cache.',
     'Combinational vs clocked: each pipeline stage must finish inside one clock period, so the clock is set by the slowest stage.',
   ],

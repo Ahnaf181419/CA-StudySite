@@ -41,12 +41,12 @@ export function RamChip() {
       <T x={238} y={258} fs={10}>⋮  (16 word lines, W0…W15)</T>
 
       {/* cell array */}
-      <Box x={330} y={30} w={240} h={240} fill="#fbfbfa" />
+      <Box x={330} y={30} w={240} h={240} fill="var(--dg-panel)" />
       {Array.from({ length: 8 }, (_, i) => (
         <g key={i}>
-          <line x1={330} y1={48 + i * 24} x2={570} y2={48 + i * 24} stroke="#17171a" strokeWidth="1" />
+          <line x1={330} y1={48 + i * 24} x2={570} y2={48 + i * 24} style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1" />
           {Array.from({ length: 8 }, (_, j) => (
-            <rect key={j} x={344 + j * 27} y={36 + i * 24} width={20} height={14} fill="none" stroke="#c4c4c0" strokeWidth="1" />
+            <rect key={j} x={344 + j * 27} y={36 + i * 24} width={20} height={14} fill="none" style={{ stroke: 'var(--dg-line)' }} strokeWidth="1" />
           ))}
         </g>
       ))}
@@ -146,11 +146,11 @@ export function DirectMap() {
 
       <T x={90} y={190} fs={12} bold>Main memory (4096 blocks)</T>
       {['Block 0', 'Block 1', '⋮', 'Block 127', 'Block 128', 'Block 129', '⋮', 'Block 255', 'Block 256', '⋮', 'Block 4095'].map((b, i) => (
-        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="#fbfbfa" fs={10.5} />
+        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
       ))}
       <T x={480} y={190} fs={12} bold>Cache (128 blocks)</T>
       {['tag | block 0', 'tag | block 1', '⋮', 'tag | block 127'].map((b, i) => (
-        <Box key={i} x={470} y={205 + i * 23} w={170} h={20} label={b} fill="#f3f3f1" fs={10.5} />
+        <Box key={i} x={470} y={205 + i * 23} w={170} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
       ))}
       <W d="M220,215 H470" />
       <W d="M220,274 H470" dash />
@@ -176,11 +176,11 @@ export function AssociativeMap() {
       <T x={80} y={130} fs={11}>any memory block may be placed in any cache position</T>
       <T x={90} y={190} fs={12} bold>Main memory (4096 blocks)</T>
       {['Block 0', 'Block 1', '⋮', 'Block 127', 'Block 128', '⋮', 'Block 255', '⋮', 'Block 4095'].map((b, i) => (
-        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="#fbfbfa" fs={10.5} />
+        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
       ))}
       <T x={480} y={190} fs={12} bold>Cache (128 blocks)</T>
       {['tag | block 0', 'tag | block 1', '⋮', 'tag | block 127'].map((b, i) => (
-        <Box key={i} x={470} y={205 + i * 23} w={170} h={20} label={b} fill="#f3f3f1" fs={10.5} />
+        <Box key={i} x={470} y={205 + i * 23} w={170} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
       ))}
       <W d="M220,215 H470" />
       <W d="M220,251 H470" dash />
@@ -203,11 +203,11 @@ export function SetAssocMap() {
       <T x={80} y={130} fs={11}>128 cache blocks ÷ 2 per set = 64 sets · tag = 4096 / 64 = 64 = 2^6</T>
       <T x={90} y={190} fs={12} bold>Main memory (4096 blocks)</T>
       {['Block 0', 'Block 1', '⋮', 'Block 63', 'Block 64', 'Block 65', '⋮', 'Block 127', 'Block 128', '⋮', 'Block 4095'].map((b, i) => (
-        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="#fbfbfa" fs={10.5} />
+        <Box key={i} x={90} y={205 + i * 23} w={130} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
       ))}
       <T x={480} y={190} fs={12} bold>Cache (64 sets × 2 blocks)</T>
       {['tag | block 0', 'tag | block 1', '⋮', 'tag | block 126', 'tag | block 127'].map((b, i) => (
-        <Box key={i} x={470} y={205 + i * 23} w={180} h={20} label={b} fill="#f3f3f1" fs={10.5} />
+        <Box key={i} x={470} y={205 + i * 23} w={180} h={20} label={b} fill="var(--dg-panel2)" fs={10.5} />
       ))}
       <T x={460} y={272} fs={10.5} anchor="end">Set 0</T>
       <T x={460} y={432} fs={10.5} anchor="end">Set 63</T>
