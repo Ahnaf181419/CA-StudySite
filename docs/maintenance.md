@@ -44,7 +44,7 @@ site trustworthy:
   assumptions register in [content.md](content.md)), record it there;
 - end numerical sections with the boxed `answer` block and give every worked table its check
   (`mod` cross-check, remainder identity, cycle count);
-- use the `think` block for the reasoning recipe and `exam` for where papers ask it.
+- use `think` for the reasoning recipe and `exam` for where papers ask it. Add a `practice` block with a new prompt and a worked answer learners can reveal.
 
 ## Add a diagram
 
@@ -64,7 +64,7 @@ real target coordinate, not an approximation; one bus output per wire.
 ## Verify a change
 
 ```sh
-npm test              # content integrity — 5 suites, <100 ms
+npm test              # content integrity
 npm run build         # production build
 npm run preview       # serve dist/ and click through the changed routes
 ```

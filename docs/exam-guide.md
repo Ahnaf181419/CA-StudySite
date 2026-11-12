@@ -1,7 +1,13 @@
 # Exam guide — what repeats, what to over-prepare
 
-Generated from the same data the site renders (six papers, every sub-question tagged by topic).
-Use it as the attack order; the site's Patterns tab keeps the live version of this table.
+Use the site's Patterns tab for the current topic counts across the six papers.
+
+## How to study
+
+1. Start with Foundations for binary, addressing, single-bus data movement, array loops and stack code.
+2. Work through the core modules in lecture order. Cover the worked answer and redo its table or diagram before attempting the nearby checkpoint.
+3. Open **Past-paper practice** at the end of the module and attempt a question on paper. Reveal the hint if you get stuck. Compare the solution with your work and record the first step where they diverged.
+4. Attempt the complete Fall 2024 paper under its 2 hour 30 minute limit. Choose the required number of sub-questions before writing answers.
 
 ## The syllabus split
 
@@ -11,37 +17,37 @@ current Hamacher track (the slide set in this folder). The 2022 shared topics �
 pipeline hazards, DMA, bus arbitration, performance arithmetic — carried over unchanged, which
 is why they dominate the repeat counts.
 
-Chapter 7 lectures start at multibus (slide 30) per the course scope; the single-bus control
-sequences that Fall/Spring 2023 still asked are solved in the question bank but are not
-re-taught.
+The core Chapter 7 lecture starts at multibus. Foundations teaches the single-bus control
+sequences and register gating asked in later papers. The older-paper supplement teaches the
+additional 2022 material, including MIPS and Hamming codes.
 
 ## Priority tiers
 
-### Tier 1 — asked in 4–5 of 6 papers (expect a full question)
+### Priority worked problems
 
 | Topic | Papers | How it's asked |
 |---|---|---|
-| **Cache mapping** (direct / associative / set-associative) | F22, S22, F23, S24, F24 (5) | always numeric: given block size, cache size, an address — split tag/index/set/word and name the exact cache position; sometimes also draw the mapping and explain the hit check |
+| **Cache mapping** (direct / associative / set-associative) | All six (including locality and mapping theory) | for numerical questions: given block size, cache size, an address — split tag/index/set/word and name the exact cache position; sometimes also draw the mapping and explain the hit check |
 | **Pipeline hazards** (data / structural / instruction) | F22, S22, F23, S23, S24, F24 (all 6 in some form) | draw the stage chart, identify the hazard, then the fix: forwarding (hardware) or NOP/reorder (software) |
 | **Branch penalty / delayed branch / prediction** | F22, S23, F24 + notes | timing chart for 2-stage and 4-stage (E-resolution), reorder a loop into the delay slot, pick predict-taken for a loop-bottom branch |
-| **Control sequences** (three-bus steps + signals) | F23, S23, S24 (3) | "generate the control sequence for instruction X in this architecture" — the 3-step fetch is always the same; the execute step is one line; memory operands cost a MARin+Read / WMFC+MDRinE pair each |
+| **Control sequences** (single-bus and three-bus) | F23, S23, S24 (3) | "generate the control sequence for instruction X in this architecture" — start from the printed datapath, write register transfers, then choose control signals. Three-bus ALU output must be latched in the cycle it is produced |
 | **Sequential multiplication / division** | F23, S23, S24 + notes | register-by-register table (add / shift-multiplicand / shift-multiplier), or the restoring-division trace with the quotient-bit column |
 
 ### Tier 2 — asked 2–3 times or singled out in class
 
 | Topic | Papers | Notes signal |
 |---|---|---|
-| Performance arithmetic (TI, tave, throughput) | F22, F23, S23, S24 | the notes derive `Pp = R` and both miss-increase formulas by hand — learn the two formulas, not the numbers |
+| Performance arithmetic (TI, tave, throughput) | F22, S22, F23, S23, S24 | distinguish average memory access time from CPI, and state whether miss time is incremental or total |
 | Operand forwarding | S23 (+ every hazards question) | forwarding datapath (SRC1/SRC2/RSLT) drawn in the notes |
 | Interrupt handling (repeated-IRQ, priorities, daisy chains) | F24, S23, S24 | all three repeated-interrupt approaches + the three simultaneous-request schemes are in the notes |
 | RAM chip internal organization | F22, S22, S23, F24 | **explicit exam pointer in the notes**: "draw the internal organization, explain read and write" |
 | Bus arbitration (centralized / distributed) | F22, S24, F24 | the notes work two distributed examples; be ready to simulate IDs bit by bit |
 | DMA | F22, S22 (+ Q4a compare) | initiation info (address, count, direction) + cycle stealing vs burst timelines |
-| Program-controlled I/O | F24, S24 | write the polling loop with side notes, name the busy-waiting disadvantage, fix = interrupts |
-| Virtual memory (small RAM, big program) | F23, S23 | yes-issue → technique → draw the MMU organization → locality |
+| Program-controlled I/O | F22, F24, S24 | write the polling loop with side notes, name the busy-waiting disadvantage, fix = interrupts |
+| Virtual memory (small RAM, big program) | F23, S23 | explain virtual mappings, resident frames, page faults and working-set limits |
 | SCSI scattered-sector reads | F23, S24 | initiator/target roles, logical→physical translation, per-sector reads |
 | Sync vs async bus timing | F24, S23 | draw both; "clock set for the slowest device" is the limitation sentence |
-| Read/write hit & miss policies | F24 | the 6-row table (through vs back, load-through) |
+| Read/write hit & miss policies | F24 | separate write-through/back from write-allocate/no-write-allocate |
 
 ### Tier 3 — single appearances or pre-scope material
 

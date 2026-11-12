@@ -39,9 +39,12 @@ const MAP = {
   distributedArb: C4.DistributedArb,
   syncBus: C4.SyncBus,
   asyncBus: C4.AsyncBus,
+  syncBusWrite: () => <C4.SyncBus write />,
+  asyncBusWrite: () => <C4.AsyncBus write />,
   scsiRead: C4.ScsiRead,
   seqMultiplier: AR.SeqMultiplier,
   divHardware: AR.DivHardware,
+  fpAdder: AR.FpAdder,
 }
 
 // every registered id must have a component, and vice versa (guards registry drift)
@@ -58,8 +61,10 @@ export default function Diagram({ id, caption }) {
   const C = MAP[id]
   if (!C) return <div className="text-ash text-[13px] my-4">missing diagram: {id}</div>
   return (
-    <figure className="my-6 border border-line bg-paper p-4 overflow-x-auto">
-      <C />
+    <figure className="my-6 border border-line bg-paper p-4">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Diagram">
+        <div className="min-w-[460px]"><C /></div>
+      </div>
       {caption ? <figcaption className="text-[12px] text-ash mt-3 border-t border-line pt-2">{caption}</figcaption> : null}
     </figure>
   )

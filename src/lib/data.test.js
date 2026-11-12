@@ -12,7 +12,7 @@ test('all referenced diagrams exist', () => {
   const check = (blocks, where) => {
     for (const b of blocks || []) {
       if (BLOCK_DIAGRAM(b) && !DIAGRAM_IDS.includes(b.id)) missing.push(`${where}: ${b.id}`)
-      if (b?.type === 'example') check(b.blocks, where)
+      if (b?.blocks) check(b.blocks, where)
     }
   }
   for (const m of MODULES) {
@@ -55,4 +55,36 @@ test('each paper exposes counts computed from its questions', () => {
     const total = Object.values(p.counts).reduce((a, b) => a + b, 0)
     assert.equal(total, p.questions.length, `${p.id} counts mismatch`)
   }
+})
+
+test('each module has a checkpoint with a worked answer', () => {
+  for (const m of MODULES) {
+    const practice = m.sections.flatMap((s) => s.blocks.filter((b) => b.type === 'practice'))
+    assert.ok(practice.length > 0, `${m.id} needs a checkpoint`)
+    for (const b of practice) {
+      assert.ok(b.prompt?.trim(), `${m.id} checkpoint has no prompt`)
+      assert.ok(b.blocks.some((solution) => solution.type === 'answer'), `${m.id} checkpoint has no answer`)
+    }
+  }
+})
+
+test('paper question IDs can be used as unique deep links', () => {
+  for (const paper of PAPERS) {
+    assert.match(paper.id, /^[a-z0-9-]+$/)
+    assert.equal(new Set(paper.questions.map((q) => q.id)).size, paper.questions.length, paper.id)
+    for (const q of paper.questions) assert.match(q.id, /^[a-zA-Z0-9-]+$/)
+  }
+})
+
+test('each timing chart has one cell per declared clock cycle', () => {
+  const check = (blocks, where) => {
+    for (const b of blocks) {
+      if (b.type === 'timing') {
+        for (const row of b.rows) assert.equal(row.cells.length, b.columns, `${where}: ${row.label}`)
+      }
+      if (b.blocks) check(b.blocks, where)
+    }
+  }
+  for (const m of MODULES) for (const s of m.sections) check(s.blocks, m.id)
+  for (const p of PAPERS) for (const q of p.questions) check(q.solution, `${p.id} ${q.id}`)
 })

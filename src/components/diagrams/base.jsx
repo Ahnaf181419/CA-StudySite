@@ -1,3 +1,5 @@
+import { createContext, useContext, useId } from 'react'
+
 // Monochrome SVG diagram primitives shared by every figure.
 // Colors go through CSS variables (see index.css :root) so the whole
 // diagram set follows the site theme; style attributes (not presentation
@@ -5,19 +7,21 @@
 const INK = 'var(--dg-ink)'
 const PANEL = 'var(--dg-panel)'
 const LINE = 'var(--dg-line)'
+const MarkerContext = createContext(null)
 
 export function Svg({ vb = '0 0 760 420', maxw = 760, children }) {
+  const id = useId()
   return (
     <svg viewBox={vb} role="img" style={{ maxWidth: maxw + 'px', width: '100%', height: 'auto' }} className="select-none">
       <defs>
-        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <marker id={`${id}-arrow`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" style={{ fill: INK }} />
         </marker>
-        <marker id="ah-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <marker id={`${id}-open`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10" style={{ fill: 'none', stroke: INK, strokeWidth: '1.6' }} />
         </marker>
       </defs>
-      {children}
+      <MarkerContext.Provider value={id}>{children}</MarkerContext.Provider>
     </svg>
   )
 }
@@ -46,9 +50,13 @@ export function T({ x, y, children, anchor = 'start', fs = 12, bold = false, mon
   )
 }
 
-export function W({ d, arrow = true, open = false, dash = false, w = 1.4 }) {
+export function W({ d, arrow = true, open = false, both = false, dash = false, w = 1.4 }) {
+  const id = useContext(MarkerContext)
   return (
-    <path d={d} style={{ fill: 'none', stroke: INK, strokeWidth: w }} strokeDasharray={dash ? '5 3' : undefined} markerEnd={arrow ? (open ? 'url(#ah-open)' : 'url(#ah)') : undefined} strokeLinejoin="round" />
+    <path d={d} style={{ fill: 'none', stroke: INK, strokeWidth: w }} strokeDasharray={dash ? '5 3' : undefined}
+      markerStart={both ? `url(#${id}-open)` : undefined}
+      markerEnd={arrow ? `url(#${id}-${open ? 'open' : 'arrow'})` : undefined}
+      strokeLinejoin="round" />
   )
 }
 

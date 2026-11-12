@@ -293,7 +293,7 @@ export function MicroCUCond() {
       <T x={530} y={186} fs={11}>External inputs</T>
       <W d="M610,190 H520" />
       <T x={60} y={336} fs={11}>If the CW is a conditional branch, the generator checks the condition codes and,</T>
-      <T x={60} y={354} fs={11}>if necessary, loads a new address into µPC from the offset field (how Branch &lt; 0 works).</T>
+      <T x={60} y={354} fs={11}>may load a new µPC address from the offset field.</T>
     </Svg>
   )
 }
@@ -301,7 +301,7 @@ export function MicroCUCond() {
 // Complete processor with internal + system bus (slide 43 / subsection 7.4.1).
 export function CompleteProcessor() {
   return (
-    <Svg vb="0 0 780 470">
+    <Svg vb="0 0 780 484">
       <Box x={90} y={30} w={600} h={300} fill="none" dashed />
       <T x={110} y={55} fs={12} bold>CPU</T>
       <Box x={130} y={80} w={170} h={54} label="Instruction" sub="cache" fs={12} />

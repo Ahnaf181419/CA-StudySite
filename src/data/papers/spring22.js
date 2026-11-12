@@ -13,7 +13,7 @@ export default {
     {
       id: 'Q2b', topic: 'mips', marks: '[~4]', flagged: true, repeats: 1,
       q: 'Explain the ALU logic(s) to take the decision for the following set-on-less-than instruction: slt $t0, $t3, $t4',
-      think: 'slt computes rd = (rs < rt) — here $t0 = ($t3 < $t4) ? 1 : 0. The ALU performs a subtraction and decides from the **sign** of the result — with an overflow correction, because subtracting two same-signed numbers can overflow and flip the sign.',
+      think: 'slt computes rd = (rs < rt) — here $t0 = ($t3 < $t4) ? 1 : 0. The ALU performs a subtraction and decides from the **sign** of the result — with an overflow correction, because subtracting numbers with opposite signs can overflow and flip the sign.',
       solution: [
         { type: 'steps', items: [
           'The ALU performs `rs − rt` (here $t3 − $t4) with the SUB operation.',
@@ -27,24 +27,15 @@ export default {
     {
       id: 'Q3a', topic: 'hamming', marks: '[4]', flagged: true, repeats: 2,
       q: 'A 10100110-bit message is encoded and transmitted over a noisy channel. During Viterbi decoding at the receiver, the bit message found is 10110110. Apply the SEC code to detect and correct a single error in the bit message. In addition, explain the procedure to detect double bits error.',
+
       think: [
-        'Same machinery as Fall 2022 Q4(c): recompute each parity check over its positions on the **received** word; the syndrome is the error position. (State your bit-numbering convention — leftmost bit = position 1, even parity — and stay consistent.)',
+        'The displayed 8-bit strings are payloads. Eight payload bits need four Hamming check bits. State the assumption that the parity bits computed for the original payload were received unchanged.',
       ],
       solution: [
-        { type: 'p', text: 'Received 10110110 → b1…b8 = 1, 0, 1, 1, 0, 1, 1, 0 (positions numbered from the left, even parity).' },
-        { type: 'table', head: ['Check', 'Positions', 'Sum', 'Result'], rows: [
-          ['p1', '1, 3, 5, 7', '1 + 1 + 0 + 1 = 3', 'odd → s1 = 1'],
-          ['p2', '2, 3, 6, 7', '0 + 1 + 1 + 1 = 3', 'odd → s2 = 1'],
-          ['p4', '4, 5, 6, 7', '1 + 0 + 1 + 1 = 3', 'odd → s4 = 1'],
-          ['p8', '8', '0', 'even → s8 = 0'],
-        ], boldFirst: true },
-        { type: 'steps', items: [
-          'Syndrome (s8 s4 s2 s1) = 0111₂ = **7** → the error is at bit position 7.',
-          'Flip bit 7 of the received word: 10110110 → **10110100** — the corrected codeword.',
-          'If the class convention numbers bits from the right, the same computation reports the mirrored position — state the convention you use and apply it consistently.',
-        ] },
-        { type: 'p', text: '**Double-error detection:** add an overall (even) parity bit over the whole word. Single error → syndrome ≠ 0 **and** overall parity odd → correct at the syndrome position. Two errors → syndrome ≠ 0 but overall parity **even** → error detected but not correctable (two single-error syndromes XOR into a misleading third position).' },
-        { type: 'answer', text: ['Syndrome 0111 = 7 → flip bit 7 → corrected word 10110100; double errors are detected (syndrome ≠ 0 with even overall parity) but not corrected.'] },
+        { type: 'p', text: 'Use even parity and number codeword positions 1…12 from the left. Put the payload in positions 3, 5, 6, 7, 9, 10, 11, 12 and reserve 1, 2, 4, 8 for parity. Original payload 10100110 gives parity bits P1=0, P2=0, P4=1, P8=0 and codeword 001101000110.' },
+        { type: 'p', text: 'With the received payload 10110110 and those parity bits, the received codeword is 001101100110. Checks 1, 2 and 4 fail; check 8 passes. The syndrome 0111₂ = 7 points to **codeword position 7**, which holds the fourth payload bit.' },
+        { type: 'p', text: 'For SECDED, append one overall parity bit to the entire Hamming codeword. Nonzero syndrome with odd overall parity indicates a single error in the Hamming portion. Zero syndrome with odd parity points to the overall parity bit. Nonzero syndrome with even overall parity signals a double error: report it without flipping a bit.' },
+        { type: 'answer', text: 'Flip codeword position 7 (payload bit 4) to recover 10100110. The syndrome needs the parity bits; here they were reconstructed from the given original payload.' },
       ],
     },
     {
@@ -86,7 +77,7 @@ export default {
         ] },
         { type: 'h', text: 'ii) NOP removal' },
         { type: 'pre', text: 'and $t3, $t2, $t1\nNOP\nNOP\nand $t5, $t3, $t4\nNOP\nNOP\nlw  $t3, 8($t5)\nNOP\nNOP\nor  $t6, $t6, $t3' },
-        { type: 'p', text: 'Each dependent consumer sits **two** NOPs after its producer — by then the producer’s Writeback (cycle k+4 vs the consumer’s Decode at k+5? compute: producer at position p has W at p+4; consumer at p+3 has D at p+4 — same cycle; with register files that write in the first half and read in the second half of a cycle, the read succeeds) → hazards removed with **6 NOPs**.' },
+        { type: 'p', text: 'Each dependent consumer sits **two** NOPs after its producer — the producer writes in cycle p+4 when it was fetched in cycle p, and the consumer fetched in p+3 reads in p+4. A first-half write and second-half read make that same-cycle transfer possible → hazards removed with **6 NOPs**.' },
         { type: 'h', text: 'iii) Execution time with full forwarding' },
         { type: 'timing', columns: 9, rows: [
           { label: 'I1  and $t3,$t2,$t1', cells: ['F', 'D', 'E', 'M', 'W', '', '', '', ''] },
@@ -189,9 +180,9 @@ export default {
         { type: 'steps', items: [
           '**Two’s complement:** MSB = 1 → negative. Magnitude = invert + 1 = `01010010 00001110 00000000 00000000` = 0x520E0000 = 1,376,649,216 → value = **−1,376,649,216**.',
           '**Unsigned:** 0xADF20000 = 2,918,318,080 (check: 2^32 − 2,918,318,080 = 1,376,649,216 ✓ consistent with (a)).',
-          '**IEEE single precision:** S = 1; E = `01011011` = 91 → exponent = 91 − 127 = −36; F = `1110010…0` → mantissa = 1 + 2^-1 + 2^-2 + 2^-3 + 2^-6 = 1.890625. Value = **−1.890625 × 2^−36 ≈ −2.74 × 10^−11**.',
+          '**IEEE single precision:** S = 1; E = `01011011` = 91 → exponent = 91 − 127 = −36; F = `1110010…0` → mantissa = 1 + 2^-1 + 2^-2 + 2^-3 + 2^-6 = 1.890625. Value = **−1.890625 × 2^−36 ≈ −2.751 × 10^−11**.',
         ] },
-        { type: 'answer', text: ['(a) −1,376,649,216 · (b) 2,918,318,080 · (c) −1.890625 × 2^−36 ≈ −2.74 × 10^−11.'] },
+        { type: 'answer', text: ['(a) −1,376,649,216 · (b) 2,918,318,080 · (c) −1.890625 × 2^−36 ≈ −2.751 × 10^−11.'] },
       ],
     },
     {

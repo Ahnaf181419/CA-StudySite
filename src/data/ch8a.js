@@ -3,7 +3,7 @@ export default {
   id: 'ch8a',
   chapter: 'Chapter 8 · Slides 6',
   title: 'Pipelining — basics, stages and hazards',
-  blurb: 'Why pipelining raises throughput but never shortens one instruction, how the stage table is read, and the three hazards that stall the pipe — with the timing charts the exam always asks you to draw.',
+  blurb: 'How pipelining raises throughput by overlapping instructions, how the stage table is read, and the three hazards that stall the pipe — with the timing charts the exam always asks you to draw.',
   tags: ['throughput', 'latency', 'interstage buffer', 'data hazard', 'structural hazard', 'instruction hazard', 'forwarding', 'superscalar'],
   prereq: [
     'The fetch–execute cycle and the F/D/E/W meaning (Fetch, Decode + fetch operands, Execute, Write result).',
@@ -21,7 +21,7 @@ export default {
         ] },
         { type: 'note', title: 'The two words you must never mix up', text: [
           '**Throughput** = number of instructions completed per unit time. Pipelining improves throughput — in the ideal, hazard-free case it approaches **1 instruction per clock cycle**.',
-          '**Latency** = the elapsed time between the start and end of one instruction. Pipelining does **not** change it — every instruction still passes through every stage.',
+          '**Latency** = the elapsed time between the start and end of one instruction. Each instruction still passes through every stage. In a balanced ideal model latency stays the same; slower stages and pipeline registers can increase it.',
           'Pipelined organization requires **sophisticated compilation techniques** (you will see why at delayed branch).',
         ] },
         { type: 'think', text: [
@@ -109,7 +109,12 @@ export default {
           'If the pipeline cannot be sustained without interruption, it **stalls**; any condition that causes a stall is a **hazard**. Hazards degrade performance, so we identify them and minimize their impact.',
         ] },
         { type: 'think', text: [
-          'The exam sentence to justify (it appears almost verbatim in Spring 2024): *“an n-stage pipeline has the potential for n× throughput, but the gain is not realized”*. Your argument: potential = n instructions in flight × 1/n clock; reality subtracts fill/drain cycles and adds stall cycles from hazards — data, instruction and structural. Then quantify with `TI` arithmetic (Part 2 of this chapter).',
+          'The exam sentence to justify (it appears almost verbatim in Spring 2024): *“an n-stage pipeline has the potential for n× throughput, but the gain is not realized”*. Your argument: after filling, one instruction completes per shorter clock. For N instructions in k stages, ideal cycles = N + k − 1; add stall cycles for hazards — data, instruction and structural. Then quantify with `TI` arithmetic (Part 2 of this chapter).',
+        ] },
+        { type: 'pre', text: 'Single-cycle CPU: N × (sum of stage delays)\nSynchronous k-stage pipeline: (N + k − 1 + stall cycles) × clock period\nClock period: max stage delay + pipeline register overhead' },
+        { type: 'p', text: 'The formula assumes one instruction can enter per cycle. For unequal stages, a short stage still gets a full clock period. Latency for an isolated instruction can increase because of padding and register overhead. CPI for a finite trace counts all elapsed cycles divided by completed instructions.' },
+        { type: 'practice', prompt: 'Four stages take 3, 5, 4 and 2 ns. Latches add 1 ns per pipeline cycle. For 20 instructions and no stalls, compare with a single-cycle processor that takes the sum of stage delays. Find isolated-instruction latency in each case.', blocks: [
+          { type: 'answer', text: 'Single-cycle: 20×14 = 280 ns, latency 14 ns. Pipeline: (20+3)×6 = 138 ns, latency 4×6 = 24 ns. Speedup ≈ 2.03×.' },
         ] },
       ],
     },
@@ -127,14 +132,14 @@ export default {
           { label: 'I2  Add R5,R4,R6', cells: ['', 'F2', 'D2', { t: 'D2A', box: true }, 'E2', 'W2', '', '', ''] },
           { label: 'I3', cells: ['', '', 'F3', '', '', 'D3', 'E3', 'W3', ''] },
           { label: 'I4', cells: ['', '', '', '', '', 'F4', 'D4', 'E4', 'W4'] },
-        ], caption: 'The Mul places its result in R4 at the end of cycle 4 (end of W1). The Add cannot leave D until then, so it is re-decoded in cycle 4 (D2A) and proceeds at E2 in cycle 5. The dependency arises because the destination of one instruction is the source of the next.' },
+        ], caption: 'Assume W writes early enough for D to read the same cycle. Mul writes R4 in cycle 4, so Add retries Decode in cycle 4 and enters Execute in cycle 5. If Decode cannot see a same-cycle write, delay it one more cycle. The dependency arises because the destination of one instruction is the source of the next.' },
         { type: 'list', items: [
-          'In cycles 5–6 the Write stage is **idle** — it has nothing to work with.',
-          'The information in buffer B2 must be **retained** until the execution of I2 completes; therefore stage 2, and by extension stage 1, cannot accept new instructions (B1 cannot be overwritten).',
+          'In cycle 5 the Write stage is **idle** — it has nothing to work with.',
+          'A blocked Decode holds the waiting instruction. Fetch must also hold when its buffer is full. Older instructions downstream may still complete.',
           'Most arithmetic/logic operations take one E cycle; **division takes longer** — the same kind of stall, longer.',
         ] },
         { type: 'think', text: [
-          'To detect a data hazard by hand: underline every register **written** by instruction k and every register **read** by instruction k+1; if the sets intersect, the Decode of k+1 cannot finish in its slot. In the table, the stall shows up as a repeated letter (D2A) — that repeat *is* the bubble.',
+          'To detect a data hazard by hand: underline every register **written** by instruction k and every register **read** by instruction k+1; an intersection is a read-after-write (RAW) dependency. Compare the cycle when the result is ready with the cycle it is needed. A repeated D indicates a stalled instruction; the corresponding empty E slot is the bubble.',
           'Class-note phrasing: the stall then **propagates toward the last stage** — every later stage sees the gap one cycle later. Draw the stage-view table (rows = stages, one instruction label per row) when the question says “show which stages occur during each clock cycle”.',
         ] },
         { type: 'exam', text: ['Fall 2024 Q3(b) gives exactly this with `SUB R1,R3,R2` / `MUL R2,R3,R4` and asks whether a hazard occurs and how forwarding handles it — solved in the question bank.'] },
@@ -144,17 +149,20 @@ export default {
       heading: 'Instruction (control) hazards',
       blocks: [
         { type: 'list', items: [
-          'The pipeline stalls because an **instruction is not available at the expected time** — classically a **cache miss** during fetch.',
+          'The slides use “instruction hazard” for interrupted instruction supply, including a **fetch cache miss**. A **control hazard** specifically occurs when the correct next PC is unknown after a branch or jump. Both can leave Decode waiting for a useful instruction.',
           'Fetching from main memory takes much longer than from the cache; the fetch cannot complete in one cycle. The slides’ example: fetching I2 misses and **F2 takes 4 clock cycles instead of 1**.',
         ] },
         { type: 'timing', columns: 9, rows: [
           { label: 'F: Fetch', cells: ['F1', 'F2', { t: 'F2' }, { t: 'F2' }, { t: 'F2' }, 'F3', '', '', ''] },
-          { label: 'D: Decode', cells: ['', 'D1', { t: 'idle', dim: true }, { t: 'idle', dim: true }, { t: 'idle', dim: true }, 'D2', 'D3', ''] },
-          { label: 'E: Execute', cells: ['', '', 'E1', { t: 'idle', dim: true }, { t: 'idle', dim: true }, { t: 'idle', dim: true }, 'E2', 'E3'] },
-          { label: 'W: Write', cells: ['', '', '', 'W1', { t: 'idle', dim: true }, { t: 'idle', dim: true }, { t: 'idle', dim: true }, 'W2'] },
+          { label: 'D: Decode', cells: ['', 'D1', { t: 'idle', dim: true }, { t: 'idle', dim: true }, { t: 'idle', dim: true }, 'D2', 'D3', '', ''] },
+          { label: 'E: Execute', cells: ['', '', 'E1', { t: 'idle', dim: true }, { t: 'idle', dim: true }, { t: 'idle', dim: true }, 'E2', 'E3', ''] },
+          { label: 'W: Write', cells: ['', '', '', 'W1', { t: 'idle', dim: true }, { t: 'idle', dim: true }, { t: 'idle', dim: true }, 'W2', 'W3'] },
         ], caption: 'Stage view of the same event: I2 is available in B1 at the end of cycle 5. Decode idles in cycles 3–5, Execute in 4–6, Write in 5–7. These idle periods are stalls, or bubbles; once created, a bubble moves downstream until it reaches the last stage.' },
         { type: 'think', text: [
           'Two shapes of the same event: the **instruction view** (long F2 cell) and the **stage view** (idle diagonal). Exams accept either, but the stage view is what “show which stages occur during each clock cycle” demands. Remember the one-way rule: a bubble only moves **downstream**; the fetch stage just stops until data arrives.',
+        ] },
+        { type: 'practice', prompt: 'In a four-stage pipeline I1 starts F in cycle 1, and I2 takes three cycles total to fetch. When does I2 enter Decode? When does I3 finish if there are no other stalls?', blocks: [
+          { type: 'answer', text: 'F2 occupies cycles 2–4, so D2=5 and W2=7. F3 starts in cycle 5, so W3=8 instead of 6. Three total fetch cycles add two stall cycles.' },
         ] },
       ],
     },
@@ -176,6 +184,9 @@ export default {
         { type: 'think', text: [
           'Recipe for spotting one: look for a resource (memory port, register-file write port, one ALU) and two instructions wanting it **in the same column** of the table. Then either delay the later instruction (what the table shows) or name the duplicate hardware that removes the conflict.',
         ] },
+        { type: 'practice', prompt: 'In a five-stage IF/ID/EX/MEM/WB machine with one memory port, I1 is a load fetched in cycle 1. Can I4 be fetched in cycle 4? What change avoids the conflict?', blocks: [
+          { type: 'answer', text: 'I1 reads data in MEM in cycle 4. With one shared port, the load and I4’s fetch conflict. Give the load priority and postpone fetch, or use separate instruction and data ports/caches.' },
+        ] },
       ],
     },
     {
@@ -189,7 +200,11 @@ export default {
         ] },
         { type: 'p', text: 'Two multiplexers at the ALU inputs select the destination-bus value instead of the SRC1/SRC2 register contents when forwarding is active.' },
         { type: 'think', text: [
-          'Forwarding fixes ALU→ALU dependencies for free, but **not load-use**: if I1 is a Load, its result only appears after the memory stage (M), so even with forwarding the consumer must stall one cycle — the classic Fall 2022 question, and the reason hazard-detection units still exist. Say this explicitly when a question asks “can forwarding alone resolve it?”.',
+          'With the indicated bypass, an ALU→ALU dependency needs no stall. In a classic 5-stage pipeline with EX/MEM and MEM/WB forwarding, an adjacent ALU consumer of a load still needs one stall: the value arrives at the end of MEM, too late for EX in that same cycle — the classic Fall 2022 question, and the reason hazard-detection units still exist. Say this explicitly when a question asks “can forwarding alone resolve it?”.',
+        ] },
+        { type: 'practice', prompt: 'For LW R2,0(R1) followed by ADD R3,R2,R4 (destination first), fill in the two EX cycles using a 5-stage MIPS pipeline with full forwarding. How do they change if LW is replaced by an ALU instruction writing R2?', blocks: [
+          { type: 'timing', columns: 7, rows: [{ label: 'LW', cells: ['IF', 'ID', 'EX', 'MEM', 'WB', '', ''] }, { label: 'ADD', cells: ['', 'IF', 'ID', 'hold ID', 'EX', 'MEM', 'WB'] }], caption: 'The hold in cycle 4 inserts a bubble into EX while the load advances to MEM.' },
+          { type: 'answer', text: 'Producer EX=3. With a load, data is ready after MEM in cycle 4, so ADD stalls and uses EX in cycle 5. With an ALU producer, its result is ready after EX in cycle 3 and ADD uses EX in cycle 4.' },
         ] },
       ],
     },

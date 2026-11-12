@@ -19,14 +19,14 @@ export default {
     {
       heading: 'Multiple-bus organization (three-bus datapath, Figure 7.8)',
       blocks: [
-        { type: 'p', text: 'A single internal bus allows only **one data transfer per clock cycle**, which forces long control sequences. Commercial processors therefore provide multiple internal paths so several transfers happen in parallel — the **multiple-bus organization**.' },
+        { type: 'p', text: 'A single internal bus allows only **one source to drive the bus per clock cycle**, which forces long control sequences. Commercial processors therefore provide multiple internal paths so several transfers happen in parallel — the **multiple-bus organization**.' },
         { type: 'diagram', id: 'threeBus', caption: 'Figure 7.8 — three-bus organization of the datapath. Check every arrow against the direction table below before you move on.' },
         { type: 'list', items: [
           'All general-purpose registers are combined into one block, the **register file**, with **three ports**: two output ports driving buses A and B (two registers readable simultaneously) and one input port loading a register from bus C.',
           'Buses A and B carry the **source operands** to the ALU; the result travels to the destination over **bus C**.',
           'The ALU can pass an operand through unmodified — control signals `R = A` or `R = B` — which is how a register reaches a bus on the other side of the ALU.',
           'The **incrementer** unit increments the PC by 4 on its own path (the Constant-4 path at the ALU multiplexer can also increment other addresses, e.g. in multiple load/store instructions).',
-          'Three buses **remove the need for the temporary registers Y and Z** that a single-bus datapath needs — both operands and the destination move in one cycle.',
+          'Bus C carries a combinational ALU result. Assert the destination’s input enable during the same step, while the source outputs and ALU control are active. Three buses **remove the need for the temporary registers Y and Z** that a single-bus datapath needs — both operands and the destination move in one cycle.',
         ] },
         { type: 'table', head: ['Connection', 'Direction'], rows: [
           ['GPR ↔ buses', 'GPR → A, B (read); GPR ← C (write)'],
@@ -38,9 +38,12 @@ export default {
         ], caption: 'The direction summary table from the slides — memorize it; both the drawing and the control-sequence questions depend on it.' },
         { type: 'think', text: [
           'Where do `R = A` / `R = B` come from? MAR is only reachable from bus C, but PC sits on bus B. To move the PC’s value into MAR you must pass it **through** the ALU: assert `R = B`, which copies bus B to bus C unchanged. That is why every fetch step begins `PCout, R = B, MARin`.',
-          'When checking the figure: MDR is the only block with **external** connections (memory data lines in/out); MAR only ever drives the external address lines; the instruction decoder consumes the IR. Anything else drawn crossing the memory bus is wrong.',
+          'When checking the figure: MDR connects to the external data lines; MAR drives the external address lines; the instruction decoder consumes the IR. Anything else drawn crossing the memory bus is wrong.',
         ] },
         { type: 'exam', text: ['“Illustrate the Three Bus CPU Datapath organization and explain each component’s purpose” — Spring 2023 Q1(c), and the first half of Spring 2024 Q2(b). Draw Figure 7.8 with the direction table beside it.'] },
+        { type: 'practice', prompt: 'Why does PC → MAR use R=B? Could you copy IR → MAR with the same ALU select?', blocks: [
+          { type: 'answer', text: 'PC drives B, MAR reads C, so R=B passes the PC value across the ALU. IR drives A, so IR → MAR needs SelectA and R=A instead.' },
+        ] },
       ],
     },
     {
@@ -49,7 +52,7 @@ export default {
         { type: 'p', text: 'The slides’ worked example, `Add R4, R5, R6`, in four steps:' },
         { type: 'table', head: ['Step', 'Action'], rows: [
           ['1', '`PCout, R=B, MARin, Read, IncPC`'],
-          ['2', '`WMFC`'],
+          ['2', '`MDRinE, WMFC`'],
           ['3', '`MDRoutB, R=B, IRin`'],
           ['4', '`R4outA, R5outB, SelectA, Add, R6in, End`'],
         ], boldFirst: true, caption: 'Figure 7.9 — the standard 3-step fetch, then a single-step execute: both operands and the destination move in one cycle.' },
@@ -57,27 +60,27 @@ export default {
         { type: 'p', text: '**1) Add (R1), R2** — load from the address in R1 and add R2 (result to R2):' },
         { type: 'table', head: ['#', 'Operational step', 'Control signals', 'T'], rows: [
           ['1', 'PC → BusB → ALU → BusC → MAR', '`PCout, R=B, MARin, Read, IncPC`', 'T1'],
-          ['2', 'Wait for MFC', '`WMFC`', 'T2'],
+          ['2', 'Memory → MDR; wait for MFC', '`MDRinE, WMFC`', 'T2'],
           ['3', 'MDR → BusB → ALU → BusC → IR', '`MDRoutB, R=B, IRin`', 'T3'],
           ['4', 'R1 → BusB → ALU → BusC → MAR', '`R1outB, R=B, MARin, Read`', 'T4'],
-          ['5', 'Wait for MFC', '`WMFC`', 'T5'],
-          ['6', 'MDR → BusB and R2 → BusA into the ALU, add', '`MDRoutB, R2outA, SelectA, Add`', 'T6'],
-          ['7', 'Result → BusC → R2', '`R2in, End`', 'T7'],
+          ['5', 'Memory → MDR; wait for MFC', '`MDRinE, WMFC`', 'T5'],
+          ['6', 'ALU adds R2 and MDR; latch bus C in R2', '`MDRoutB, R2outA, SelectA, Add, R2in, End`', 'T6'],
         ], boldFirst: true },
         { type: 'p', text: '**2) Add R1, (R2)** — store the sum into memory at the address in R2 (fetch as above, then):' },
         { type: 'table', head: ['#', 'Operational step', 'Control signals', 'T'], rows: [
-          ['7', 'R2 → BusB → ALU → BusC → MAR', '`R2outB, R=B, MARin, Read`', 'T4'],
-          ['8–10', 'WMFC, mem → MDR', '`WMFC, MDRinE`', 'T5'],
-          ['11–13', 'MDR → BusB, R1 → BusA, add', '`MDRoutB, R1outA, SelectA, Add`', 'T6'],
-          ['14–15', 'Result → BusC → MDR, write', '`MDRin, Write`', 'T7'],
-          ['16–17', 'MDR → external bus, wait, end', '`MDRoutE, WMFC, End`', 'T8'],
+          ['4', 'R2 → BusB → ALU → BusC → MAR', '`R2outB, R=B, MARin, Read`', 'T4'],
+          ['5', 'Memory → MDR; wait for MFC', '`MDRinE, WMFC`', 'T5'],
+          ['6', 'ALU adds R1 and MDR; latch bus C in MDR', '`MDRoutB, R1outA, SelectA, Add, MDRin`', 'T6'],
+          ['7', 'Drive the new MDR value; start write at the unchanged MAR address', '`MDRoutE, Write`', 'T7'],
+          ['8', 'Keep write data available until completion', '`MDRoutE, WMFC, End`', 'T8'],
         ], boldFirst: true },
         { type: 'p', text: '**3) Add R1, (R2)+, R3** — auto-increment addressing: after using R2 as the pointer, R2 is incremented:' },
         { type: 'table', head: ['#', 'Operational step', 'Control signals', 'T'], rows: [
-          ['1–6', 'Fetch; read operand at [R2] into R4', '`PCout…IRin`, then `R2outB, R=B, MARin, Read`, `WMFC, MDRinE`, `MDRoutB, R=B, R4in`', 'T1–T6'],
-          ['12–15', 'R2 → BusB, select Constant 4, add → R2 (auto-increment)', '`R2outB, Select4, Add, R2in`', 'T7–T8'],
-          ['16–18', 'R1 → BusA, R4 → BusB, add → R3', '`R1outA, R4outB, SelectA, Add, R3in`', 'T8'],
-          ['19–20', 'End', '`End`', 'T9'],
+          ['1–3', 'Fetch instruction', 'Standard fetch shown above', 'T1–T3'],
+          ['4', 'Read at the old R2 address', '`R2outB, R=B, MARin, Read`', 'T4'],
+          ['5', 'Memory → MDR; wait for MFC', '`MDRinE, WMFC`', 'T5'],
+          ['6', 'Increment R2 by one 4-byte word; MDR keeps the operand', '`R2outB, Select4, Add, R2in`', 'T6'],
+          ['7', 'ALU adds R1 and the saved operand; latch bus C in R3', '`R1outA, MDRoutB, SelectA, Add, R3in, End`', 'T7'],
         ], boldFirst: true },
         { type: 'note', title: 'Merging steps — the two rules from class', text: [
           'Two transfers may share one time step **only if they do not drive the same bus as output** (one `out` per bus) — e.g. `R1outA` and `R2outB` combine; two outs on bus B never do.',
@@ -85,9 +88,13 @@ export default {
           'Same clock cycle, same bus, **different values** → forbidden. Same value on a bus read by several destinations → fine.',
         ] },
         { type: 'think', text: [
-          'Recipe for writing any three-bus sequence: (1) write the standard 3-step fetch — it never changes. (2) Find every memory access the instruction needs and give each a `MARin + Read/Write` step followed by `WMFC + MDRinE/MDRoutE`. (3) The actual ALU work is one step: source A out, source B out, SelectA, the operation, destination in. (4) Auto-increment/decrement of a pointer register is a separate ALU step using `Select4`. (5) End. Then compress using the merge rules.',
+          'Recipe for writing any three-bus sequence: (1) write the standard 3-step fetch — it never changes. (2) For a read, latch the address and start Read, then wait with MDRinE. For a write, have the address in MAR and the data in MDR before driving the external data bus and starting Write; wait for MFC. Follow the given memory-interface convention. (3) The actual ALU work is one step: source A out, source B out, SelectA, the operation, destination in. (4) Auto-increment/decrement of a pointer register is a separate ALU step using `Select4`. (5) End. Then compress using the merge rules.',
         ] },
         { type: 'exam', text: ['The most repeated big question in the bank: **Fall 2023 SUB (R1),(R2) · Spring 2023 MUL (R1),(R2) · Spring 2024 MUL R1, 4(R2) + hardwired signal generation**. Note: the 2023 papers print a single-bus figure for this question — their solutions are in the question bank; the method above is the three-bus version the current syllabus teaches.'] },
+        { type: 'practice', prompt: 'After the standard fetch, write the execute steps for Move (R3),R5. R3 = 100 and M[100] = 42. Name what each step latches.', blocks: [
+          { type: 'p', text: 'MAR holds 100, then MDR holds 42 when memory completes. The pass-through must remain active while R5 latches bus C.' },
+          { type: 'answer', text: 'R5 finishes with 42; R3 is unchanged. T4: R3outB, R=B, MARin, Read. T5: MDRinE, WMFC. T6: MDRoutB, R=B, R5in, End.' },
+        ] },
       ],
     },
     {
@@ -126,6 +133,9 @@ export default {
           'To build any one signal, list the (step, instruction) pairs where it must be 1 — that table *is* the Boolean function. Buffer the pairs that apply to all instructions, AND-gate the pairs that need a specific instruction, OR everything together.',
         ] },
         { type: 'exam', text: ['**Fall 2024 Q1(d)**: this block diagram with a 16-instruction processor, 4th instruction, 8 steps. **Spring 2024 Q2(b)** (second half): sketch the gates for `PCin, R1in, MARin, MDRinE`. **Fall 2023 Q1(a)**: both control-unit types with figures.'] },
+        { type: 'practice', prompt: 'A 16-opcode CPU has up to eight control steps. A signal X is required in T2 for every instruction, T4 for ADD, and T6 for STORE only when MFC is true. Give the two decoder widths and draw or write X.', blocks: [
+          { type: 'answer', text: 'A 4-to-16 opcode decoder and a 3-to-8 step decoder (assuming eight encoded counter states). X = T2 OR (T4 AND ADD) OR (T6 AND STORE AND MFC).' },
+        ] },
       ],
     },
     {
@@ -150,6 +160,9 @@ export default {
           'Why is it slower? Every control-signal step costs a **control-store read** before the datapath can act, while hardwired logic is just gate delay.',
         ] },
         { type: 'exam', text: ['**Spring 2024 Q1(d)**: Figure 7.18 plus the Branch<0 walkthrough — N = 1 means negative; the generator checks N, and if N = 0 execution continues at microinstruction 0 instead of jumping to L1.'] },
+        { type: 'practice', prompt: 'A control word at µPC = 11 tests N. Its next-address field selects µaddress 40 if N=1; otherwise the sequencer increments. Give the next µPC for each N and explain what happens to the instruction PC.', blocks: [
+          { type: 'answer', text: 'N=1 gives 40; N=0 gives 12. The sequencer changes the microinstruction address. The instruction PC changes only if a control word explicitly causes a datapath transfer into it.' },
+        ] },
       ],
     },
     {

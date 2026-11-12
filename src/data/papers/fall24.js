@@ -1,4 +1,4 @@
-// Fall 2024 — pages 5-6 of the paper (pages 1-4 were not in the folder).
+// Fall 2024 — both CA paper pages (pages 5–6 in the multi-course scan).
 // Hamacher-track syllabus; the closest paper to the current slide set.
 export default {
   id: 'fall24',
@@ -38,13 +38,13 @@ export default {
         { type: 'diagram', id: 'ramChip', caption: 'Redraw with 512 word lines (W0…W511), a 9-to-512 address decoder, a 512 × 16 cell array, and 16 sense/write circuits feeding D15…D0, plus R/W̄ and CS.' },
         { type: 'p', text: '**Step-by-step read of the 8th word** (assume R/W̄ = 1 and CS active):' },
         { type: 'steps', items: [
-          'The processor puts the address of word 8 on the address lines: 8 = `000001000` (9 bits).',
-          'The **address decoder** decodes A0–A8 and drives exactly one word line high: **W8**.',
-          'All 16 cells of row 8 are connected to W8 → they place their stored bits on their bit lines (one per column).',
+          'With the first word at address 0, the **eighth word** has address 7 = `000000111` (9 bits). If “word 8” is an explicit address label, use address 8 = `000001000` instead.',
+          'The **address decoder** decodes A0–A8 and drives exactly one word line high: **W7** for address 7.',
+          'All 16 cells of row 7 are connected to W7 → they place their stored bits on their bit lines (one per column).',
           'The **sense/write circuits** (one per column) detect/amplify the small cell signals.',
           'The 16 bits appear in parallel on the data input/output lines **D15…D0** — the word is now available to the processor/MDR.',
         ] },
-        { type: 'answer', text: ['512 × 16 organization, 9-to-512 decoder, and for the 8th word: A0–A8 = 000001000 → decoder selects W8 → row-8 cells drive the 16 bit lines → sense circuits output the word on D15–D0.'] },
+        { type: 'answer', text: ['512 × 16 organization, 9-to-512 decoder, and for the eighth word (counting from W0): A8…A0 = 000000111 → W7 → row-7 cells drive the 16 bit lines → sense circuits output the word on D15–D0.'] },
       ],
     },
     {
@@ -81,7 +81,7 @@ export default {
         { type: 'p', text: '**With the given numbers:** the instruction decoder outputs 16 lines (INS1…INS16, one active for the instruction in IR); the step decoder outputs T1…T8 for the currently executing step of instruction 4. The control signals for step *k* of INS4 are the outputs of the encoder for the input pair (INS4, Tk).' },
         { type: 'p', text: 'Each signal is a sum-of-products of timing and instruction signals. Example — a signal that must be on during T1 for **every** instruction and during T5 **only** for instruction 4:' },
         { type: 'pre', text: 'X = T1 + T5 · INS4' },
-        { type: 'diagram', id: 'controlSignalGates', caption: 'Gate realization: a buffer for the T1 term, an AND gate for T5·INS4, one OR gate — exactly the class-notes drawing for Zin = T1 + T6·ADD + T4·BRANCH.' },
+        { type: 'diagram', id: 'controlSignalGates', caption: 'The slide figure illustrates the sum-of-products pattern. For example, X = T1 OR (T5 AND INS4) uses one AND gate feeding an OR gate with T1. The question supplies no specific signal schedule.' },
         { type: 'steps', items: [
           'While INS4 executes, the step counter advances T1 → T2 → … → T8, one per clock cycle.',
           'At each Tk the encoder activates the (INS4, Tk) product terms → the control signals for that step (e.g. step 1: `PCout, R=B, MARin, Read, IncPC`; final step adds `End`).',
@@ -106,7 +106,7 @@ NEXT   SHIFT RIGHT R2
 (IV) If branch prediction is used, discuss which prediction would be more beneficial for this program: predict branch taken or predict branch not taken. [2]`,
       pattern: 'The flagship repeated question: branch penalty on the same loop appears in Spring 2023 Q1(e) and the class notes. Master this one and both variants are free marks.',
       think: [
-        'Anchor on the slides’ rule: **penalty = how many fetch slots are wasted before the target can be fetched**. Two-stage → the branch resolves during its Execute cycle, so one wrong fetch (NEXT’s first instruction) → 1. Four-stage with E-stage resolution → two wrong fetches → 2. For delayed branch, look at what may legally move into the slot(s): `DEC R3` must stay **before** the branch (it produces the flags BRANCH tests), but `SHIFT LEFT R2` is independent — it can fill one slot.',
+        'Anchor on the slides’ rule: **penalty = how many fetch slots are wasted before the target can be fetched**. Two-stage → the branch resolves during its Execute cycle, so one wrong fetch (NEXT’s first instruction) → 1. Four-stage with E-stage resolution → two wrong fetches → 2. For delayed branch, look at what may legally move into the slot(s): `DEC R3` must stay **before** the branch (it produces the flags BRANCH tests), but ADD and SHIFT LEFT can move together in their original order if the branch reads DEC’s flags and no later instruction needs those flags after the slots.',
       ],
       solution: [
         { type: 'h', text: 'I — Two-stage pipeline (F | E)' },
@@ -131,26 +131,21 @@ NEXT   SHIFT RIGHT R2
         ], caption: 'The branch resolves at the end of E4 (cycle 6). Instructions fetched in cycles 5 and 6 (SHIFT RIGHT, INC R4) are both on the wrong path and are discarded; the target is fetched in cycle 7.' },
         { type: 'answer', text: ['Branch penalty = 2 clock cycles per iteration (except the last).'] },
         { type: 'h', text: 'III — Delayed branching (four-stage)' },
-        { type: 'p', text: 'With E-stage resolution there are **two delay slots** after the branch; instructions placed there are always executed, taken or not. `DEC R3` must stay before the branch (it sets the condition), and `SHIFT RIGHT R2`/`INC R4` belong to NEXT — moving them into the slots would run them every iteration and break the logic. But `SHIFT LEFT R2` is independent of the branch decision and of the loop-exit path, so it can move into the first slot; the second slot gets a NOP:' },
-        { type: 'table', head: ['Original', 'Reordered'], rows: [
-          ['`LOOP  ADD R1, R2`', '`LOOP  ADD R1, R2`'],
-          ['`      SHIFT LEFT R2`', '`      DEC R3`'],
-          ['`      DEC R3`', '`      BRANCH > 0 LOOP`'],
-          ['`      BRANCH > 0 LOOP`', '`      SHIFT LEFT R2`  ← delay slot 1'],
-          ['`NEXT  SHIFT RIGHT R2`', '`      NOP`  ← delay slot 2'],
-          ['`      INC R4`', '`NEXT  SHIFT RIGHT R2`'],
-          ['', '`      INC R4`'],
-        ] },
-        { type: 'timing', columns: 10, rows: [
-          { label: '2nd-last iter: ADD', cells: ['F', 'D', 'E', 'W', '', '', '', '', '', ''] },
-          { label: 'DEC R3', cells: ['', 'F', 'D', 'E', 'W', '', '', '', '', ''] },
-          { label: 'BRANCH', cells: ['', '', 'F', 'D', 'E', 'W', '', '', '', ''] },
-          { label: 'SHIFT LEFT (slot 1)', cells: ['', '', '', 'F', 'D', 'E', 'W', '', '', ''] },
-          { label: 'NOP (slot 2)', cells: ['', '', '', '', 'F', 'D', 'E', 'W', '', ''] },
-          { label: 'last iter: ADD', cells: ['', '', '', '', '', 'F', 'D', 'E', 'W', ''] },
-          { label: 'DEC R3', cells: ['', '', '', '', '', '', 'F', 'D', 'E', 'W'] },
-        ], caption: 'Last two iterations: the pipeline never stalls — every slot carries a real instruction except the single NOP. The branch target fetch begins right after the branch’s Execute, and the slot instructions cover exactly the cycles the penalty used to waste.' },
-        { type: 'answer', text: ['After delayed branching the penalty drops from 2 cycles to 1 cycle per iteration (only the unfilled NOP slot is lost); the logic is unchanged because the slot instruction executes in every pass, as it did before the branch inside the loop body.'] },
+        { type: 'p', text: 'With E-stage resolution there are two delay slots, executed on either path. Keep DEC before the branch because it sets the branch condition. DEC modifies R3 only, so move ADD and SHIFT LEFT together after the branch, preserving their order and the dependence of the shift on the sum. Move LOOP to DEC. This assumes DEC supplies the flags the branch needs, and later code does not need DEC’s flags to survive the two slots.' },
+        { type: 'pre', text: 'LOOP   DEC R3\n       BRANCH > 0 LOOP\n       ADD R1, R2      ; slot 1\n       SHIFT LEFT R2   ; slot 2\nNEXT   SHIFT RIGHT R2\n       INC R4' },
+        { type: 'timing', columns: 13, rows: [
+          { label: 'Penultimate DEC', cells: ['F', 'D', 'E', 'W', '', '', '', '', '', '', '', '', ''] },
+          { label: 'Branch (taken)', cells: ['', 'F', 'D', 'E', '', '', '', '', '', '', '', '', ''] },
+          { label: 'ADD (slot 1)', cells: ['', '', 'F', 'D', 'E', 'W', '', '', '', '', '', '', ''] },
+          { label: 'SHIFT LEFT (slot 2)', cells: ['', '', '', 'F', 'D', 'E', 'W', '', '', '', '', '', ''] },
+          { label: 'Final DEC', cells: ['', '', '', '', 'F', 'D', 'E', 'W', '', '', '', '', ''] },
+          { label: 'Branch (falls through)', cells: ['', '', '', '', '', 'F', 'D', 'E', '', '', '', '', ''] },
+          { label: 'ADD (slot 1)', cells: ['', '', '', '', '', '', 'F', 'D', 'E', 'W', '', '', ''] },
+          { label: 'SHIFT LEFT (slot 2)', cells: ['', '', '', '', '', '', '', 'F', 'D', 'E', 'W', '', ''] },
+          { label: 'SHIFT RIGHT (NEXT)', cells: ['', '', '', '', '', '', '', '', 'F', 'D', 'E', 'W', ''] },
+          { label: 'INC R4', cells: ['', '', '', '', '', '', '', '', '', 'F', 'D', 'E', 'W'] },
+        ], caption: 'Both slots do useful work. The taken branch redirects to DEC in cycle 5. After the final branch, the slots still execute and fetch continues at NEXT in cycle 9. The diagram assumes bypassing prevents additional data stalls.' },
+        { type: 'answer', text: ['Both delay slots can be filled under the stated dependencies, so the branch penalty is 0 wasted slots. If only SHIFT LEFT can be moved under an additional scheduling constraint, put a NOP in the other slot: one wasted cycle per execution of the branch.'] },
         { type: 'h', text: 'IV — Which prediction?' },
         { type: 'p', text: 'The branch sits at the **bottom (end) of the loop** and is taken on every pass except the final one (R3 counts down to 0). So “predict **taken**” is correct (n−1) of n times: the fetch unit should start fetching at the branch target immediately, while “predict not taken” would fetch the wrong NEXT path (n−1) times.' },
         { type: 'answer', text: ['Predict **branch taken** — a loop-bottom branch is taken in every iteration except the last.'] },
@@ -166,15 +161,15 @@ NEXT   SHIFT RIGHT R2
       solution: [
         { type: 'p', text: '**Given:** cache 128 blocks × 32 words; memory 8K = 2^13 blocks of 32 words; 18-bit word address. Memory block number of the given address = top 13 bits = `1111111100001` = 8161.' },
         { type: 'h', text: 'Direct mapping — Tag (6) | Block (7) | Word (5)' },
-        { type: 'diagram', id: 'directMap', caption: 'Direct-mapped organization with the field widths of this question.' },
+        { type: 'diagram', id: 'directMap', caption: 'Template using the Chapter 5 example. For this question, redraw the address fields as 6 tag, 7 line and 5 word bits.' },
         { type: 'pre', text: 'address  111111110000111100\n          ────── ─────── ─────\nsplit     111111 1100001  11100\n           tag=63  block=97 word=28' },
         { type: 'p', text: 'Check: memory block 8161 mod 128 = 97 ✓. The block is stored in **cache block 97** with tag 111111; the referenced word is **word 28** of that block. Hit test: compare the address tag with the 6 stored tag bits of block 97.' },
         { type: 'h', text: 'Associative mapping — Tag (13) | Word (5)' },
-        { type: 'diagram', id: 'associativeMap', caption: 'Fully associative organization: any block anywhere, full block number as tag.' },
+        { type: 'diagram', id: 'associativeMap', caption: 'The Chapter 5 template shows parallel tag checks. In this question, label the tag 13 bits and the word field 5 bits.' },
         { type: 'pre', text: 'address  111111110000111100\n          ───────────── ─────\nsplit     1111111100001  11100\n           tag = block 8161  word = 28' },
         { type: 'p', text: 'The block may occupy **any** of the 128 cache positions (chosen by the replacement algorithm); the 13-bit tag 1111111100001 is stored with it. Hit test: **all 128 tags compared in parallel** with 1111111100001. The referenced word is **word 28** of the block wherever it resides.' },
         { type: 'h', text: 'Set-associative mapping (4 blocks/set) — Tag (8) | Set (5) | Word (5)' },
-        { type: 'diagram', id: 'setAssocMap', caption: 'Four-way set-associative: 128 blocks ÷ 4 = 32 sets.' },
+        { type: 'diagram', id: 'setAssocMap', caption: 'The Chapter 5 template shows two ways. For this question, draw four ways per set, 32 sets and 8/5/5-bit fields.' },
         { type: 'pre', text: 'address  111111110000111100\n          ──────── ───── ─────\nsplit     11111111 00001 11100\n           tag=255  set=1  word=28' },
         { type: 'p', text: 'Check: 8161 mod 32 = 1 ✓. The block maps to **set 1** and may occupy **any of the 4 block positions** inside that set, with stored tag 11111111. Hit test: compare the 8-bit tag against the **4 tags of set 1 only**. Referenced word: **word 28**.' },
         { type: 'answer', text: [
@@ -201,9 +196,9 @@ NEXT   SHIFT RIGHT R2
         ] },
         { type: 'steps', items: [
           'All three assert Start-Arbitration and place their IDs on the arbitration lines. Line pattern = **0101 OR 1100 OR 1001 = 1111**.',
-          '**D5 (0101)** compares 0101 with 1111 from the MSB: bit 3 is 0 on the line and 1 → difference at the MSB → D5 transmits 0s at that and all lower positions: drops to **0000**.',
-          '**D9 (1001)** compares 1001 with 1111: bit 3 matches (1), bit 2 differs (0 vs 1) → drops bit 2 and below: **1000**.',
-          '**D12 (1100)** compares 1100 with 1111: bits 3, 2 match; bit 1 differs (0 vs 1) → drops bit 1 and bit 0 (already 0): stays **1100**.',
+          '**D5 (0101)** compares 0101 with 1111 from the MSB: its bit 3 is 0 while the bus line is 1 → difference at the MSB → D5 transmits 0s at that and all lower positions: drops to **0000**.',
+          '**D9 (1001)** and **D12 (1100)** both survive bit 3.',
+          'After settling bit 3, the bus carries 1101. At bit 2 D12 has 1 and D9 has 0, so D9 drops bit 2 and below, leaving 1000 on its output. The lower bits from eliminated contenders are ignored.',
           'New line pattern = 0000 OR 1000 OR 1100 = **1100** — exactly D12’s ID. D9 (1000 ≠ 1100, differs at bit 2) and D5 (0000) have lost; only D12’s pattern equals the lines.',
         ] },
         { type: 'answer', text: ['**Device 12 wins** and becomes the bus master — as expected, the arbitration implements “highest ID wins”.' ] },
@@ -212,35 +207,36 @@ NEXT   SHIFT RIGHT R2
     {
       id: 'Q3b', topic: 'hazards', marks: '[4]', repeats: 4,
       q: 'Identify if the following two instructions will cause a data hazard in a four-stage pipelining by drawing necessary figures.\nSUB R1, R3, R2\nMUL R2, R3, R4\nIf it causes a data hazard, explain how it can be handled in hardware. (The explanation must be related to the given instructions.)',
-      pattern: 'Fall 2023 and the class notes use the Mul→Add pair (a real hazard); this variant tests whether you can prove the negative case too.',
+      pattern: 'The same forwarding method as the Chapter 8 MUL→ADD example. Identify the producer and consumer from the operand convention.',
+
       think: [
-        'A data hazard exists when the **destination of one instruction is a source of the next** (RAW). SUB writes R1; MUL reads R3 and R4 — no overlap in that direction. MUL writes R2 which SUB *read*, but SUB reads first (in-order pipeline: its D happens cycles before MUL’s W) — a WAR situation an in-order 4-stage pipeline does not stall on. Draw the table to prove both statements.',
+        'Use the Chapter 8 source, source, destination convention. Underline the destination of SUB and the sources of MUL. If they overlap, compare when SUB produces that register with when MUL needs it.',
       ],
       solution: [
-        { type: 'p', text: 'Hazard test: RAW hazard ⟺ destination(I1) ∈ sources(I2). Here destination(I1) = **R1**; sources(I2) = **R3, R4** → no overlap → **no data hazard**.' },
-        { type: 'timing', columns: 8, rows: [
-          { label: 'I1  SUB R1,R3,R2  (R1 ← R3−R2)', cells: ['F1', 'D1', 'E1', 'W1', '', '', '', ''] },
-          { label: 'I2  MUL R2,R3,R4  (R2 ← R3×R4)', cells: ['', 'F2', 'D2', 'E2', 'W2', '', '', ''] },
-        ], caption: 'D2 (cycle 3) needs R3 and R4 — both untouched by I1, which writes R1 only at W1 (cycle 4). No stall: I2 proceeds on schedule. The reverse overlap (I2 writes R2, which I1 read in D1, cycle 2) finishes reading before the write (cycle 5) — safe in an in-order pipeline.' },
-        { type: 'p', text: '**Had there been a hazard** — e.g. if the second instruction were `MUL R1, R3, R4` (reading R1): I2’s D2 could not complete before W1, and the hardware fix is **operand forwarding**: the subtracted result is available at the ALU output at the end of E1, so it is routed directly from the ALU/RSLT latch into the ALU input for E2, and I2 proceeds without waiting for W1.' },
-        { type: 'diagram', id: 'forwarding', caption: 'The forwarding hardware: SRC1/SRC2 buffers and the destination feedback MUXes at the ALU inputs.' },
-        { type: 'answer', text: ['No data hazard: SUB’s destination R1 is not a source of MUL, and MUL’s destination R2 is read by SUB before it is overwritten. The timing figure proves it; forwarding is the hardware fix that would apply if the registers did overlap.'] },
+        { type: 'p', text: 'SUB R1,R3,R2 writes R2 ← R1 − R3. MUL R2,R3,R4 reads R2 and R3 and writes R4. The shared R2 gives a **read-after-write** dependency. In an unmodified pipeline, MUL decodes in cycle 3 while SUB has yet to write R2.' },
+        { type: 'timing', columns: 6, rows: [
+          { label: 'SUB', cells: ['F', 'D', 'E', 'W', '', ''] },
+          { label: 'MUL without forwarding', cells: ['', 'F', 'D', { t: 'D (retry)', box: true }, 'E', 'W'] },
+          { label: 'MUL with forwarding', cells: ['', 'F', 'D', { t: 'E (bypass R2)', box: true }, 'W', ''] },
+        ], caption: 'Without forwarding, this chart assumes a register write is visible to Decode in the same cycle. With forwarding, the subtraction result produced at the end of cycle 3 bypasses the register file and feeds MUL’s ALU in cycle 4.' },
+        { type: 'diagram', id: 'forwarding', caption: 'Compare SUB’s destination to both MUL source register numbers. Select the buffered subtraction result for the ALU input that needs R2.' },
+        { type: 'answer', text: 'There is a RAW hazard on R2 with the course’s destination-last syntax. Forward SUB’s E-stage result to MUL’s E input to avoid a stall. If the examiner explicitly specifies destination-first syntax, these operands instead produce a WAR dependency on R2, which is safe in this in-order pipeline.' },
       ],
     },
     {
       id: 'Q3c', topic: 'cache-rw', marks: '[4]', repeats: 1,
       q: 'Explain how the processor handles read hit, write hit and read miss, write miss in cache memory. Discuss all possible techniques.',
-      think: 'Two axes: hit/miss × read/write. The read column is one line each; the write column is where the marks are — write-through vs write-back for hits, and the two different miss behaviours those protocols produce.',
+      think: 'Two axes: hit/miss × read/write. The read column is one line each; the write column is where the marks are — write-through vs write-back for hits, and write-allocate vs no-write-allocate on misses.',
       solution: [
         { type: 'table', head: ['Event', 'Handling'], rows: [
           ['Read hit', 'Data is obtained directly from the cache — fastest case.'],
           ['Read miss', 'The block containing the word is transferred from main memory into the cache (one word at a time), then the word is forwarded to the processor. Improvement: **load-through / early-restart** — forward the requested word as soon as it arrives, without waiting for the whole block.'],
           ['Write hit — write-through protocol', 'Cache **and** main memory are updated simultaneously; memory is always current, at the cost of a memory write on every write.'],
           ['Write hit — write-back (copy-back) protocol', 'Only the cache copy is updated; the block’s **dirty/modified bit** is set. Main memory is updated only when this block is replaced. Fewer memory writes; memory can be temporarily stale (coherence risk).'],
-          ['Write miss — with write-through', 'Write main memory directly; the cache block may or may not be loaded.'],
-          ['Write miss — with write-back', 'First **bring the block into the cache**, then overwrite the addressed word in the cache (and set the dirty bit) — the rest of the block must be present so later reads see correct neighbours.'],
+          ['Write miss — no-write-allocate', 'Write to the next level without filling this cache. Commonly paired with write-through.'],
+          ['Write miss — write-allocate', 'Fetch the block, then store into it. With write-back, mark it dirty; with write-through, also send the store to the next level.'],
         ] },
-        { type: 'answer', text: ['Read hit: serve from cache. Read miss: fetch block (+ load-through). Write hit: write-through (update both) or write-back (update cache, set dirty bit). Write miss: write-through → update memory directly; write-back → fetch block, then overwrite in cache.'] },
+        { type: 'answer', text: ['Read hit: serve from cache. Read miss: fetch block (+ load-through). Write hit: write-through (update both) or write-back (update cache, set dirty bit). Write miss: allocate and update the cached block, or bypass to the next level. The hit update policy is a separate choice.'] },
       ],
     },
     {

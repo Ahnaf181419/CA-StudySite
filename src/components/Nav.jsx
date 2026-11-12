@@ -20,7 +20,8 @@ export default function Nav({ route }) {
               <a
                 key={id}
                 href={`#/${id}`}
-                className={`press px-3.5 py-2 text-[13.5px] border-b-2 ${active ? 'border-ink font-semibold' : 'border-transparent text-ash hover:text-ink'}`}
+                aria-current={active ? 'page' : undefined}
+                className={`press inline-flex min-h-11 items-center px-3.5 py-2 text-[13.5px] border-b-2 ${active ? 'border-ink font-semibold' : 'border-transparent text-ash hover:text-ink'}`}
               >
                 {label}
               </a>

@@ -51,12 +51,16 @@ export default {
           'The solution to that problem is the interrupt: let the **device** announce readiness.',
         ] },
         { type: 'exam', text: ['Spring 2024 Q3(d) asks for exactly this program with side notes plus the disadvantage and a fix.'] },
+        { type: 'p', text: 'To test a single ready flag, AND the status with 1 shifted left by the bit index, then branch back on zero. For a line echo, check both input-ready and output-ready for each character, and stop on the stated end-of-line character.' },
+        { type: 'practice', prompt: 'Input-ready is bit 2 with bit 0 least significant. Status reads are 0x08, then 0x0C. On which read should you fetch DATAIN?', blocks: [
+          { type: 'answer', text: 'Mask 1 << 2 = 0x04. 0x08 AND 0x04 = 0, so wait. 0x0C AND 0x04 = 0x04, so read DATAIN after the second status read.' },
+        ] },
       ],
     },
     {
       heading: 'Interrupts and the interrupt-service routine',
       blocks: [
-        { type: 'p', text: 'In program-controlled I/O the processor monitors continuously and does nothing useful. The alternative: the device sends a hardware signal — an **interrupt** — on a dedicated bus control line, the **interrupt-request (IRQ)** line. The processor can do other useful work while waiting.' },
+        { type: 'p', text: 'In program-controlled I/O the processor monitors continuously and does nothing useful. The alternative: the device signals an **interrupt request (IRQ)**. The simple bus diagrams use a dedicated control line. The processor can do other useful work while waiting.' },
         { type: 'list', items: [
           'The routine executed in response is the **interrupt-service routine (ISR)**, written by the OS or the device manufacturer.',
           'If the processor is executing the instruction at address i when the interrupt arrives, control must transfer to the ISR, but the PC (holding i+1) must first be **saved in a known location** (the processor stack) so the return-from-interrupt can resume at i+1.',
@@ -88,6 +92,9 @@ export default {
         ], caption: 'Class-note check line: with IE = 1 an IRQ is accepted (✓); with the interrupts disabled, IRQ is ignored (✗) — the ISR runs only in the first case.' },
         { type: 'think', text: [
           'All three answer the same fear — “the still-active IRQ re-triggers immediately”. Approach 1 polices it in software ordering, approach 2 in a saved-and-cleared status bit, approach 3 in the line’s physics. A fourth “summary” fact worth one line in any answer: the full sequence is device raises IRQ → processor interrupts the program → interrupts disabled → device informed (it drops IRQ) → ISR performs the task → interrupts re-enabled → program resumes.',
+        ] },
+        { type: 'practice', prompt: 'An active-high, level-triggered device keeps IRQ high after the ISR returns and IE becomes 1 again. What happens and what should the ISR do before returning?', blocks: [
+          { type: 'answer', text: 'The same pending request may be accepted again. Acknowledge or clear its device source according to the device protocol before restoring interrupt enable. Masking during the ISR prevents nested acceptance but does not clear the level.' },
         ] },
       ],
     },
@@ -121,12 +128,15 @@ export default {
         { type: 'think', text: [
           'For “who is serviced first” questions, first ask **which scheme** the question fixed: shared line → one of the three techniques; separate lines → priority arbitration comparing device priority with the processor’s current priority. Spring 2024 Q3(b) mixes both: D0–D5 in two priority groups — D0, D1, D2 at level 2 and D3, D4, D5 at level 1 — then asks which device wins for three simultaneous-request scenarios. Inside a level: proximity; across levels: the higher group always wins.',
         ] },
+        { type: 'practice', prompt: 'D1 and D2 are in level 3, D0 in level 1. All request and the CPU runs at level 0. The level-3 chain sees D2 before D1. Who wins? Can D1 preempt D2’s ISR under a strictly-higher-priority rule?', blocks: [
+          { type: 'answer', text: 'D2 wins: level 3 outranks level 1 and D2 captures the group’s acknowledge first. D1 has equal priority and waits.' },
+        ] },
       ],
     },
     {
       heading: 'Direct Memory Access (DMA)',
       blocks: [
-        { type: 'p', text: 'Normal transfers go **processor → memory → I/O** and every word costs processor instructions. A special control unit — the **DMA controller**, part of the device’s interface — transfers a block **directly between an I/O device and main memory without continuous processor intervention**:' },
+        { type: 'p', text: 'With programmed or interrupt-driven I/O, CPU instructions move each word between device registers and memory, often through a CPU register. A special control unit — the **DMA controller**, part of the device’s interface — transfers a block **directly between an I/O device and main memory without continuous processor intervention**:' },
         { type: 'diagram', id: 'dmaSystem', caption: 'DMA controllers on the system bus: a disk controller with two DMA channels, a network DMA controller; the keyboard stays program-controlled.' },
         { type: 'list', items: [
           'The controller does what the processor would have done: for **each word** it supplies the memory address and the control signals; for a block it **increments the address and counts the transfers**.',
@@ -142,7 +152,10 @@ export default {
           '**Block / burst mode**: the DMA controller gets **exclusive** use of the bus (and memory) for the whole block — the controller, not the processor, is the **bus master** during the transfer.',
         ] },
         { type: 'think', text: [
-          'Choose by block size and urgency: many short transfers → cycle stealing (processor keeps running, slightly slower); one big contiguous block → burst (cheapest per word, processor frozen meanwhile). If a question asks “when is the processor blocked?”, the precise answer differs between the modes: in cycle stealing only individual cycles are lost; in burst the whole transfer.',
+          'Choose by block size and urgency: many short transfers → cycle stealing (processor keeps running, slightly slower); one big contiguous block → burst (amortizes arbitration overhead). The bus is unavailable to CPU requests during the burst; the CPU can still do work that needs no bus access. Distinguish the program waiting for DMA completion from the CPU waiting to acquire the bus.',
+        ] },
+        { type: 'practice', prompt: 'Program DMA to copy 128 words of four bytes from a device to a byte-addressed buffer at 0x2000. Give the direction, last word start address and event that tells the CPU it is done.', blocks: [
+          { type: 'answer', text: 'Set start 0x2000, count 128 words, direction device→memory. Addresses advance by 4; last word starts at 0x21FC. The controller sets Done and can raise a completion interrupt when enabled.' },
         ] },
       ],
     },
@@ -171,9 +184,12 @@ export default {
         { type: 'diagram', id: 'distributedArb', caption: 'Two devices OR-tied onto the arbitration lines; the highest ID wins bit by bit.' },
         { type: 'p', text: 'Slide example — device A (ID = 5 = 0101) and device B (ID = 6 = 0110) both request: 0101 OR 0110 = **0111** on the lines. A compares 0101 with 0111, sees a difference at bit position 2, and drops to 0100. Lines now carry 0100 OR 0110 = **0110** — exactly B’s ID → **B wins** and becomes bus master.' },
         { type: 'think', text: [
-          'Simulation recipe (Fall 2024 Q3(a) asks it for IDs 5, 12, 9): (1) OR **all** competing IDs onto the lines; (2) walk devices one at a time from the MSB: any device whose own bit is 0 where the line has a 1 drops its low bits to 0; (3) re-OR after each drop; (4) when the line pattern equals exactly one device’s ID, that device is the master. Highest ID always wins — that is the design’s simple fairness rule.',
+          'Simulation recipe (Fall 2024 Q3(a) asks it for IDs 5, 12, 9): (1) OR **all** competing IDs onto the lines; (2) scan bit positions from MSB to LSB. At each position, a contender driving 0 loses if the line is 1. It stops contributing lower bits before those bits are evaluated. (3) Recompute the OR after each elimination; (4) the one surviving contender takes mastership when the bus is free. The highest ID wins; repeated higher-ID requests can starve a lower-ID device.',
         ] },
         { type: 'exam', text: ['Distributed arbitration with specific IDs: Fall 2024 Q3(a) (5, 12, 9). Centralized: Spring 2024 Q1(f).'] },
+        { type: 'practice', prompt: 'Devices 3, 10 and 12 request the bus. Write the initial 4-bit wired OR, the eliminations from MSB to LSB, and the winner.', blocks: [
+          { type: 'answer', text: '0011 OR 1010 OR 1100 = 1111 initially. At bit 3, device 3 loses; at bit 2, device 10 loses. With only 1100 remaining, device 12 wins. Compare only surviving contenders at each step.' },
+        ] },
       ],
     },
     {
@@ -188,10 +204,13 @@ export default {
         { type: 'list', items: [
           'The master asserts address/command **and Master-ready** (t0). The slave returns data and asserts **Slave-ready** (t1).',
           'Seeing Slave-ready, the master drops Master-ready (t2); the slave then drops Slave-ready (t3) — each transition triggers the next, a **full handshake**.',
-          '**Advantage**: devices of any speed cooperate; the cost is extra lines and the accumulated propagation delays.',
+          '**Advantage**: the transfer adapts to each device’s response time; handshake lines and propagation delays add overhead. Synchronous buses with wait states are another way to support slower devices.',
         ] },
         { type: 'think', text: [
           'Timing-diagram questions (Fall 2024 Q1(c), Spring 2023 Q3(g)) want the **four events in order** for the handshake and the phrase “the clock is set for the slowest device” as the synchronous limitation. If asked to “overcome the limitation”, the answer is the asynchronous handshake — or intermediate designs — but name the handshake explicitly.',
+        ] },
+        { type: 'practice', prompt: 'In an asynchronous write, who drives data? Give the order of Master-ready and Slave-ready transitions, and say what the slave’s assertion means.', blocks: [
+          { type: 'answer', text: 'Master drives address, write command and data, then asserts Master-ready. Slave accepts the data and asserts Slave-ready. Master drops Master-ready, then slave drops Slave-ready. The slave’s assertion acknowledges acceptance.' },
         ] },
       ],
     },

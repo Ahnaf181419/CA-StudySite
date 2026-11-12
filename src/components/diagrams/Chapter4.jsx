@@ -3,7 +3,7 @@ import { Svg, Box, T, W, Bus } from './base.jsx'
 // Slide 2 — accessing I/O devices over a bus.
 export function IoBus() {
   return (
-    <Svg vb="0 0 720 300">
+    <Svg vb="0 0 720 315">
       <Box x={60} y={30} w={160} h={60} label="Processor" />
       <Box x={480} y={30} w={160} h={60} label="Memory" />
       <Box x={100} y={200} w={130} h={60} label="I/O device 1" fs={11.5} />
@@ -45,7 +45,7 @@ export function IoInterface() {
 // Slide 9 — interrupt and the interrupt-service routine.
 export function IsrFlow() {
   return (
-    <Svg vb="0 0 760 330">
+    <Svg vb="0 0 760 345">
       <T x={80} y={40} fs={12} bold>Program 1</T>
       {['1', '2', '⋮', 'i', 'i+1', '⋮', 'M'].map((s, i) => (
         <Box key={i} x={110} y={55 + i * 32} w={110} h={26} label={s} fill="var(--dg-panel)" fs={11} />
@@ -147,7 +147,7 @@ export function PrioritizedDaisyChain() {
 // Slide 34 — DMA in a computer system.
 export function DmaSystem() {
   return (
-    <Svg vb="0 0 760 360">
+    <Svg vb="0 0 760 380">
       <Box x={70} y={30} w={150} h={60} label="Processor" />
       <Box x={520} y={30} w={150} h={60} label="Main memory" />
       <Bus x1={220} y1={60} x2={520} y2={60} w={6} />
@@ -238,63 +238,55 @@ export function DistributedArb() {
   )
 }
 
-// Synchronous bus timing (book 4.5.1).
-export function SyncBus() {
-  const wave = (x0, x1, y, hi = 18) => {
-    // square wave with 50% duty between x0 and x1
-    const n = Math.floor((x1 - x0) / 40)
-    let d = `M${x0},${y}`
-    for (let i = 0; i < n; i++) {
-      d += ` h20 v-${hi} h20 v${hi}`
-    }
-    return d
-  }
+// Synchronous bus timing (book 4.5.1), one transfer per clock period.
+export function SyncBus({ write = false }) {
+  const dataStart = write ? 200 : 355
   return (
-    <Svg vb="0 0 780 400">
-      <T x={60} y={30} fs={11.5} bold>Clock</T>
-      <path d={wave(160, 700, 40)} fill="none" style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1.6" />
-      <T x={60} y={110} fs={11.5}>Address / command</T>
-      <W d="M200,120 H460" />
-      <T x={60} y={180} fs={11.5}>Data</T>
-      <W d="M320,190 H620" />
-      <T x={470} y={114} fs={10.5}>valid from t0</T>
-      <T x={630} y={184} fs={10.5}>slave places data</T>
-      {[240, 400, 560].map((x, i) => (
-        <line key={i} x1={x} y1={20} x2={x} y2={280} style={{ stroke: 'var(--dg-line)' }} strokeDasharray="4 3" />
+    <Svg vb="0 0 640 236">
+      {[180, 355, 530].map(x => (
+        <line key={x} x1={x} y1={16} x2={x} y2={174} style={{ stroke: 'var(--dg-line)' }} strokeDasharray="4 3" />
       ))}
-      <T x={232} y={300} fs={11} anchor="middle">t0</T>
-      <T x={392} y={300} fs={11} anchor="middle">t1</T>
-      <T x={552} y={300} fs={11} anchor="middle">t2</T>
-      <path d="M240,320 H560" style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1.2" markerStart="url(#ah-open)" markerEnd="url(#ah)" />
-      <T x={340} y={340} fs={11}>one bus cycle = fixed number of clock cycles</T>
-      <T x={60} y={376} fs={11}>Everything happens at clock edges, so every device must be fast enough —</T>
-      <T x={60} y={390} fs={11}>the clock is set for the slowest slave.</T>
+      <T x={16} y={53}>Bus clock</T>
+      <W d="M145,57 H180 V34 H355 V57 H530 V34 H602" arrow={false} />
+      <T x={16} y={101}>Address / command</T>
+      <W d="M145,104 H180 L193,92 H518 L530,104 H602" arrow={false} />
+      <W d="M180,104 L193,116 H518 L530,104" arrow={false} />
+      <T x={355} y={109} anchor="middle">valid for transfer</T>
+      <T x={16} y={149}>{write ? 'Write data' : 'Read data'}</T>
+      <W d={`M145,152 H${dataStart} L${dataStart + 13},140 H548 L560,152 H602`} arrow={false} />
+      <W d={`M${dataStart},152 L${dataStart + 13},164 H548 L560,152`} arrow={false} />
+      <T x={445} y={156} anchor="middle">valid before sample</T>
+      <T x={180} y={191} anchor="middle">t0 · launch</T>
+      <T x={355} y={191} anchor="middle">{write ? 't1 · mid-cycle' : 't1 · data available'}</T>
+      <T x={530} y={191} anchor="middle">t2 · sample</T>
+      <W d="M180,210 H530" both />
+      <T x={355} y={230} anchor="middle">one bus clock period</T>
     </Svg>
   )
 }
 
-// Asynchronous bus timing — full handshake (book 4.5.2).
-export function AsyncBus() {
+// Asynchronous read timing, with each ready transition tied to its event.
+export function AsyncBus({ write = false }) {
+  const dataStart = write ? 187 : 320
   return (
-    <Svg vb="0 0 780 420">
-      <T x={60} y={30} fs={11.5} bold>Address / command</T>
-      <W d="M200,40 H440" />
-      <T x={60} y={100} fs={11.5} bold>Data</T>
-      <W d="M300,110 H560" />
-      <T x={60} y={160} fs={11.5} bold>Master-ready</T>
-      <path d="M200,170 h100 v-24 h200 v24 h100" fill="none" style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1.6" />
-      <T x={60} y={230} fs={11.5} bold>Slave-ready</T>
-      <path d="M340,240 h110 v-24 h110" fill="none" style={{ stroke: 'var(--dg-ink)' }} strokeWidth="1.6" />
-      {[220, 320, 420, 470, 570].map((x, i) => (
-        <line key={i} x1={x} y1={14} x2={x} y2={290} style={{ stroke: 'var(--dg-line)' }} strokeDasharray="4 3" />
+    <Svg vb="0 0 640 258">
+      {[205, 338, 460, 565].map(x => (
+        <line key={x} x1={x} y1={16} x2={x} y2={217} style={{ stroke: 'var(--dg-line)' }} strokeDasharray="4 3" />
       ))}
-      <T x={212} y={310} fs={11} anchor="middle">t0</T>
-      <T x={312} y={310} fs={11} anchor="middle">t1</T>
-      <T x={412} y={310} fs={11} anchor="middle">t2</T>
-      <T x={562} y={310} fs={11} anchor="middle">t3</T>
-      <T x={60} y={345} fs={11}>Master asserts address + Master-ready (t0); slave returns data and asserts Slave-ready (t1–t2);</T>
-      <T x={60} y={363} fs={11}>master drops Master-ready (t2); slave drops Slave-ready (t3). Each edge triggers the next — a full handshake.</T>
-      <T x={60} y={400} fs={11}>No shared clock: devices of any speed can talk, at the cost of extra handshake lines and propagation delay.</T>
+      <T x={16} y={46}>Address / command</T>
+      <W d="M145,46 H188 L200,34 H448 L460,46 H615" arrow={false} />
+      <W d="M188,46 L200,58 H448 L460,46" arrow={false} />
+      <T x={16} y={94}>{write ? 'Write data' : 'Read data'}</T>
+      <W d={`M145,94 H${dataStart} L${dataStart + 12},82 H553 L565,94 H615`} arrow={false} />
+      <W d={`M${dataStart},94 L${dataStart + 12},106 H553 L565,94`} arrow={false} />
+      <T x={16} y={148}>Master-ready</T>
+      <W d="M145,152 H205 V130 H460 V152 H615" arrow={false} />
+      <T x={16} y={198}>Slave-ready</T>
+      <W d="M145,202 H338 V180 H565 V202 H615" arrow={false} />
+      <T x={205} y={236} anchor="middle">t0</T>
+      <T x={338} y={236} anchor="middle">t1</T>
+      <T x={460} y={236} anchor="middle">t2</T>
+      <T x={565} y={236} anchor="middle">t3</T>
     </Svg>
   )
 }

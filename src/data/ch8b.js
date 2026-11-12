@@ -8,7 +8,7 @@ export default {
   tags: ['branch penalty', 'delayed branch', 'branch prediction', 'throughput', 'miss penalty'],
   prereq: [
     'The 4-stage pipeline table and the three hazards (previous module).',
-    'Cache hit rate h, miss penalty M, and tave = h·C + (1−h)·M from Chapter 5 — the same variables return inside TI.',
+    'Cache hit rate h, miss penalty M, and the difference between an extra miss penalty and a total miss-path time. Chapter 5 explains both.',
     'The laundry lesson: the deeper the pipe, the more instructions are in flight — and the more that must be thrown away when a branch changes the flow.',
   ],
   sections: [
@@ -22,7 +22,7 @@ export default {
           { label: 'I3', cells: ['', '', { t: 'F3', dim: true }, '', '', ''] },
           { label: 'Ik', cells: ['', '', '', 'Fk', 'Ek', ''] },
         ], caption: 'Two-stage: the wrong instruction (I3) occupies one slot. Branch penalty = 1 clock cycle.' },
-        { type: 'note', title: 'Definition', text: ['The time lost as a result of a branch instruction is the **branch penalty**. Branch penalty is longer for longer pipelines.'] },
+        { type: 'note', title: 'Definition', text: ['The time lost as a result of a branch instruction is the **branch penalty**. The penalty depends on how many useful issue slots are lost before redirecting fetch.'] },
       ],
     },
     {
@@ -44,20 +44,23 @@ export default {
           { label: 'Ik', cells: ['', '', '', 'Fk', 'Dk', 'Ek', 'Wk'] },
         ], caption: 'Branch penalty = 1 clock cycle. Reducing the penalty means computing the branch address earlier in the pipeline — typically in the instruction-fetch unit itself.' },
         { type: 'think', text: [
-          'Rule of thumb: **penalty = (number of stages the branch resolves after the first)**. Resolve in stage 2 of a 4-stage pipe → 1 wasted slot; resolve in stage 3 → 2. Deeper pipelines pay more, which is why “branch penalty is longer for longer pipelines”.',
-          'Class note: W2 of a branch is not mandatory — a branch writes nothing, so its W slot is a free gift the hardware may reuse.',
+          'Rule of thumb: **In these charts**, with sequential fetch, one fetch per cycle, and redirect in the cycle after resolution, penalty = resolution stage number − 1. Resolve in stage 2 of a 4-stage pipe → 1 wasted slot; resolve in stage 3 → 2. A deeper pipeline can increase the penalty if branch resolution moves later.',
+          'An ordinary branch has no register result to write. A blank W entry alone does not change the redirect cycle.',
+        ] },
+        { type: 'practice', prompt: 'A branch is fetched in cycle 4 and resolves at the end of E in F/D/E/W. Sequential fetch continued until resolution. When is the target first fetched? Which fetches are squashed?', blocks: [
+          { type: 'answer', text: 'E is in cycle 6. Target F is cycle 7. Wrong-path fetches in cycles 5 and 6 are squashed, costing two slots. If the branch resolved in D instead, the target would be fetched in cycle 6.' },
         ] },
       ],
     },
     {
       heading: 'Conditional branching',
       blocks: [
-        { type: 'p', text: 'A conditional branch adds a second problem: the decision to branch **depends on the result of the preceding instruction**, so it cannot be made until that instruction finishes executing.' },
+        { type: 'p', text: 'A conditional branch adds a second problem: the decision to branch **depends on a condition value, often set by an earlier instruction**, so it cannot be made until that instruction finishes executing.' },
         { type: 'pre', text: 'Loop   Shift_left  R1\n       Dec  R2\n       Branch ≠ 0  Loop\nNext   Add  R1, R3' },
         { type: 'list', items: [
           'Branch instructions are about **20% of the dynamic instruction count** of most programs.',
           'If the penalty of conditional branches is not reduced, the performance improvement from pipelining is **vastly reduced**.',
-          'Class note: with a loop of n iterations, the penalty is paid **n times** (every iteration except when the branch finally falls through).',
+          'Class note: with an n-iteration bottom-tested loop and predict-not-taken, the branch runs n times and redirects fetch n−1 times. Predict-taken with an available target reverses which outcome loses time.',
         ] },
         { type: 'think', text: [
           'Unconditional = we know *where*, the only cost is *when* the pipe learns it. Conditional = we do not even know *whether*. Every trick below (delayed branch, prediction) is about hiding the *when* or guessing the *whether* early.',
@@ -95,7 +98,7 @@ export default {
           'So if increasing the number of pipeline stages increases the number of delay slots, the potential gain may **not be fully realized**.',
         ] },
         { type: 'think', text: [
-          'When rearranging, the safety check is: the instruction moved into the slot must (a) not depend on the branch decision, (b) not write anything the branch target reads before it should, and (c) not use a register the loop still needs intact if the branch is *not* taken. Counter decrements and independent shifts are safe; the loop’s own body order usually is not.',
+          'When rearranging, the safety check is: the instruction moved into the slot must (a) not depend on the branch decision, (b) not write anything the branch target reads before it should, and (c) not use a register the loop still needs intact if the branch is *not* taken. Keep a counter decrement before a branch that tests its flags. Move an independent shift only if it is safe on both paths and its changed flag timing has no effect.',
         ] },
         { type: 'exam', text: ['**Fall 2024 Q2(a)** asks this end-to-end on a 4-instruction loop: penalty in a 2-stage pipe, in a 4-stage pipe with E-stage resolution, the delayed-branch rearrangement (last two iterations drawn), and which branch prediction suits the loop. Fully solved in the question bank.'] },
       ],
@@ -107,7 +110,7 @@ export default {
           'Another technique for reducing the branch penalty of **conditional** branches: predict whether the branch will be taken.',
           '**Simplest form**: assume the branch will **not** be taken and keep fetching sequentially.',
           '**Speculative execution**: instructions are executed before the processor is certain they are in the correct sequence. Until the branch condition is evaluated, execution along the predicted path must be speculative.',
-          'Care: **no processor registers or memory may be updated** until it is confirmed the instructions should indeed execute. If the prediction was wrong, the instructions and their data in the execution units must be **purged**, and the correct instructions fetched.',
+          'Care: speculative results must not commit to architectural registers or memory until the path is confirmed. If the prediction was wrong, the instructions and their data in the execution units must be **purged**, and the correct instructions fetched.',
         ] },
         { type: 'timing', columns: 6, rows: [
           { label: 'I1', cells: ['F1', 'D1', 'E1', 'W1', '', ''] },
@@ -128,7 +131,11 @@ export default {
           '**Dynamic branch prediction**: the decision may change depending on execution history (self-study).',
         ] },
         { type: 'think', text: [
-          'For a “which prediction for this loop?” question, look only at where the branch sits: branch at the **bottom** of a loop (the common case) → taken (n−1 of n times). Branch at the **top** → not taken. Say it in those counts and the justification writes itself.',
+          'For a “which prediction for this loop?” question, look only at where the branch sits: branch at the **bottom** of a loop (the common case) → taken (n−1 of n times). For other loops, trace which direction actually stays in the loop and count outcomes. Say it in those counts and the justification writes itself.',
+        ] },
+        { type: 'p', text: 'A simple dynamic predictor stores the last outcome for each tracked branch (one bit). A two-bit saturating counter starts in one of four states: strongly not taken, weakly not taken, weakly taken, strongly taken. Predict from the state before updating. Taken moves one step toward strongly taken; not taken moves one step toward strongly not taken. One loop exit does not flip a strongly taken prediction.' },
+        { type: 'practice', prompt: 'A bottom-tested loop has five iterations. The taken target is ready at prediction time, and a wrong prediction loses two cycles. Find extra cycles for always taken and always not taken.', blocks: [
+          { type: 'answer', text: 'Outcomes T,T,T,T,N. Always taken misses once, losing 2 cycles. Always not taken misses four times, losing 8 cycles.' },
         ] },
       ],
     },
@@ -147,7 +154,7 @@ export default {
         { type: 'pre', text: 'increase = [ (1 − hi) + d (1 − hd) ] × Mp' },
         { type: 'p', text: 'Slides’ numbers: `d = 30%`, `hi = 95%`, `hd = 90%`, `Mp = 17` cycles → increase = (0.05 + 0.3 × 0.1) × 17 = 0.08 × 17 = **1.36 cycles**, so `TI = 2.36`.' },
         { type: 'h', text: 'Step 3 — compare with sequential execution' },
-        { type: 'p', text: 'A sequential processor needs 4 cycles per instruction **plus** the same miss increase: `S = 4 + 1.36 = 5.36` → `Ps = 500 / 5.36 ≈ 93 MIPS` (the slides round to 95). In instructions-per-cycle terms the pipelined machine achieves 0.42 versus 0.19 sequential — a gain of **2.2×**, only slightly better than half the ideal 4×.' },
+        { type: 'p', text: 'A sequential processor needs 4 cycles per instruction **plus** the same miss increase: `S = 4 + 1.36 = 5.36` → `Ps = 500 / 5.36 ≈ 93.3 MIPS`. In instructions-per-cycle terms the pipelined machine achieves 0.42 versus 0.19 sequential — a gain of **2.2×**, only slightly better than half the ideal 4×.' },
         { type: 'h', text: 'Step 4 — add a secondary (L2) cache' },
         { type: 'p', text: 'Put a secondary cache between the on-chip cache and memory. If transferring an 8-word block from it takes 10 ns, a primary-cache miss found in the secondary cache costs only `Ms = 5` cycles; only secondary misses pay the full `Mp = 17`. With `hs = 94%`:' },
         { type: 'pre', text: 'increase = [ (1 − hi) + d (1 − hd) ] × [ hs·Ms + (1 − hs)·Mp ]\n        = 0.08 × (0.94 × 5 + 0.06 × 17)\n        = 0.08 × 5.72 = 0.46  →  TI = 1.46' },
@@ -155,7 +162,10 @@ export default {
         { type: 'think', text: [
           'The structure of every one of these numeric questions is the same: **compute a per-instruction cycle count, then divide the clock by it**. Two formulas cover all of them: the single-cache increase `[(1−hi) + d(1−hd)]·Mp` and the two-level version where `Mp` is replaced by `hs·Ms + (1−hs)·Mp`. Spring 2023 Q3(d)/(e) and Fall 2023 Q3(d)/(e) are exactly these with the numbers changed.',
         ] },
-        { type: 'exam', text: ['**Fall 2023 Q3(d)**: two-level cache, compare with/without secondary cache by throughput. **Spring 2023 Q3(d)**: same formula but compare against a non-pipelined processor. Both solved step-by-step in the question bank.'] },
+        { type: 'exam', text: ['**Fall 2023 Q3(d)**: two-level cache, compare with/without secondary cache by throughput. **Spring 2023 Q3(d)**: same formula but compare against a non-pipelined processor. Both are solved in the question bank. Q3(e) in each 2023 paper instead asks for average memory-access time; use the Chapter 5 model and state what each quoted time includes.'] },
+        { type: 'practice', prompt: 'The clock period is 4 ns and base CPI is 1. Instruction and data miss rates are 5% and 10%; 20% of instructions access data. An L1 miss incurs 8 extra cycles on an L2 hit (75% of L1 misses), or 32 extra cycles on an L2 miss. Find CPI and throughput.', blocks: [
+          { type: 'answer', text: 'Misses per instruction = 0.05 + 0.20×0.10 = 0.07. Average extra cost per miss = 0.75×8 + 0.25×32 = 14. CPI = 1 + 0.07×14 = 1.98. Clock = 250 MHz, so throughput ≈ 126.3 MIPS.' },
+        ] },
       ],
     },
     {

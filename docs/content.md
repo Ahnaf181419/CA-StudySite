@@ -1,5 +1,28 @@
 # Content provenance and the assumptions register
 
+## 2026-11-12 content review
+
+The original provenance and assumptions are retained below. The site now teaches single-bus
+control in Foundations while the core Chapter 7 module still starts at multibus. The Fall 2024
+CA paper is complete: its two pages are pages 5–6 of the multi-course scan. Spring 2022 remains
+partial.
+
+- Fall 2024 Q2(a) can fill both delay slots by moving ADD and SHIFT LEFT together after the
+  branch, preserving their order. The trace assumes the branch samples DEC's flags and the
+  exit path does not need those flags preserved. The solution gives the one-slot case too.
+- Fall 2024 Q3(b) follows the Chapter 8 slides' destination-last syntax. Spring 2024 Q2(b)
+  specifies `R1in`, which identifies the destination for that question.
+- The cache lesson and 2023 solutions now state whether times represent complete paths or
+  successive lookup costs. Both interpretations are calculated where the wording permits them.
+- The source scans and slides determine the course scope. The supplemental explanations use
+  [the MIPS appendix](https://pages.cs.wisc.edu/~larus/HP_AppA.pdf),
+  [Cornell's cache notes](https://www.cs.cornell.edu/courses/cs3410/2025fa/notes/caches.html),
+  [OSTEP on paging](https://pages.cs.wisc.edu/~remzi/Classes/537/Fall2022/Book/vm-beyondphys-policy.pdf),
+  [Oracle's IEEE-format guide](https://docs.oracle.com/cd/E60778_01/html/E60763/z4000ac019878.html),
+  and the original [RAID paper](https://www.cs.cmu.edu/afs/cs/academic/class/15712-f08/www/readings/Patterson88.pdf).
+
+## Original source review
+
 Three source folders feed the site. This document records what was taken from each, how it was
 processed, and every place where a judgment call was made. If an answer ever looks wrong, check
 here first.

@@ -35,7 +35,10 @@ export const DIAGRAM_IDS = Object.freeze([
   'distributedArb',
   'syncBus',
   'asyncBus',
+  'syncBusWrite',
+  'asyncBusWrite',
   'scsiRead',
   'seqMultiplier',
   'divHardware',
+  'fpAdder',
 ])

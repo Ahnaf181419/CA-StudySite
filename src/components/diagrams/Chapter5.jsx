@@ -225,7 +225,7 @@ export function SetAssocMap() {
 // Virtual memory — MMU translation (Fig 5.26 idea).
 export function VirtualMemory() {
   return (
-    <Svg vb="0 0 780 330">
+    <Svg vb="0 0 780 350">
       <Box x={40} y={100} w={140} h={70} label="Processor" />
       <W d="M180,125 H300" />
       <T x={192} y={118} fs={11}>virtual address</T>
@@ -235,10 +235,10 @@ export function VirtualMemory() {
       <Box x={560} y={100} w={150} h={70} label="Main memory" />
       <Box x={300} y={240} w={150} h={60} label="Disk" sub="(secondary)" fs={11.5} />
       <W d="M635,170 V270 H450" dash />
-      <T x={470} y={295} fs={11}>not in memory → OS loads the block from disk</T>
+      <T x={470} y={295} fs={11}>valid page absent → OS handles page fault</T>
       <W d="M370,240 V170" dash />
-      <T x={40} y={315} fs={11}>Virtual addresses are translated by hardware + software; only the active portion of the address space is mapped</T>
-      <T x={40} y={333} fs={11}>onto physical memory, the rest lives on disk — the programmer sees one large memory.</T>
+      <T x={40} y={315} fs={11}>The MMU translates resident pages to physical frames.</T>
+      <T x={40} y={333} fs={11}>On a page fault, the OS loads or initializes a valid missing page and retries.</T>
     </Svg>
   )
 }

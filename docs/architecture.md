@@ -7,21 +7,21 @@ local data files — the site is fully usable offline once loaded.
 
 | Layer | Choice | Why |
 |---|---|---|
-| UI | React 19 | the block renderer and question toggles need state; nothing more |
+| UI | React 19 | hash navigation uses React state; question disclosures are native HTML |
 | Build | Vite 8 + rolldown | fast, zero config; `base` switches to `/CA-StudySite/` when `GITHUB_ACTIONS` is set |
 | Styling | Tailwind 4 (`@theme` tokens) | the whole palette is 7 grayscale tokens — theming means editing one block |
 | Math/formatting | `src/lib/md.jsx` (~30 lines) | the content needs `**bold**`, `` `code` ``, `^{sup}`, `_{sub}` — KaTeX would be dead weight |
 | Tests | `node:test` | content-integrity checks run in milliseconds, no test framework |
 
 Deliberately absent: a router library (three routes), KaTeX, an animation library, fonts (system
-stack), state management (two pieces of local state in the whole app).
+stack), external state management.
 
 ## Data model
 
 ```
 src/data/
-  syllabus.js          → MODULES: the six lecture modules in teaching order
-  ch7.js arith.js ch8a.js ch8b.js ch5.js ch4io.js
+  syllabus.js          → MODULES: the eight modules in teaching order
+  foundations.js ch7.js arith.js ch8a.js ch8b.js ch5.js ch4io.js olderPapers.js
                        → one file per module
   topics.js            → TOPICS: topic registry (id → name, module link, class-notes signal)
   papers/
@@ -47,9 +47,10 @@ src/data/
 | `p` | paragraph | explanations |
 | `h` | sub-heading | dividing a long section |
 | `list` | bulleted / `ordered: true` numbered list | slide enumerations, steps |
+| `practice` | prompt and collapsed worked answer (`prompt`, `blocks`) | independent checkpoint within a lecture |
 | `steps` | numbered squares | procedures (read-out-loud order matters) |
 | `table` | bordered table (`head`, `rows`, optional `caption`) | control sequences, comparisons |
-| `timing` | **pipeline chart**: clock columns × instruction rows | the exam's stage tables; `cell` may be `{ t, dim, box }` for stalls/discards |
+| `timing` | **pipeline chart**: clock columns × instruction rows (optional `start` cycle) | the exam's stage tables; `cell` may be `{ t, dim, box }` for stalls/discards |
 | `pre` | monospace block | formulas, address splits, assembly |
 | `note` | grey panel | rules, memory aids |
 | `think` | black "How to think about it" panel | the requested reasoning coaching |
@@ -99,17 +100,15 @@ Colors never appear literally in figure files. Everything goes through CSS varia
 `src/index.css`), applied via `style` attributes — presentation attributes (`fill="var(…)"`) do
 not resolve CSS variables in all browsers. Theming the site therefore re-themes every figure.
 
-Note: `singleBus`, `registerGating`, `registerBit` are no longer used by the (trimmed) Chapter 7
-lectures but remain registered — past-paper solutions still embed them.
+Foundations uses the single-bus and register-gating figures. The same registry serves the past-paper solutions.
 
 ## Routing and views
 
-Hash routing in `App.jsx` (`#/lectures[/:module]`, `#/qb[/:paper]`, `#/patterns`) — no history
+Hash routing in `App.jsx` (`#/lectures[/:module[/:section]]`, `#/qb[/:paper[/:question]]`, `#/patterns`) — no history
 API, so the site works from any static host including `file://` builds.
 
-- `Lectures.jsx` — module cards → module page with sticky section nav + prev/next
-- `QuestionBank.jsx` — paper cards → question list; each question is a `<button aria-expanded>`
-  that reveals the think box + solution
+- `Lectures.jsx` — module cards → module contents, practice links and previous/next navigation
+- `QuestionBank.jsx` — paper cards → question list; each question has native `<details>` controls for its hint and solution
 - `Patterns.jsx` — the derived matrix and trend cards
 
 ## Theming
@@ -128,8 +127,7 @@ and an inline SVG favicon in `index.html`.
 
 ## Build, test, deploy
 
-- `npm test` — 5 content-integrity suites (diagram refs, question completeness, module shape,
-  topic→module links, per-paper counts)
+- `npm test` — 8 content-integrity checks, including question deep-link IDs, worked checkpoints and timing chart widths
 - `npm run build` — single-chunk bundle (~580 kB / ~185 kB gzip); the size warning is expected
   and accepted
 - `.github/workflows/deploy.yml` — on push to `main`: test → build → GitHub Pages.

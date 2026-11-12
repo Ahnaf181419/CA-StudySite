@@ -17,14 +17,14 @@ export default {
       ],
       solution: [
         { type: 'table', head: ['', 'CISC', 'RISC'], rows: [
-          ['Instruction set', 'large, complex, variable-length instructions; memory-oriented operations', 'small, simple, fixed-length; load/store architecture (only lw/sw touch memory)'],
-          ['N (instruction count)', 'smaller — one instruction does more', 'larger — simple instructions need more of them'],
-          ['S (CPI)', 'high — complex operations take many cycles, hard to pipeline', '≈ 1 — uniform stages pipeline cleanly'],
-          ['R (clock rate)', 'lower — long stages, complex decoding', 'higher — short, regular stages'],
+          ['Instruction set', 'large, complex, variable-length instructions; memory-oriented operations', 'small, simple, fixed-length; load/store design (memory operands use dedicated load/store instructions)'],
+          ['N (instruction count)', 'can be lower when one instruction does more', 'can be higher for sequences of simpler operations'],
+          ['S (CPI)', 'complex operations can take several cycles', 'regular formats and operations can simplify pipelining'],
+          ['R (clock rate)', 'decode and execution design can constrain the clock', 'regular stages can help shorten the clock period'],
           ['Control unit', 'often microprogrammed', 'usually hardwired'],
         ] },
-        { type: 'p', text: 'Effect on `T = N × S / R`: CISC reduces **N** but inflates **S** and depresses **R**; RISC increases **N** but keeps **S ≈ 1** and allows a high **R**. The product N×S tends to favour RISC in pipelined implementations, and the simpler datapath also raises R.' },
-        { type: 'answer', text: ['For improving T, **RISC is the better choice** (in practice): its S ≈ 1 with a high clock rate R outweighs the larger N — which is exactly why modern processors are RISC inside, even when they emulate CISC instructions in front-end translation.'] },
+        { type: 'p', text: 'A RISC implementation wins when its lower cycles per instruction or faster clock more than compensate for any increase in instruction count. Conversely a smaller dynamic instruction count can make a CISC implementation faster at the same throughput per instruction.' },
+        { type: 'answer', text: 'For a design with a regular pipeline and comparable workload, RISC can improve T through S and R. The ISA label alone does not determine the winner. Compare measured N×S/R for each implementation.' },
       ],
     },
     {
@@ -102,7 +102,7 @@ export default {
       ],
     },
     {
-      id: 'Q1e', topic: 'cpu-datapath', marks: '[6.5]', inNotes: true, repeats: 1,
+      id: 'Q1e', topic: 'single-bus', marks: '[6.5]', inNotes: true, repeats: 1,
       q: 'Consider the single bus CPU organization. Let’s assume that the registers are of 4 bits in this organization. Draw a figure showing input and output gating for the four register bits. Explain how the register is handling inputs and outputs using the figure that you have drawn.',
       think: [
         'This is Figure 7.3 replicated four times side by side with **shared** Riin and Riout lines. Per bit: a 2-to-1 MUX choosing between “hold” (Q fed back) and “load” (bus bit) into the D input, and a tri-state buffer from Q up to the bus bit. Say explicitly: one Riin/Riout for the whole register, per-bit muxes/buffers.',
@@ -166,7 +166,7 @@ export default {
       q: 'Draw the diagram of three bus CPU organization. Examine all the steps of complete execution of MUL R1, 4(R2) using the three bus CPU organization and generate control sequences for the steps. Sketch the circuit configuration to generate the PCin, R1in, MARin and MDRinE signals for this instruction if a hardwired control unit scheme is used.',
       pattern: 'The flagship control-sequence question — same family as Fall 2023 SUB (R1),(R2) and Spring 2023 MUL (R1),(R2), plus the gate sketch from the class notes.',
       think: [
-        'Meaning of the instruction: R1 ← R1 × M[4 + [R2]] (indexed source operand). Standard 3-step fetch, then one step to compute [R2] + 4 straight into MAR (bus B + Constant 4 through the ALU, result on bus C → MARin), wait, then a single multiply step with both operands and the destination in one cycle. For the gates: list which steps assert each signal, then one AND/OR network per signal.',
+        'The requested R1in signal identifies R1 as the destination here: R1 ← R1 × M[4 + [R2]] (indexed source operand). Standard 3-step fetch, then one step to compute [R2] + 4 straight into MAR (bus B + Constant 4 through the ALU, result on bus C → MARin), wait, then a single multiply step with both operands and the destination in one cycle. For the gates: list which steps assert each signal, then one AND/OR network per signal.',
       ],
       solution: [
         { type: 'diagram', id: 'threeBus', caption: 'Figure 7.8 — three-bus datapath (draw with the direction table: GPR → A,B; GPR ← C; ALU ← (A or 4) and B; ALU → C; PC → B only; IR → A only; MDR → A,B; PC/IR/MDR/MAR ← C).' },
@@ -184,10 +184,10 @@ export default {
           'Step 6: both operands (M[4+[R2]] from MDR, R1 from the register file) enter the ALU simultaneously on buses B and A, and R1in loads the product from bus C — one execute cycle, no Y/Z registers.',
         ] },
         { type: 'h', text: 'Hardwired generation of PCin, R1in, MARin, MDRinE for this instruction' },
-        { type: 'p', text: 'Which steps assert each signal (from the table above, for the MUL instruction — call its instruction-decoder line `MUL`): PCin at T1 (with IncPC); R1in at T6; MARin at T1 and T4; MDRinE at T2 and T5. Each signal is an OR of its (step · instruction) terms:' },
-        { type: 'pre', text: 'PCin   = T1 · MUL\nR1in   = T6 · MUL\nMARin  = T1 · MUL + T4 · MUL       (two AND gates + one OR)\nMDRinE = T2 · MUL + T5 · MUL       (two AND gates + one OR)\n\n(or factored:  MARin = (T1 + T4)·MUL,  MDRinE = (T2 + T5)·MUL)' },
-        { type: 'diagram', id: 'controlSignalGates', caption: 'Gate shape per signal: T1 into a buffer (or AND with the instruction line) feeding an OR gate; additional AND terms T4·MUL / T5·MUL feed the other OR inputs — exactly the class-notes Zin network with different labels.' },
-        { type: 'answer', text: ['Six-step sequence above; gates: PCin = T1·MUL, R1in = T6·MUL, MARin = T1·MUL + T4·MUL, MDRinE = T2·MUL + T5·MUL (OR of AND terms of step counter and instruction decoder outputs).'] },
+        { type: 'p', text: 'Fetch happens before IR contains the MUL opcode. Its T1 and T2 terms apply to every instruction. Gate only the execute terms with MUL. In this figure IncPC selects the dedicated increment path. If PCin specifically selects bus C, it stays inactive for this instruction; if PCin is the generic PC write enable, assert it with IncPC in T1.' },
+        { type: 'pre', text: 'IncPC  = T1\nR1in   = T6 · MUL\nMARin  = T1 + T4 · MUL\nMDRinE = T2 + T5 · MUL' },
+        { type: 'diagram', id: 'controlSignalGates', caption: 'Use the pattern from this figure. For MARin, feed T4 and MUL into an AND gate, then OR it with T1. Use T5, MUL and T2 for MDRinE. R1in needs a single AND gate. These equations include common fetch plus MUL execution; other opcodes add their own execute terms.' },
+        { type: 'answer', text: 'R1in = T6·MUL; MARin = T1 + T4·MUL; MDRinE = T2 + T5·MUL. T1 enables the PC increment. Label its separate IncPC and PCin signals according to the datapath convention.' },
       ],
     },
     {
@@ -284,10 +284,10 @@ export default {
       id: 'Q3d', topic: 'prog-io', marks: '[8]', repeats: 2,
       q: 'Consider the figure where a keyboard and display device are connected to the processor via bus. Assume that the SIN, SOUT flags are in the 3rd bit of INSTATUS and OUTSTATUS registers respectively. Write a program to read a line of characters from the keyboard and print them to the display screen applying the concept of program-controlled I/O method. Provide side notes to explain your program. Also determine the problem of this program-controlled I/O method based on your code.',
       think: [
-        'Structure: outer loop “until carriage return”, inner polling loops on bit 3 of each status register (bit 3 = 0000 0010 0000₂ mask = 0x0020? No — 3rd bit conventionally bit 3 → mask 0x0008 if counting bit 0 first; use the mask you state). Side-note each instruction. The “problem” must come **from your code**: count the busy-wait loops — every character spends two polling loops doing nothing.',
+        'Poll input-ready and output-ready for each character, then test for carriage return. State the bit numbering: with bit index 3 the mask is 0x08; if “third bit” counts the least significant bit as the first, use index 2 and mask 0x04. The code below assumes index 3.',
       ],
       solution: [
-        { type: 'pre', text: 'READ    TestBit  #3, INSTATUS    ; poll SIN (bit 3 of keyboard status)\n        Branch = 0 READ            ; wait until a character is ready\n        Load     DATAIN, R1        ; fetch the character\n        Store    R1, LINE(I)       ; keep it (optional)\nWRITE   TestBit  #3, OUTSTATUS     ; poll SOUT (bit 3 of display status)\n        Branch = 0 WRITE           ; wait until display can accept\n        Store    R1, DATAOUT       ; print the character\n        Compare   R1, #CR          ; carriage return ends the line\n        Branch ≠ 0 READ            ; next character\n        <continue after the line>' },
+        { type: 'pre', text: 'READ    TestBit  #3, INSTATUS    ; poll SIN (bit 3 of keyboard status)\n        Branch = 0 READ            ; wait until a character is ready\n        Load     DATAIN, R1        ; fetch the character\nWRITE   TestBit  #3, OUTSTATUS     ; poll SOUT (bit 3 of display status)\n        Branch = 0 WRITE           ; wait until display can accept\n        Store    R1, DATAOUT       ; print the character\n        Compare   R1, #CR          ; carriage return ends the line\n        Branch ≠ 0 READ            ; next character\n        <continue after the line>' },
         { type: 'table', head: ['Side note', 'Explanation'], rows: [
           ['`TestBit #3, INSTATUS`', 'checks the SIN flag: set to 1 by the keyboard interface when DATAIN holds a valid character'],
           ['`Branch = 0 READ`', 'busy-wait loop — the whole processor spins here while the human types'],

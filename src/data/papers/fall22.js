@@ -14,13 +14,14 @@ export default {
     {
       id: 'Q1a', topic: 'mips', marks: '[4]', flagged: true, repeats: 1,
       q: 'Consider a branch-if-equal instruction that is 32 bits long: [Opcode | RS | RT | Offset]. The offset is 16 bits (not in 2’s complement form, a constant). The instruction syntax is BEQ $t3, $t2, X, where X is the offset. If $t3 == $t2, the PC is set to PC + X instead of PC + 4. Answer whether the following code snippet will function properly or not, and explain your reasoning.\nAddress [Instruction]\n5000 [ … ]\n5004 BEQ $t3, $t2, Label\n5008 ADD $t4, $t3, $t2\n80000 Label: SUB $t5, $t4, $t2',
+
       think: [
-        'The whole question is one comparison: the required offset against the 16-bit field’s range. Required X = target − (branch address + 4) = 80000 − 5008 = 74992. A 16-bit field holds at most 65535 (unsigned) or ±32767 (signed) — 74992 does not fit, so the branch cannot encode its target.',
+        'Use the custom unscaled byte offset in the prompt. After calculating the required offset, compare it to 65535, the largest unsigned 16-bit value.',
       ],
       solution: [
-        { type: 'p', text: 'Branch target calculation: `PC ← (address of branch + 4) + X`. Here the branch is at 5004, so the base is 5008 and the required offset is X = 80000 − 5008 = **74992**.' },
-        { type: 'p', text: 'The offset field is 16 bits long: even read as an unsigned constant its maximum value is 2^16 − 1 = **65535** — and 74992 > 65535 (as a signed 2’s-complement value the maximum is only 32767). The required offset **cannot be encoded** in the instruction.' },
-        { type: 'answer', text: ['The code will **not** function properly: the branch distance (74992) exceeds the 16-bit offset field’s range, so the assembler cannot generate a working BEQ to Label at 80000. (If the label were within ±32K — e.g. at 8000, X = 2992 — it would work normally.)'] },
+        { type: 'p', text: 'Taking PC as the address of the branch, required X = 80000 − 5004 = 74996 bytes. If the implementation has already advanced PC to 5008, required X = 74992 bytes. Both exceed 65535, so the branch in the question cannot encode the destination.' },
+        { type: 'note', text: 'Standard MIPS BEQ instead uses a signed word displacement from PC+4. Under that rule, (80000 − 5008)/4 = 18748 words fits in 16 bits. Use the custom rule for this question and the MIPS rule when asked for the standard encoding.' },
+        { type: 'answer', text: 'No. The unscaled displacement exceeds the 16-bit field under either interpretation of the PC base.' },
       ],
     },
     {
@@ -66,13 +67,13 @@ export default {
       q: 'The pipelined datapath has generally been broken down into five stages. Assume that each stage takes the time specified in Table 1 (Fetch 8 ns, Decode 6 ns, Execute 9 ns, Memory 12 ns, Write-back 6 ns). Assuming that N instructions are executed and all N instructions are load (lw) instructions, evaluate the speedup of a pipeline implementation (assuming no hazards/stalls) when compared to a single-cycle implementation.',
       pattern: 'The speedup derivation that Spring 2022 Q5(a) asks with equal stage times — the formula family every performance question leans on.',
       think: [
-        'Single-cycle: every instruction pays the **sum** of all stage delays (41 ns). Pipelined: the clock is set by the **longest** stage (Memory = 12 ns); total = one full fill pass + one clock per remaining instruction.',
+        'Single-cycle: every instruction pays the **sum** of all stage delays (41 ns). Pipelined: the clock is set by the **longest** stage (Memory = 12 ns); every stage gets a full clock cycle, including the first instruction through the pipeline.',
       ],
       solution: [
         { type: 'p', text: 'Σt = 8 + 6 + 9 + 12 + 6 = **41 ns**; the pipeline clock is set by the slowest stage: tmax = **12 ns** (Memory).' },
-        { type: 'pre', text: 'Single-cycle:  T_single = N × 41 ns\n\nPipelined:     T_pipe  = 41 + (N − 1) × 12 ns\n               (fill the pipe once, then one instruction per 12 ns cycle)\n\nSpeedup = 41N / (41 + 12(N − 1)) = 41N / (12N + 29)' },
-        { type: 'p', text: 'Checks: N = 1 → speedup 1 (no benefit); N → ∞ → **41/12 ≈ 3.42**. The ceiling is Σt/tmax — well below the ideal 5 because the stages are unbalanced: every stage idles 3–11 ns per cycle waiting for the 12 ns Memory stage. Fill/drain and hazards (ignored here) reduce it further in practice.' },
-        { type: 'answer', text: ['Speedup = 41N/(12N + 29), approaching 41/12 ≈ **3.42×** for large N (ideal 5× lost to unbalanced stage times).'] },
+        { type: 'pre', text: 'Single-cycle:  T_single = N × 41 ns\n\nPipelined:     T_pipe  = (N + 4) × 12 ns\n               (five cycles for the first load, one cycle per additional load)\n\nSpeedup = 41N / [12(N + 4)]' },
+        { type: 'p', text: 'At N=1 the pipeline takes 60 ns because each stage gets a 12 ns cycle, so it is slower for one load. As N grows, speedup approaches 41/12 ≈ 3.42. Shorter stages have unused time in each cycle. This calculation neglects pipeline-register overhead as the question supplies none.' },
+        { type: 'answer', text: ['Speedup = 41N/[12(N + 4)], approaching 41/12 ≈ **3.42×** for large N (ideal 5× lost to unbalanced stage times).'] },
       ],
     },
     {
@@ -124,7 +125,7 @@ export default {
       id: 'Q3a', topic: 'perf', marks: '[4]', repeats: 1,
       q: 'Examine the following MIPS instructions for a 5-stage pipelined processor with fixed 2 ns cycle time. Calculate the total clock cycles and the overall CPI. Consider forwarding and hazard detection methods to reduce the stalls and beq has TRUE condition.\nlw $t0, 0($s5)\naddi $s5, $s5, 4\nadd $t0, $s3, $t0\nsw $t0, 0($s5)\nxor $t3, $t2, $s5\nbeq $t3, $t4, Label\nadd $t2, $t3, $t2\nLabel: add $t5, $t6, $t7',
       think: [
-        'Schedule instruction by instruction and count only real stalls. Key observations: the addi **between** lw and add absorbs the load-use hazard (no stall); every ALU dependency is forwarded; the taken beq (resolving in E) squashes exactly one instruction (the add after it).',
+        'Schedule instruction by instruction and count only real stalls. Key observations: the addi **between** lw and add absorbs the load-use hazard (no stall); every ALU dependency is forwarded; assume branch resolution at the end of EX with sequential fetch and forwarding to EX. Two younger fetch slots are discarded; the target may have been fetched speculatively and is fetched again after redirect.',
       ],
       solution: [
         { type: 'timing', columns: 13, rows: [
@@ -135,10 +136,11 @@ export default {
           { label: '5  xor $t3,$t2,$s5', cells: ['', '', '', '', 'F', 'D', 'E', 'M', 'W', '', '', '', ''] },
           { label: '6  beq $t3,$t4 (taken)', cells: ['', '', '', '', '', 'F', 'D', 'E', 'M', 'W', '', '', ''] },
           { label: '7  add $t2,$t3,$t2', cells: ['', '', '', '', '', '', { t: 'F', dim: true }, { t: 'D', dim: true }, '', '', '', '', ''] },
+          { label: 'L: speculative fetch', cells: ['', '', '', '', '', '', '', { t: 'F', dim: true }, '', '', '', '', ''] },
           { label: 'L: add $t5,$t6,$t7', cells: ['', '', '', '', '', '', '', '', 'F', 'D', 'E', 'M', 'W'] },
-        ], caption: 'Stall analysis: (3) needs $t0 from (1), but (2) sits between them, so the load-use hazard is absorbed — M4 forwards into E5? No: (3)’s E is cycle 5, the load’s M is cycle 4 → MEM→EX forwarding works with no stall. (4) reads $s5 (E6, forwarded from W6 of (2)) and $t0 (forwarded). (6) reads $t3 produced by (5) in E7 → EX→EX forward into E8. The taken branch resolves at the end of E8, squashing (7).' },
+        ], caption: 'Stall analysis: (3) needs $t0 from (1), but (2) sits between them, so the load-use hazard is absorbed — the load completes MEM in cycle 4 and forwards to EX in cycle 5. (4) reads $s5 (E6, forwarded from W6 of (2)) and $t0 (forwarded). (6) reads $t3 produced by (5) in E7 → EX→EX forward into E8. The taken branch resolves at the end of EX in cycle 8. In this model it flushes both younger slots, then fetch restarts at the target in cycle 9.' },
         { type: 'p', text: 'Cycle count: the last instruction (L:) writes back in cycle 13 → **13 cycles**. Instructions that complete: 7 (the squashed add does not count).' },
-        { type: 'answer', text: ['Total = 13 clock cycles for 7 completed instructions → CPI = 13/7 ≈ **1.86**. Only stall: the single branch bubble; both load-use and ALU dependencies were covered by forwarding.'] },
+        { type: 'answer', text: ['Total = 13 clock cycles for 7 completed instructions → CPI = 13/7 ≈ **1.86**. That is 7 completed instructions + 4 fill/drain cycles + 2 lost fetch slots. With a different branch-resolution stage or target-retention policy, recalculate the branch cost.'] },
       ],
     },
     {
@@ -233,10 +235,10 @@ export default {
       id: 'Q4c', topic: 'hamming', marks: '[4]', flagged: true, repeats: 2,
       q: 'A 00110011-bit stream is encoded and transmitted over a noisy channel. During Viterbi decoding at the receiver, the bitstream found is 00100011 with a single bit error. Apply the Hamming code algorithm to identify and correct the single-bit error. In addition, explain the procedure to detect double-bit errors in the bit message.',
       think: [
-        'Number the bits from 1; parity bits sit at positions 1, 2, 4, 8 (with position 8 doubling as overall parity in the SEC-DED layout that fits this word). Recompute each check over its positions; the syndrome (s4s2s1) **is** the position of the error; the overall parity bit separates single from double errors.',
+        'The two displayed words also form a valid SECDED(8,4) example if treated as already encoded. Under that convention, positions 1, 2 and 4 are Hamming checks and position 8 is overall parity. Recompute each check over its positions; the syndrome (s4s2s1) **is** the position of the error; the overall parity bit separates single from double errors.',
       ],
       solution: [
-        { type: 'p', text: 'Received word 00100011, bits b1…b8 = 0, 0, 1, 0, 0, 0, 1, 1 (even parity assumed).' },
+        { type: 'p', text: 'First interpret the strings as encoded SECDED(8,4) words. Received 00100011 has bits 0, 0, 1, 0, 0, 0, 1, 1, with even parity assumed.' },
         { type: 'table', head: ['Check bit', 'Covers positions', 'Received sum', 'Parity'], rows: [
           ['p1', '1, 3, 5, 7', '0 + 1 + 0 + 1 = 2', 'even → s1 = 0'],
           ['p2', '2, 3, 6, 7', '0 + 1 + 0 + 1 = 2', 'even → s2 = 0'],
@@ -249,11 +251,12 @@ export default {
           'Flip bit 4 of 00100011 → **00110011** — the transmitted word ✓.',
         ] },
         { type: 'p', text: '**Double-error detection:** with the extra overall parity bit: if the syndrome is **non-zero but the overall parity is even**, two bits are wrong — detected but **not correctable** (the syndrome of two errors XORs into a third position that cannot be trusted). Syndrome zero + odd overall parity means only the parity bit itself flipped.' },
-        { type: 'answer', text: ['Syndrome 100 → error at bit 4 → corrected word 00110011. Double errors: syndrome ≠ 0 with even overall parity → detected, uncorrectable.'] },
+        { type: 'note', text: 'If both 8-bit strings are payloads, use four Hamming checks in a 12-bit codeword. Original payload 00110011 encodes as 010101100011. With the original parity and the altered payload, the word is 010101000011. Syndrome 0111 points to codeword bit 7, the fourth payload bit. The corrected payload is the same under both readings.' },
+        { type: 'answer', text: ['In the SECDED(8,4) reading, syndrome 100 → error at bit 4 → corrected word 00110011. Double errors: syndrome ≠ 0 with even overall parity → detected, uncorrectable.'] },
       ],
     },
     {
-      id: 'Q5a', topic: 'misc', marks: '[4]', repeats: 1,
+      id: 'Q5a', topic: 'prog-io', marks: '[4]', repeats: 1,
       q: 'Contrast a memory map system with an isolated I/O system.',
       solution: [
         { type: 'table', head: ['', 'Memory-mapped I/O', 'Isolated (I/O-mapped) I/O'], rows: [
@@ -276,8 +279,8 @@ export default {
         { type: 'h', text: 'i) The two interpretations' },
         { type: 'steps', items: [
           'Split: S = 1; E = `10011010` = 154; F = `01010000000000000111001`.',
-          'True exponent = 154 − 127 = **27**; mantissa = 1 + 2^-2 + 2^-18 + 2^-19 + 2^-20 + 2^-23 = 1.2500068.',
-          'Value = −1.2500068 × 2^27 ≈ **−1.6777 × 10^8**.',
+          'True exponent = 154 − 127 = **27**; mantissa = 1 + 2^-2 + 2^-4 + 2^-18 + 2^-19 + 2^-20 + 2^-23 = 1.3125067949….',
+          'Value = −1.3125067949… × 2^27 = **−176,161,680**.',
           'Two’s complement: negative (MSB = 1). Magnitude = 2^32 − value = invert and add 1: `00110010110101111111111111000111` = 0x32D7FFC7 = 853,016,519.',
           'Integer value = **−853,016,519**.',
         ] },
@@ -288,7 +291,7 @@ export default {
           'At the **rounding** step these three decide round-up or not — e.g. with round-to-nearest-even: values above the halfway point (guard = 1, more set) round up; exactly halfway (guard = 1, round = sticky = 0) rounds to even.',
           'They exist only **during the operation**; the stored result is back to the 23-bit fraction — but the answer is as if the arithmetic had been done at full precision.',
         ] },
-        { type: 'answer', text: ['i) FP ≈ −1.2500068 × 2^27 ≈ −1.678 × 10^8; two’s complement = −853,016,519. ii) Guard/round/sticky preserve the shifted-out information needed for correct rounding of the 23-bit result.'] },
+        { type: 'answer', text: ['i) FP = −176,161,680; two’s complement = −853,016,519. ii) Guard/round/sticky preserve the shifted-out information needed for correct rounding of the 23-bit result.'] },
       ],
     },
     {

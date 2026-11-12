@@ -51,7 +51,7 @@ export function Pipe4Buffers() {
 // Slide 36 — operand forwarding datapath (SRC1/SRC2/RSLT + forwarding MUXes).
 export function Forwarding() {
   return (
-    <Svg vb="0 0 800 430">
+    <Svg vb="0 0 800 448">
       <T x={70} y={32} fs={12} bold>Source 1</T>
       <W d="M70,40 H360" />
       <T x={70} y={92} fs={12} bold>Source 2</T>

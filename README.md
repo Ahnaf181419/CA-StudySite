@@ -2,18 +2,14 @@
 
 **Live site: https://ahnaf181419.github.io/CA-StudySite/**
 
-A self-contained study site built from the course materials in this folder: the faculty slide set
-(Hamacher chapters 4, 5, 7, 8 + the P&H §3.5 self-study pointer), the handwritten class notes, and
-every past paper (Fall 2022 → Fall 2024). Chapter 7 covers the exam scope only (from multibus,
-slide 30, onward).
+A self-contained study site for the faculty slides, class notes and six past finals (2022–2024).
+Start with Foundations, work through the six course modules, then use the older-paper supplement
+for MIPS, error correction and system-design questions.
 
-Three views, dark monochrome and distraction-free:
-
-- **Lectures** — every exam-syllabus slide topic explained from prerequisites up, each section
-  closing with a "how to think about it" box for exam use, plus 36 hand-drawn SVG diagrams.
-- **Question bank** — every sub-question of all six papers with a full exam-format solution
-  (steps, timing charts, figures, boxed answers). Repeated questions and class-notes priorities
-  are badged.
+- **Lectures** teach the course with diagrams, worked traces, 36 checkpoints with hidden worked
+  answers, and past-paper questions grouped by topic. The core Chapter 7 module starts at multibus.
+- **Question bank** contains 92 questions from the available paper pages, with separately
+  revealable hints and solutions and links back to the relevant lectures.
 - **Patterns** — topic × paper matrix with repeat counts, notes-priority markers and per-topic
   trend notes, so preparation effort can be aimed where it repeats.
 

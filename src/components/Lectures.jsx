@@ -1,5 +1,6 @@
 import Blocks from './Blocks.jsx'
 import { MODULES } from '../data/syllabus.js'
+import { PAPERS, TOPICS } from '../data/papers/index.js'
 import { md } from '../lib/md.jsx'
 
 function ModuleCard({ m, i }) {
@@ -28,8 +29,7 @@ export default function Lectures({ moduleId }) {
       <div>
         <h1 className="text-[26px] font-semibold tracking-tight">Lectures</h1>
         <p className="text-ash text-[14.5px] mt-2 leading-relaxed">
-          Every exam-syllabus topic in the slide set, explained from the prerequisites up, in teaching order (Chapter 7 starts at multibus, slide 30, per the course scope). Each section ends with the way you should
-          think about that topic when a question asks it. The arithmetic module covers the self-study part the slides point to.
+          Start with the foundations if the notation is new. For each module, trace the worked examples, try the checkpoints without opening their solutions, then attempt the linked past-paper questions under time pressure.
         </p>
         <div className="mt-7">
           {MODULES.map((m, i) => <ModuleCard key={m.id} m={m} i={i} />)}
@@ -40,6 +40,17 @@ export default function Lectures({ moduleId }) {
 
   const m = MODULES.find((x) => x.id === moduleId)
   if (!m) return null
+
+  const practiceTopics = Object.entries(TOPICS)
+    .filter(([, topic]) => topic.module === m.id)
+    .map(([id, topic]) => ({
+      id,
+      name: topic.name,
+      questions: PAPERS.flatMap((paper) => paper.questions
+        .filter((q) => q.topic === id)
+        .map((q) => ({ paperId: paper.id, paperName: paper.name, id: q.id }))),
+    }))
+    .filter((topic) => topic.questions.length)
 
   return (
     <article>
@@ -57,20 +68,21 @@ export default function Lectures({ moduleId }) {
         </aside>
       ) : null}
 
-      <nav className="mt-7 border border-line divide-y divide-line">
+      <nav aria-label="Module contents" className="mt-7 border border-line divide-y divide-line">
         <div className="bg-panel px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em]">In this module</div>
         {m.sections.map((s, i) => (
-          <a key={i} href={`#sec-${i}`} className="press block px-4 py-2.5 text-[14px] flex justify-between gap-4 hover:bg-panel">
+          <a key={i} href={`#/lectures/${m.id}/sec-${i}`} className="press px-4 min-h-11 py-2.5 text-[14px] flex justify-between gap-4 hover:bg-panel">
             <span>{md(s.heading)}</span>
             <span className="font-mono text-[11px] text-ash pt-1">{String(i + 1).padStart(2, '0')}</span>
           </a>
         ))}
+        <a href={`#/lectures/${m.id}/past-papers`} className="press block min-h-11 px-4 py-2.5 text-[14px] hover:bg-panel">Past-paper practice</a>
       </nav>
 
       <div className="mt-4">
         {m.sections.map((s, i) => (
-          <section key={i} id={`sec-${i}`} className="mt-10 scroll-mt-24">
-            <h2 className="text-[20px] font-semibold tracking-tight border-b border-line pb-2">
+          <section key={i} className="mt-10">
+            <h2 id={`sec-${i}`} tabIndex={-1} className="scroll-mt-32 text-[20px] font-semibold tracking-tight border-b border-line pb-2">
               <span className="font-mono text-[13px] text-ash mr-2.5">{String(i + 1).padStart(2, '0')}</span>
               {md(s.heading)}
             </h2>
@@ -78,6 +90,25 @@ export default function Lectures({ moduleId }) {
           </section>
         ))}
       </div>
+
+      <section className="mt-12">
+        <h2 id="past-papers" tabIndex={-1} className="scroll-mt-32 border-b border-line pb-2 text-[20px] font-semibold">Past-paper practice</h2>
+        <p className="mt-3 text-[14px] text-ash">Write your answer before revealing the solution. If you get stuck, open the hint and try again before checking your work.</p>
+        <div className="mt-4 divide-y divide-line">
+          {practiceTopics.map((topic) => (
+            <div key={topic.id} className="py-3">
+              <h3 className="text-[14px] font-medium">{topic.name}</h3>
+              <div className="mt-1 flex flex-wrap gap-x-4">
+                {topic.questions.map((q) => (
+                  <a key={`${q.paperId}/${q.id}`} href={`#/qb/${q.paperId}/${q.id}`} className="press inline-flex min-h-11 items-center text-[13px] text-ash underline underline-offset-4 hover:text-ink">
+                    {q.paperName} · {q.id}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className="mt-12 pt-6 border-t border-line flex justify-between text-[13.5px]">
         {(() => {

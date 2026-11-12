@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import Nav from './components/Nav.jsx'
 import Lectures from './components/Lectures.jsx'
 import QuestionBank from './components/QuestionBank.jsx'
@@ -18,14 +18,24 @@ function useHash() {
 
 export default function App() {
   const route = useHash()
-  const [, view, arg] = route.split('/')
+  const [, view, arg, target] = route.split('/')
 
   useEffect(() => {
     if (!window.location.hash.includes('#')) window.location.hash = '#/lectures'
   }, [])
 
+  useLayoutEffect(() => {
+    const destination = target ? document.getElementById(target) : null
+    if (destination) {
+      destination.focus({ preventScroll: true })
+      destination.scrollIntoView({ behavior: 'instant' })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }, [route, target])
+
   let page
-  if (view === 'qb') page = <QuestionBank paperId={arg} />
+  if (view === 'qb') page = <QuestionBank key={arg} paperId={arg} />
   else if (view === 'patterns') page = <Patterns />
   else page = <Lectures moduleId={arg} />
 
@@ -34,7 +44,7 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
       <Nav route={route} />
-      <main className="flex-1 w-full max-w-[860px] mx-auto px-5 md:px-8 py-8 md:py-12">
+      <main className="flex-1 w-full max-w-[860px] mx-auto px-5 md:px-8 wrap-anywhere py-8 md:py-12">
         {view === 'qb' && arg && !PAPERS.find((p) => p.id === arg) ? (
           <p className="text-ash">Unknown paper.</p>
         ) : view === 'lectures' && arg && !moduleTitle ? (
