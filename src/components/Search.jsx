@@ -20,7 +20,7 @@ export default function SearchView() {
         placeholder="e.g. daisy chain, branch penalty, tave, SUB (R1)"
         aria-label="Search sections and questions"
         autoFocus
-        className="press w-full mt-6 bg-panel border border-line2 rounded-none px-4 py-3 text-[16px] outline-none focus:border-ink placeholder:text-ash"
+        className="press w-full mt-6 bg-panel border border-line2 rounded-none px-4 py-3 text-[16px] outline-none focus:border-ink focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-ink focus-visible:outline-offset-2 placeholder:text-ash"
       />
       {!q ? (
         <div className="mt-6 text-ash text-[13.5px] leading-relaxed">
@@ -29,12 +29,15 @@ export default function SearchView() {
           <span className="font-mono">distributed arbitration</span>,{' '}
           <span className="font-mono">denormalized</span>.
         </div>
-      ) : results.length === 0 ? (
+      ) : results.items.length === 0 ? (
         <div className="mt-6 text-ash text-[14px]">No matches. Terms must all appear — try fewer words.</div>
       ) : (
         <div className="mt-6 border-t border-line">
-          <div className="text-[12px] text-ash pt-2 pb-1">{results.length} match{results.length === 1 ? '' : 'es'}</div>
-          {results.map((r) => (
+          <div className="text-[12px] text-ash pt-2 pb-1">
+            {results.total} match{results.total === 1 ? '' : 'es'}
+            {results.total > results.items.length ? ` — showing the first ${results.items.length}` : ''}
+          </div>
+          {results.items.map((r) => (
             <a key={r.href} href={r.href} className="press block border-b border-line py-3 hover:bg-panel px-2 -mx-2">
               <div className="flex items-baseline gap-2.5">
                 <span className={`text-[10px] font-semibold uppercase tracking-[0.1em] px-1.5 py-0.5 shrink-0 ${r.kind === 'question' ? 'bg-ink text-paper' : 'border border-line2 text-ash'}`}>

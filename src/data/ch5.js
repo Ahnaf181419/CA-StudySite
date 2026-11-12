@@ -198,7 +198,7 @@ export default {
           'FIFO evicts the block loaded earliest. A hit changes LRU order but leaves FIFO order unchanged. Which policy gets more hits depends on the access sequence.',
         ] },
         { type: 'note', title: 'From the class notes', text: [
-          'The notes compare **LRU, MRU** and a **fetch-time-based** rule on a concrete access sequence (blocks 100, 400, 200, 300, 400 with their fetch times). Conclusion written in the notes: LRU usually gives better efficiency, **but not always** — “it depends on the requirements”. MRU evicts the most recently used block. It can help on repeated scans where older entries will be needed before the newest one. Use the reference trace to compare policies.',
+          'The notes compare **LRU, MRU** and a **fetch-time-based** rule on one worked block diagram — a row of resident blocks annotated with their fetch times and their last-access times. Conclusion written in the notes: fetch-time-based replacement is **not as efficient as the others**, while LRU gives better efficiency — **but not always**; “it depends on the requirements”. MRU evicts the most recently used block. It can help on repeated scans where older entries will be needed before the newest one. Use the reference trace to compare policies.',
         ] },
         { type: 'think', text: [
           'Simulating LRU by hand: write the reference string, and after each access keep the list of resident blocks ordered by last use. On a hit, move the referenced block to the tail. On a miss, fill an invalid way first or evict the head if the set is full, then insert at the tail. Count hits at the end — the question almost always wants the hit count per algorithm compared.',

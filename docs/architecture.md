@@ -84,7 +84,7 @@ at render time from `PAPERS` × `TOPICS`. Adding a paper updates the analysis au
 
 ## Diagrams
 
-Hand-built monochrome SVGs, ~36 figures, organized per chapter in `src/components/diagrams/`
+Hand-built monochrome SVGs, 41 figures, organized per chapter in `src/components/diagrams/`
 with shared primitives in `base.jsx` (`Svg`, `Box`, `T`, `W`, `Bus`, `ALUshape`, `Muxshape`).
 
 Two invariants (both enforced):
@@ -152,7 +152,7 @@ and an inline SVG favicon in `index.html`.
 
 ## Build, test, deploy
 
-- `npm test` — 21 checks: content integrity (diagram refs, questions, module shape, topic links,
+- `npm test` — 22 checks: content integrity (diagram refs, questions, module shape, topic links,
   counts, checkpoints, timing widths) plus the search index, review marks and paper-reference
   resolver
 - `npm run build` — single-chunk bundle (~580 kB / ~185 kB gzip); the size warning is expected

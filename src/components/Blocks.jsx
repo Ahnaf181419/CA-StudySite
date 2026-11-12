@@ -69,7 +69,7 @@ function Timing({ block }) {
 const Block = ({ b }) => {
   switch (b.type) {
     case 'h':
-      return <h4 className="font-semibold text-[15px] mt-7 mb-2 tracking-tight">{md(b.text)}</h4>
+      return <h3 className="font-semibold text-[15px] mt-7 mb-2 tracking-tight">{md(b.text)}</h3>
     case 'p':
       return <p className="my-3 leading-[1.75] text-[15.5px]">{md(b.text)}</p>
     case 'list':

@@ -45,7 +45,7 @@ export function buildIndex() {
 // every term must appear somewhere; titles that contain a term rank first
 export function search(index, query, limit = 24) {
   const terms = strip(query).split(' ').filter(Boolean)
-  if (!terms.length) return []
+  if (!terms.length) return { total: 0, items: [] }
   const hits = []
   for (const item of index) {
     if (!terms.every((t) => item.hay.includes(t))) continue
@@ -53,5 +53,5 @@ export function search(index, query, limit = 24) {
     hits.push({ item, score: inTitle })
   }
   hits.sort((a, b) => b.score - a.score)
-  return hits.slice(0, limit).map((h) => h.item)
+  return { total: hits.length, items: hits.slice(0, limit).map((h) => h.item) }
 }

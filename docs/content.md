@@ -67,9 +67,14 @@ handwritten derivations in the notes — they match.
 **Class notes** — pages were scanned to images. Pages 1–26 and 39–49 were transcribed in full
 (the three-bus sequences `Add (R1),R2` / `Add R1,(R2)` / `Add R1,(R2)+,R3`, the merge rules, the
 Zin gate network, the multiplication table, cache-mapping worked examples, the interrupt and DMA
-pages). Pages 27–38 (branch prediction, pipeline performance, memory chapter) are only legible
-at keyword level in the scan; their topics are fully covered by the slide decks, and **every
-exam-priority marker used on the site comes from the cleanly transcribed pages.**
+pages). Pages 27–38 (branch prediction, pipeline performance, memory chapter) were re-scanned at
+the PDF's native 300 dpi and OCR'd with an ensemble of preprocessing variants (two independent
+passes). They now corroborate the slide material — branch penalty and the delay slot, the
+`Δ = [(1−hi) + d(1−hd)]·Mp` miss arithmetic with `hi`/`hd`/`d`/`Mp` defined, the write-policy
+and coherence pages, and the LRU/MRU/fetch-time replacement comparison on page 36 — but their
+worked tables are still too degraded to transcribe number-for-number, so **no numeric example was
+added from them**. **Every exam-priority marker used on the site comes from the cleanly
+transcribed pages.**
 
 **Question banks** — scanned papers. Two independent passes (tesseract OCR + a second
 transcription) were run over every page and cross-checked; disagreements were resolved against
@@ -107,6 +112,8 @@ stated openly inside the solution itself.
 | Spring 24 Q2(a) | Set-associative = 2 blocks/set (64 sets) | The paper doesn't state blocks/set; the slide/book standard example is 2-way. General k-way formula included in the solution |
 | Ch 5 lectures | L2 tave formula `tave = h1C1 + (1−h1)h2C2 + (1−h1)(1−h2)M` | The slide equation is an image; this is the standard Hamacher form consistent with the worked numbers on the same slide |
 | Patterns `notes` markers | Derived only from transcribed notes pages | Pages 27–38 never contribute priority claims |
+| Ch 5, replacement algorithms | The notes' worked example is described, not reproduced | Page 36 compares LRU / MRU / fetch-time on a block diagram whose numbers are too degraded to transcribe; an earlier draft of this page cited an access sequence ("100, 400, 200, 300, 400") that appears on **no** page of the notes — checked across all 49 pages by OCR — and was removed. The comparison and its conclusion are kept because two independent OCR passes agree on them |
+| Performance formulas | `Δ = [(1−hi) + d(1−hd)]·Mp`, `hi`/`hd`/`d`/`Mp` as defined in Ch 8 pt 2 | The slide PDF carries the equation as an image; the text extract gave only prose, so the form was taken from Hamacher and cross-checked against the notes. Notes page 29 (300 dpi, two passes) independently gives the same expression with the same variable meanings |
 
 ## Verification already performed
 

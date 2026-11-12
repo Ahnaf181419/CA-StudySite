@@ -140,7 +140,7 @@ export default function Diagram({ id, caption }) {
               </button>
             </div>
             <div className="border border-line bg-paper p-3 md:p-5 overflow-x-auto [&_svg]:max-w-none!">
-              <LabelProvider label={label}><C /></LabelProvider>
+              <div className="min-w-[460px]"><LabelProvider label={label}><C /></LabelProvider></div>
             </div>
           </div>
         </div>

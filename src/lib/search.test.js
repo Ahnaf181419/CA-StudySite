@@ -30,11 +30,19 @@ test('every indexed href points at a real route target', () => {
 
 test('search finds known terms and ranks nothing for gibberish', () => {
   const idx = buildIndex()
-  assert.ok(search(idx, 'daisy chain').length >= 2)
-  assert.ok(search(idx, 'branch penalty').length >= 3)
-  assert.ok(search(idx, 'set-associative').length >= 3)
-  assert.ok(search(idx, 'control sequence').length >= 1)
-  assert.equal(search(idx, 'zzzznotopic').length, 0)
+  assert.ok(search(idx, 'daisy chain').items.length >= 2)
+  assert.ok(search(idx, 'branch penalty').items.length >= 3)
+  assert.ok(search(idx, 'set-associative').items.length >= 3)
+  assert.ok(search(idx, 'control sequence').items.length >= 1)
+  assert.equal(search(idx, 'zzzznotopic').items.length, 0)
+  assert.equal(search(idx, 'zzzznotopic').total, 0)
+})
+
+test('search reports the true total even when the list is capped', () => {
+  const idx = buildIndex()
+  const r = search(idx, 'cache')
+  assert.ok(r.total > r.items.length, `total ${r.total} should exceed the ${r.items.length} shown`)
+  assert.ok(r.items.length <= 24)
 })
 
 test('search strips formatting syntax from haystacks', () => {
@@ -45,7 +53,7 @@ test('search strips formatting syntax from haystacks', () => {
 
 test('a heading that matches the query ranks first', () => {
   const idx = buildIndex()
-  const res = search(idx, 'operand forwarding')
+  const res = search(idx, 'operand forwarding').items
   assert.ok(res.length > 1)
   assert.ok(res[0].title.includes('forwarding'), `top hit was ${res[0].title}`)
 })
