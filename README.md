@@ -27,3 +27,12 @@ npm run build      # production build to dist/
 ```
 
 Deploys to GitHub Pages automatically on every push to `main` (see `.github/workflows/deploy.yml`).
+
+## Documentation
+
+Detailed docs live in [`docs/`](docs/README.md):
+
+- [architecture.md](docs/architecture.md) — data model, block types, diagrams, routing, theming
+- [content.md](docs/content.md) — content provenance and the assumptions register
+- [exam-guide.md](docs/exam-guide.md) — the distilled study plan: priority tiers, paper formats, answer templates
+- [maintenance.md](docs/maintenance.md) — how to add papers, sections and diagrams; test/deploy
