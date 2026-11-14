@@ -51,7 +51,7 @@ here first.
 |---|---|---|
 | `Slides/` | 6 decks (Arithmetic pointer, Ch 7, Ch 8 pt 1+2, Ch 5, Ch 4 I/O), 216 pages | **the lecture content** — every topic, definition, figure and worked number |
 | `Classnotes/CA Final Note.pdf` | 49 handwritten pages with Bengali margin notes | three-bus control sequences, exam pointers, priority signals, the multiplication worked table |
-| `QuestionBank/` | Fall 22, Spring 22 (partial), Fall 23, Spring 23, Spring 24, Fall 24 (its CA pages only — the other pages of that combined paper were another subject) | every question, verbatim, plus marks and figures |
+| `QuestionBank/` | Fall 22, Spring 22 (partial), Fall 23, Spring 23, Spring 24, Fall 24 (its CA pages only — the other pages of that combined paper were another subject), Spring 25 (2-page scan, complete) | every question, verbatim, plus marks and figures |
 
 The folders themselves are gitignored (never commit the PDFs) — a fresh clone gets the site, not
 the sources. This file is the map back to them.
@@ -113,6 +113,10 @@ stated openly inside the solution itself.
 | Ch 5 lectures | L2 tave formula `tave = h1C1 + (1−h1)h2C2 + (1−h1)(1−h2)M` | The slide equation is an image; this is the standard Hamacher form consistent with the worked numbers on the same slide |
 | Patterns `notes` markers | Derived only from transcribed notes pages | Pages 27–38 never contribute priority claims |
 | Ch 5, replacement algorithms | The notes' worked example is described, not reproduced | Page 36 compares LRU / MRU / fetch-time on a block diagram whose numbers are too degraded to transcribe; an earlier draft of this page cited an access sequence ("100, 400, 200, 300, 400") that appears on **no** page of the notes — checked across all 49 pages by OCR — and was removed. The comparison and its conclusion are kept because two independent OCR passes agree on them |
+| Spring 25 Q1(d) | Opening line read as "Explain how the bus is granted to competing devices (or processes) under…" | The scan line is partly illegible; "bus under:", the two bullets and "arbitration processes" are all clearly legible, so only the connective wording is reconstructed |
+| Spring 25 Q2(a) | A = 2.6125 × 10¹, B = 4.150390625 × 10⁰ | The scan shows "10′" for A and a bare "10" for B; these are the textbook's canonical exercise values and both convert to clean binary mantissas, which any other exponent pair would not |
+| Spring 25 Q1 instruction | "Answer any 3 of 4" | The Question-1 heading line did not OCR; inferred from [Marks: 3×6=18], exactly four sub-questions, and the parallel Q2/Q3 headings that did read cleanly |
+| Spring 25 date | 12/05/2026 | The scan's date field reads "12/5/26" at two OCR settings; consistent with Fall 2024 sitting in Nov 2025 |
 | Performance formulas | `Δ = [(1−hi) + d(1−hd)]·Mp`, `hi`/`hd`/`d`/`Mp` as defined in Ch 8 pt 2 | The slide PDF carries the equation as an image; the text extract gave only prose, so the form was taken from Hamacher and cross-checked against the notes. Notes page 29 (300 dpi, two passes) independently gives the same expression with the same variable meanings |
 
 ## Verification already performed

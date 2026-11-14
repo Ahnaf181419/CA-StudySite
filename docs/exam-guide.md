@@ -1,6 +1,6 @@
 # Exam guide — what repeats, what to over-prepare
 
-Use the site's Patterns tab for the current topic counts across the six papers.
+Use the site's Patterns tab for the current topic counts across the seven papers.
 
 ## How to study
 
@@ -27,9 +27,9 @@ additional 2022 material, including MIPS and Hamming codes.
 
 | Topic | Papers | How it's asked |
 |---|---|---|
-| **Cache mapping** (direct / associative / set-associative) | All six (including locality and mapping theory) | for numerical questions: given block size, cache size, an address — split tag/index/set/word and name the exact cache position; sometimes also draw the mapping and explain the hit check |
+| **Cache mapping** (direct / associative / set-associative) | All seven (including locality and mapping theory) | for numerical questions: given block size, cache size, an address — split tag/index/set/word and name the exact cache position; sometimes also draw the mapping and explain the hit check |
 | **Pipeline hazards** (data / structural / instruction) | F22, S22, F23, S23, S24, F24 (all 6 in some form) | draw the stage chart, identify the hazard, then the fix: forwarding (hardware) or NOP/reorder (software) |
-| **Branch penalty / delayed branch / prediction** | F22, S23, F24 + notes | timing chart for 2-stage and 4-stage (E-resolution), reorder a loop into the delay slot, pick predict-taken for a loop-bottom branch |
+| **Branch penalty / delayed branch / prediction** | F22, S23, F24, S25 + notes | timing chart for 2-stage and 4-stage (E-resolution), reorder a loop into the delay slot, pick predict-taken for a loop-bottom branch |
 | **Control sequences** (single-bus and three-bus) | F23, S23, S24 (3) | "generate the control sequence for instruction X in this architecture" — start from the printed datapath, write register transfers, then choose control signals. Three-bus ALU output must be latched in the cycle it is produced |
 | **Sequential multiplication / division** | F23, S23, S24 + notes | register-by-register table (add / shift-multiplicand / shift-multiplier), or the restoring-division trace with the quotient-bit column |
 
@@ -37,31 +37,33 @@ additional 2022 material, including MIPS and Hamming codes.
 
 | Topic | Papers | Notes signal |
 |---|---|---|
-| Performance arithmetic (TI, tave, throughput) | F22, S22, F23, S23, S24 | distinguish average memory access time from CPI, and state whether miss time is incremental or total |
+| Performance arithmetic (TI, tave, throughput) | F22, S22, F23, S23, S24, S25 | distinguish average memory access time from CPI, and state whether miss time is incremental or total |
 | Operand forwarding | S23 (+ every hazards question) | forwarding datapath (SRC1/SRC2/RSLT) drawn in the notes |
-| Interrupt handling (repeated-IRQ, priorities, daisy chains) | F24, S23, S24 | all three repeated-interrupt approaches + the three simultaneous-request schemes are in the notes |
+| Interrupt handling (repeated-IRQ, priorities, daisy chains) | F23, S24, F24, S25 | all three repeated-interrupt approaches + the three simultaneous-request schemes are in the notes |
 | RAM chip internal organization | F22, S22, S23, F24 | **explicit exam pointer in the notes**: "draw the internal organization, explain read and write" |
-| Bus arbitration (centralized / distributed) | F22, S24, F24 | the notes work two distributed examples; be ready to simulate IDs bit by bit |
+| Bus arbitration (centralized / distributed) | F22, S24, F24, S25 | the notes work two distributed examples; be ready to simulate IDs bit by bit |
 | DMA | F22, S22 (+ Q4a compare) | initiation info (address, count, direction) + cycle stealing vs burst timelines |
 | Program-controlled I/O | F22, F24, S24 | write the polling loop with side notes, name the busy-waiting disadvantage, fix = interrupts |
 | Virtual memory (small RAM, big program) | F23, S23 | explain virtual mappings, resident frames, page faults and working-set limits |
 | SCSI scattered-sector reads | F23, S24 | initiator/target roles, logical→physical translation, per-sector reads |
-| Sync vs async bus timing | F24, S23 | draw both; "clock set for the slowest device" is the limitation sentence |
+| Sync vs async bus timing | F23, F24, S25 | draw both; "clock set for the slowest device" is the limitation sentence |
 | Read/write hit & miss policies | F24 | separate write-through/back from write-allocate/no-write-allocate |
 
 ### Tier 3 — single appearances or pre-scope material
 
 Addressing modes (F23, S23), one/zero-address evaluation (F23, S23, S24), assembly programs
 (average/dot-product/product — F23, S23), RISC/CISC and T (S24), three-bus drawing (S23, S24),
-register gating (S24), stack CPU (S24), n-stage justification derivation (S24), replacement
-algorithms, locality of reference (F23), locality/classification, Flash vs RRAM, microarch vs
-ISA, QPI, RAID — plus the 2022 MIPS-only items (encoding, datapath modification, Hamming,
-floating-point bit patterns).
+register gating (S24, S25 — paired with the coherence problem), stack CPU (S24), n-stage
+justification derivation (S24), replacement algorithms, locality of reference (F23, S25 —
+verbatim repeat), Flash vs RRAM, microarch vs ISA, QPI, RAID — plus the 2022 MIPS-only items
+(encoding, datapath modification, Hamming). Floating point returned to the current track in
+Spring 2025 as a half-precision addition with guard/round/sticky bits.
 
 ## Paper formats
 
 | Paper | Structure | Marks |
 |---|---|---|
+| Spring 2025 | Q1 any 3 of 4 × 6 · **Q2 both** × 10 · Q3 any 3 of 4 × 4 | 50, 2h30 |
 | Fall 2024 | Q1 any 3 of 4 × 6 · **Q2 both** × 10 · Q3 any 3 of 4 × 4 | 50, 2h30 |
 | Spring 2024 | Q1 any 4 of 6 × 6.5 · Q2 any 2 of 3 × 10 · Q3 any 3 of 4 × 8 | 70, 3h |
 | Spring 2023 | Q1 any 5 of 7 × 6 · Q2 any 2 of 3 × 5 · Q3 any 5 of 7 × 6 | 70, 3h |

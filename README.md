@@ -2,13 +2,13 @@
 
 **Live site: https://ahnaf181419.github.io/CA-StudySite/**
 
-A self-contained study site for the faculty slides, class notes and six past finals (2022–2024).
+A self-contained study site for the faculty slides, class notes and seven past finals (2022–2025).
 Start with Foundations, work through the course modules, then use the older-paper supplement
 for MIPS, error correction and system-design questions.
 
 - **Lectures** teach the course with diagrams, worked traces, 37 checkpoints with hidden worked
   answers, and past-paper questions grouped by topic. The core Chapter 7 module starts at multibus.
-- **Question bank** contains 92 questions from the available paper pages, with separately
+- **Question bank** contains 102 questions from the available paper pages, with separately
   revealable hints and solutions and links back to the relevant lectures.
 - **Patterns** — topic × paper matrix with per-paper question counts, notes-priority markers and per-topic
   trend notes, so preparation effort can be aimed where it repeats.

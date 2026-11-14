@@ -4,10 +4,11 @@ import fall23 from './fall23.js'
 import spring23 from './spring23.js'
 import spring24 from './spring24.js'
 import fall24 from './fall24.js'
+import spring25 from './spring25.js'
 
 import { TOPICS } from '../topics.js'
 
-const papers = [fall24, spring24, spring23, fall23, spring22, fall22]
+const papers = [spring25, fall24, spring24, spring23, fall23, spring22, fall22]
 const topicPapers = {}
 for (const paper of papers) {
   for (const topic of new Set(paper.questions.map((q) => q.topic))) {

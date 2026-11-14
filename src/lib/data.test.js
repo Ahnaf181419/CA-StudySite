@@ -117,7 +117,7 @@ test('each timing chart has one cell per declared clock cycle', () => {
 
 test('topic frequency counts distinct papers, even when a topic has multiple questions', () => {
   const cachePapers = PAPERS.filter((p) => p.questions.some((q) => q.topic === 'cache'))
-  assert.equal(cachePapers.length, 6, 'all six available papers include a cache question')
+  assert.equal(cachePapers.length, 7, 'all seven available papers include a cache question')
   for (const paper of cachePapers) {
     for (const q of paper.questions.filter((q) => q.topic === 'cache')) {
       assert.equal(q.repeats, cachePapers.length, `${paper.id} ${q.id} reports a stale topic frequency`)
