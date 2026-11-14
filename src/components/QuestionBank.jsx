@@ -32,6 +32,7 @@ function Question({ q, paperId, open, onToggle, done, onDone, target }) {
         <div className="text-[14.5px] leading-[1.7] whitespace-pre-line">{md(q.q)}</div>
         <div className="flex flex-wrap items-center gap-2 mt-2.5">
           <span className="text-[11.5px] border border-line bg-panel px-2 py-0.5 text-ash">{TOPICS[q.topic].name}</span>
+          {TOPICS[q.topic].skip ? <span title={TOPICS[q.topic].skip} className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-skip border border-skip px-1.5 py-0.5 whitespace-nowrap">Topic marked skippable</span> : null}
           {q.repeats > 1 ? <Badge label={`Topic in ${q.repeats} papers`} /> : null}
           {q.inNotes ? <Badge label="In class notes" /> : null}
           {q.flagged ? <span className="text-[10.5px] uppercase tracking-[0.08em] text-ash">Supplemental question</span> : null}

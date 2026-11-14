@@ -128,12 +128,14 @@ export default {
         ] },
         { type: 'list', items: [
           '**Static branch prediction**: the decision is the same every time a given instruction executes.',
-          '**Dynamic branch prediction**: the decision may change depending on execution history (self-study).',
+        ] },
+        { type: 'list', skip: true, items: [
+          '**Dynamic branch prediction**: the decision may change depending on execution history (self-study). Never asked in any paper 2022–2025 — every prediction question so far uses the static direction rule above.',
         ] },
         { type: 'think', text: [
           'For a “which prediction for this loop?” question, look only at where the branch sits: branch at the **bottom** of a loop (the common case) → taken (n−1 of n times). For other loops, trace which direction actually stays in the loop and count outcomes. Say it in those counts and the justification writes itself.',
         ] },
-        { type: 'p', text: 'A simple dynamic predictor stores the last outcome for each tracked branch (one bit). A two-bit saturating counter starts in one of four states: strongly not taken, weakly not taken, weakly taken, strongly taken. Predict from the state before updating. Taken moves one step toward strongly taken; not taken moves one step toward strongly not taken. One loop exit does not flip a strongly taken prediction.' },
+        { type: 'p', skip: true, text: 'A simple dynamic predictor stores the last outcome for each tracked branch (one bit). A two-bit saturating counter starts in one of four states: strongly not taken, weakly not taken, weakly taken, strongly taken. Predict from the state before updating. Taken moves one step toward strongly taken; not taken moves one step toward strongly not taken. One loop exit does not flip a strongly taken prediction.' },
         { type: 'practice', prompt: 'A bottom-tested loop has five iterations. The taken target is ready at prediction time, and a wrong prediction loses two cycles. Find extra cycles for always taken and always not taken.', blocks: [
           { type: 'answer', text: 'Outcomes T,T,T,T,N. Always taken misses once, losing 2 cycles. Always not taken misses four times, losing 8 cycles.' },
         ] },

@@ -66,7 +66,7 @@ function Timing({ block }) {
   )
 }
 
-const Block = ({ b }) => {
+const BlockBody = ({ b }) => {
   switch (b.type) {
     case 'h':
       return <h3 className="font-semibold text-[15px] mt-7 mb-2 tracking-tight">{md(b.text)}</h3>
@@ -190,6 +190,17 @@ const Block = ({ b }) => {
       return null
   }
 }
+
+// skip-flagged blocks (the student's skip list): red rule + tag, body dimmed
+const Block = ({ b }) =>
+  b.skip ? (
+    <div className="my-3 border-l-[3px] border-skip pl-3.5">
+      <div className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-skip">Skipped for the exam</div>
+      <div className="opacity-[0.65]"><BlockBody b={b} /></div>
+    </div>
+  ) : (
+    <BlockBody b={b} />
+  )
 
 export default function Blocks({ blocks }) {
   return <div>{(blocks || []).map((b, i) => <Block key={i} b={b} />)}</div>

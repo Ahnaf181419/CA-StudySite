@@ -40,6 +40,7 @@ export default function Patterns() {
                           {t.name}
                         </a>
                         {n >= 3 ? <span className="text-[9.5px] font-semibold uppercase tracking-[0.08em] bg-ink text-paper px-1.5 py-0.5">repeat</span> : null}
+                        {t.skip ? <span title={t.skip} className="text-[9.5px] font-semibold uppercase tracking-[0.08em] text-skip border border-skip px-1.5 py-0.5">skippable</span> : null}
                         {t.notes ? <span className="text-[9.5px] font-semibold uppercase tracking-[0.08em] border border-line2 bg-panel px-1.5 py-0.5">in notes</span> : null}
                       </span>
                     </th>
@@ -69,6 +70,7 @@ export default function Patterns() {
                 <div className="text-[11.5px] text-ash font-mono">{t.papers.map((p) => p.short).join(' · ')}</div>
               </div>
               {t.trend ? <p className="text-[14px] mt-2 leading-[1.7]">{t.trend}</p> : null}
+              {t.skip ? <p className="text-[13px] mt-2 leading-[1.7] text-skip border-l-2 border-skip pl-3">{t.skip}</p> : null}
               {t.notes ? <p className="text-[13px] mt-2 leading-[1.7] text-ash border-l-2 border-line2 pl-3">{t.notes}</p> : null}
             </div>
           ))}

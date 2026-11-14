@@ -48,8 +48,9 @@ lecture explanations and question-bank analysis only.
 
 ## Design
 
-- Strict monochrome: `paper / panel / line / ash / ink` tokens in `src/index.css`. Light theme
-  only, system fonts, no external requests.
+- Strict monochrome (dark): `paper / panel / line / ash / ink` tokens in `src/index.css`. System
+  fonts, no external requests. One deliberate exception: `--color-skip` (red) marks topics the
+  student chose to skip — the only non-monochrome token, used sparingly for skip badges/rules.
 - Diagrams are inline SVG with shared primitives in `diagrams/base.jsx` (`Box`, `T`, `W`, `Bus`,
   `ALUshape`, `Muxshape`). Every figure was checked in a browser against its slide source
   (components, connection directions, no text outside the viewBox).

@@ -73,7 +73,7 @@ export default function Lectures({ moduleId, sectionId }) {
         <div className="bg-panel px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em]">In this module</div>
         {m.sections.map((s, i) => (
           <a key={i} href={`#/lectures/${m.id}/sec-${i}`} className="press px-4 min-h-11 py-2.5 text-[14px] flex justify-between gap-4 hover:bg-panel">
-            <span>{md(s.heading)}</span>
+            <span>{md(s.heading)}{s.skip ? <span className="ml-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-skip">skip</span> : null}</span>
             <span className="font-mono text-[11px] text-ash pt-1">{String(i + 1).padStart(2, '0')}</span>
           </a>
         ))}
@@ -86,8 +86,9 @@ export default function Lectures({ moduleId, sectionId }) {
             <h2 id={`sec-${i}`} tabIndex={-1} className="scroll-mt-32 text-[20px] font-semibold tracking-tight border-b border-line pb-2">
               <span className="font-mono text-[13px] text-ash mr-2.5">{String(i + 1).padStart(2, '0')}</span>
               {md(s.heading)}
+              {s.skip ? <span className="ml-2 align-middle inline-block text-[10.5px] font-semibold uppercase tracking-[0.08em] text-skip border border-skip px-1.5 py-0.5">Skipped — not in exam scope</span> : null}
             </h2>
-            <Blocks blocks={s.blocks} />
+            <div className={s.skip ? 'opacity-[0.65]' : undefined}><Blocks blocks={s.blocks} /></div>
           </section>
         ))}
       </div>

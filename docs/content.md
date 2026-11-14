@@ -117,6 +117,7 @@ stated openly inside the solution itself.
 | Spring 25 Q2(a) | A = 2.6125 × 10¹, B = 4.150390625 × 10⁰ | The scan shows "10′" for A and a bare "10" for B; these are the textbook's canonical exercise values and both convert to clean binary mantissas, which any other exponent pair would not |
 | Spring 25 Q1 instruction | "Answer any 3 of 4" | The Question-1 heading line did not OCR; inferred from [Marks: 3×6=18], exactly four sub-questions, and the parallel Q2/Q3 headings that did read cleanly |
 | Spring 25 date | 12/05/2026 | The scan's date field reads "12/5/26" at two OCR settings; consistent with Fall 2024 sitting in Nov 2025 |
+| Skip marks | Dynamic branch prediction (Ch 8 pt 2) and synchronous bus timing (Ch 4) carry red "skipped" marks | The student's own call for this sitting, not derived from any source — which is why the marks state the counter-evidence (S23/F24/S25 asked bus timing verbatim; no paper has asked dynamic prediction) |
 | Performance formulas | `Δ = [(1−hi) + d(1−hd)]·Mp`, `hi`/`hd`/`d`/`Mp` as defined in Ch 8 pt 2 | The slide PDF carries the equation as an image; the text extract gave only prose, so the form was taken from Hamacher and cross-checked against the notes. Notes page 29 (300 dpi, two passes) independently gives the same expression with the same variable meanings |
 
 ## Verification already performed

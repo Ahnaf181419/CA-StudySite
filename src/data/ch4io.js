@@ -210,6 +210,7 @@ export default {
     },
     {
       heading: 'Bus timing: synchronous and asynchronous (book 4.5)',
+      skip: true,
       blocks: [
         { type: 'diagram', id: 'syncBus', caption: 'Synchronous bus: all timing derived from a common clock; a bus cycle spans a fixed number of clock cycles (t0 → t2).' },
         { type: 'list', items: [

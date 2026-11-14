@@ -46,7 +46,7 @@ additional 2022 material, including MIPS and Hamming codes.
 | Program-controlled I/O | F22, F24, S24 | write the polling loop with side notes, name the busy-waiting disadvantage, fix = interrupts |
 | Virtual memory (small RAM, big program) | F23, S23 | explain virtual mappings, resident frames, page faults and working-set limits |
 | SCSI scattered-sector reads | F23, S24 | initiator/target roles, logical→physical translation, per-sector reads |
-| Sync vs async bus timing | F23, F24, S25 | draw both; "clock set for the slowest device" is the limitation sentence |
+| Sync vs async bus timing | F23, F24, S25 | draw both; "clock set for the slowest device" is the limitation sentence. **Marked skippable** for this sitting — against the evidence: it repeated verbatim into the newest paper |
 | Read/write hit & miss policies | F24 | separate write-through/back from write-allocate/no-write-allocate |
 
 ### Tier 3 — single appearances or pre-scope material

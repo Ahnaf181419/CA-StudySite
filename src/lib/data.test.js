@@ -124,3 +124,31 @@ test('topic frequency counts distinct papers, even when a topic has multiple que
     }
   }
 })
+
+test('skip marks are well-formed and still present', () => {
+  let sections = 0, blocks = 0
+  const checkBlocks = (bs, where) => {
+    for (const b of bs || []) {
+      if (b.skip !== undefined) {
+        assert.equal(b.skip, true, `${where}: block skip must be true`)
+        blocks++
+      }
+      if (b.blocks) checkBlocks(b.blocks, where)
+    }
+  }
+  for (const m of MODULES) {
+    for (const s of m.sections) {
+      if (s.skip !== undefined) {
+        assert.equal(s.skip, true, `${m.id}: section skip must be true`)
+        sections++
+      }
+      checkBlocks(s.blocks, m.id)
+    }
+  }
+  for (const [tid, t] of Object.entries(TOPICS)) {
+    if (t.skip !== undefined) assert.equal(typeof t.skip, 'string', `topic ${tid} skip must be a reason string`)
+  }
+  assert.ok(sections >= 1, 'no lecture section is flagged skippable — skip marking broke?')
+  assert.ok(blocks >= 2, 'the dynamic-prediction block skips vanished')
+  assert.ok(TOPICS['bus-timing'].skip, 'bus-timing skip reason missing')
+})

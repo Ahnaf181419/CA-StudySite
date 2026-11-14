@@ -22,7 +22,7 @@ export const TOPICS = {
   'prog-io': { name: 'Program-controlled I/O', module: 'ch4io', notes: 'Notes list it as the base technique whose disadvantage motivates interrupts.' },
   dma: { name: 'DMA (modes, initiation)', module: 'ch4io', notes: 'DMA marked “self study” in the notes but asked in papers; modes drawn as timelines.' },
   'bus-arb': { name: 'Bus arbitration (centralized / distributed)', module: 'ch4io', notes: 'Notes work two distributed-arbitration examples (D5/D6 → D7 wins) with the OR-line rule.' },
-  'bus-timing': { name: 'Synchronous / asynchronous bus timing', module: 'ch4io', notes: 'Figures 4.5-style timing diagrams referenced via the book section in the slides.' },
+  'bus-timing': { name: 'Synchronous / asynchronous bus timing', module: 'ch4io', skip: 'Marked skippable for this sitting — though S23 Q3(g), F24 Q1(c) and S25 Q3(b) (a verbatim F24 repeat) all asked it.', notes: 'Figures 4.5-style timing diagrams referenced via the book section in the slides.' },
   scsi: { name: 'SCSI / reading scattered disk sectors', module: 'ch4io', trend: 'Not in the notes — but asked twice (Fall 2023, Spring 2024), so treated as exam-priority by repetition.' },
   addressing: { name: 'Addressing modes of operands', module: 'foundations', trend: 'The (R1)+ / #imm / X(R3,R4) drill appears in both 2023 papers.' },
   asm: { name: 'Assembly programs (indirect addressing, parameter passing)', module: 'foundations', trend: 'Average / dot-product / product programs in the papers; chapter-2 material kept brief.' },
